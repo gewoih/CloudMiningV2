@@ -25,9 +25,13 @@ namespace CloudMining.App.Controllers
 		}
 
 		[HttpPost("auth")]
-		public async Task<IActionResult> Login()
+		public async Task<IActionResult> Login([FromBody] LoginCredentials credentials)
 		{
-			return Ok();
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			var authResult = await _userService.LoginAsync(credentials);
+			return View(authResult);
 		}
 	}
 }
