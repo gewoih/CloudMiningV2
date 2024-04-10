@@ -29,4 +29,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+var scope = app.Services.CreateScope();
+var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
+await database.MigrateAsync();
+
 app.Run();
