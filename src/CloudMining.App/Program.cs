@@ -1,3 +1,4 @@
+using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,8 @@ builder.Services.AddDbContext<CloudMiningContext>(options =>
 
 builder.Services.AddIdentity<User, Role>()
 	.AddEntityFrameworkStores<CloudMiningContext>();
+
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -28,6 +31,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 var scope = app.Services.CreateScope();
 var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
