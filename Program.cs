@@ -1,25 +1,23 @@
-using CloudMining.DBContext;
-using CloudMining.Models;
-using Microsoft.AspNetCore.Identity;
+using CloudMining.Domain.Models.Identity;
+using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<DataContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<CloudMiningContext>(options =>
+	options.UseNpgsql(connectionString));
 
 builder.Services.AddIdentity<User, Role>()
-    .AddEntityFrameworkStores<DataContext>();
+	.AddEntityFrameworkStores<CloudMiningContext>();
 
 var app = builder.Build();
-
 
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Home/Error");
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
 
@@ -31,8 +29,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=Home}/{action=Index}/{id?}");
+var scope = app.Services.CreateScope();
+var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
+await database.MigrateAsync();
 
 app.Run();
