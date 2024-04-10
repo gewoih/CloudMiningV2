@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34408.163
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudMining.App", "src\CloudMining.App\CloudMining.App.csproj", "{1C40E560-52FD-439C-98B3-89C8807FB44B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudMining.Application", "src\CloudMining.Application\CloudMining.Application.csproj", "{A7C3189C-6736-4BAE-961E-5FEAF1877FDD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudMining.Domain", "src\CloudMining.Domain\CloudMining.Domain.csproj", "{83208C98-E393-4A22-B30E-C56A9F7E1948}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudMining.Infrastructure", "src\CloudMining.Infrastructure\CloudMining.Infrastructure.csproj", "{1F6A2AEF-D628-44DA-8659-D8F1817A41A4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C40E560-52FD-439C-98B3-89C8807FB44B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C40E560-52FD-439C-98B3-89C8807FB44B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C40E560-52FD-439C-98B3-89C8807FB44B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C40E560-52FD-439C-98B3-89C8807FB44B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7C3189C-6736-4BAE-961E-5FEAF1877FDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7C3189C-6736-4BAE-961E-5FEAF1877FDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7C3189C-6736-4BAE-961E-5FEAF1877FDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7C3189C-6736-4BAE-961E-5FEAF1877FDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83208C98-E393-4A22-B30E-C56A9F7E1948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83208C98-E393-4A22-B30E-C56A9F7E1948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83208C98-E393-4A22-B30E-C56A9F7E1948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83208C98-E393-4A22-B30E-C56A9F7E1948}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F6A2AEF-D628-44DA-8659-D8F1817A41A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F6A2AEF-D628-44DA-8659-D8F1817A41A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F6A2AEF-D628-44DA-8659-D8F1817A41A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F6A2AEF-D628-44DA-8659-D8F1817A41A4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CCB28C0E-19F2-4A9F-BD68-EACAC2496CD2}
+	EndGlobalSection
+EndGlobal
