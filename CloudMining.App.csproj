@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CloudMining.Application\CloudMining.Application.csproj" />
     <ProjectReference Include="..\CloudMining.Domain\CloudMining.Domain.csproj" />
     <ProjectReference Include="..\CloudMining.Infrastructure\CloudMining.Infrastructure.csproj" />
   </ItemGroup>
