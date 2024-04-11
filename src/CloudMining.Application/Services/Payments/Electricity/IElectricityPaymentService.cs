@@ -8,5 +8,6 @@ namespace CloudMining.Application.Services.Payments.Electricity
 {
     public interface IElectricityPaymentService
     {
+        Task CreateAsync();
     }
 }
