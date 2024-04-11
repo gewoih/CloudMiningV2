@@ -9,6 +9,6 @@ namespace CloudMining.Domain.Models
 		public Guid UserId { get; set; }
 		public decimal Before { get; set; }
 		public decimal After { get; set; }
-		public decimal Change { get; set; }
+		public decimal Change => After - Before;
 	}
 }
