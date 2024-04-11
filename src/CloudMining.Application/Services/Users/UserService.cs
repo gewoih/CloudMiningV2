@@ -38,8 +38,12 @@ namespace CloudMining.Application.Services.Users
 
         public async Task<List<Guid>> GetAllUsersIdsAsync()
         {
-            var userIds = await _userManager.Users.Select(u => u.Id).ToListAsync();
-            return userIds;
+            var usersIds = await _userManager.Users
+	            .Select(u => u.Id)
+	            .ToListAsync()
+	            .ConfigureAwait(false);
+
+            return usersIds;
         }
 	}
 }

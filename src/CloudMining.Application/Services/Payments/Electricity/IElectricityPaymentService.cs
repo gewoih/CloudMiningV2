@@ -10,6 +10,6 @@ namespace CloudMining.Application.Services.Payments.Electricity
 {
     public interface IElectricityPaymentService
     {
-        Task<ShareablePayment> CreateAsync(ElectricityCredentials credentials);
+        Task<ShareablePayment> CreateAsync(CreateElectricityPaymentDto paymentDto);
     }
 }

@@ -1,14 +1,15 @@
-﻿using CloudMining.Domain.Models;
+﻿using CloudMining.Application.Models.Shares;
+using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace CloudMining.Application.Services.Shares
+namespace CloudMining.Application.Services.ShareChanges
 {
-	public sealed class SharesChangesService : ISharesChangesService
+	public sealed class UserShareService : IUserShareService
 	{
 		private readonly CloudMiningContext _context;
 
-		public SharesChangesService(CloudMiningContext context)
+		public UserShareService(CloudMiningContext context)
 		{
 			_context = context;
 		}
@@ -25,28 +26,28 @@ namespace CloudMining.Application.Services.Shares
 			return userShare;
 		}
 
-		public async Task<List<KeyValuePair<Guid, decimal>>> GetUsersSharesAsync()
+		public async Task<List<UserShare>> GetUsersSharesAsync()
 		{
 			var usersShares = await _context.ShareChanges
 				.GroupBy(shareChange => shareChange.UserId)
 				.Select(group => group.OrderByDescending(group => group.CreatedDate).FirstOrDefault())
-				.Select(shareChange => new KeyValuePair<Guid, decimal>(shareChange.UserId, shareChange.After))
+				.Select(shareChange => new UserShare(shareChange.UserId, shareChange.After))
 				.ToListAsync()
 				.ConfigureAwait(false);
 
 			return usersShares;
 		}
 
-		public async Task CreateSharesChangesAsync(Deposit deposit)
+		public async Task UpdateUsersSharesAsync(Deposit deposit)
 		{
 			//TODO: Нужно узнать сумму депозитов по всем юзерам чтобы рассчитать новую долю
 			var currentShares = await GetUsersSharesAsync();
-			var newSharesChanges = currentShares.Select(shareChange => 
+			var newSharesChanges = currentShares.Select(userShare =>
 				new ShareChange
 				{
-					UserId = shareChange.Key, 
-					Before = shareChange.Value, 
-					After = 0, 
+					UserId = userShare.UserId,
+					Before = userShare.Share,
+					After = 0,
 					CreatedDate = deposit.CreatedDate
 				});
 
