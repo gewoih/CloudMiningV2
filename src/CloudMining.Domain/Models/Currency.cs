@@ -1,10 +1,11 @@
-﻿using CloudMining.Domain.Models.Base;
+﻿using CloudMining.Domain.Enums;
+using CloudMining.Domain.Models.Base;
 
 namespace CloudMining.Domain.Models
 {
 	public class Currency : Entity
 	{
-		public string Code { get; set; }
+		public CurrencyCode Code { get; set; }
 		public int Precision { get; set; }
 	}
 }
