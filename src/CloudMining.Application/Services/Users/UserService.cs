@@ -1,6 +1,7 @@
 ﻿using CloudMining.Application.Models.Users;
 using CloudMining.Domain.Models.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services.Users
 {
@@ -34,5 +35,11 @@ namespace CloudMining.Application.Services.Users
 			var authResult = await _signInManager.PasswordSignInAsync(credentials.Email, credentials.Password, true, false);
 			return authResult;
 		}
+
+        public async Task<List<Guid>> GetAllUsersIdsAsync()
+        {
+            var userIds = await _userManager.Users.Select(u => u.Id).ToListAsync();
+            return userIds;
+        }
 	}
 }
