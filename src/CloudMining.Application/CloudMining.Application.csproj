@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Services\Shares\" />
     <Folder Include="Services\Users" />
   </ItemGroup>
 

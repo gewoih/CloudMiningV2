@@ -11,6 +11,7 @@ namespace CloudMining.Infrastructure.Database
 		public DbSet<Deposit> Deposits { get; set; }
 		public DbSet<PaymentShare> PaymentShares { get; set; }
 		public DbSet<ShareablePayment> ShareablePayments { get; set; }
+		public DbSet<ShareChange> ShareChanges { get; set; }
 
 		public CloudMiningContext(DbContextOptions<CloudMiningContext> options) : base(options) { }
 	}
