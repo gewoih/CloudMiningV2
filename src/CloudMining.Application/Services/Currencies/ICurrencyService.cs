@@ -1,4 +1,4 @@
-﻿using CloudMining.Application.Models.Currencies;
+﻿using CloudMining.Application.DTO.Currencies;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 

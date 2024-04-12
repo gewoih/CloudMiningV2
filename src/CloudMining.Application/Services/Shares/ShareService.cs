@@ -1,12 +1,11 @@
-﻿using CloudMining.Application.Models;
-using CloudMining.Application.Models.Shares;
+﻿using CloudMining.Application.Models.Shares;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services.Shares
 {
-	public sealed class ShareService : IShareService
+    public sealed class ShareService : IShareService
 	{
 		private readonly CloudMiningContext _context;
 

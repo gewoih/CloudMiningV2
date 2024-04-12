@@ -1,4 +1,4 @@
-﻿using CloudMining.Application.Models.Currencies;
+﻿using CloudMining.Application.DTO.Currencies;
 using CloudMining.Application.Services.Currencies;
 using Microsoft.AspNetCore.Mvc;
 

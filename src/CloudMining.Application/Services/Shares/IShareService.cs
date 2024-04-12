@@ -3,7 +3,7 @@ using CloudMining.Domain.Models;
 
 namespace CloudMining.Application.Services.Shares
 {
-	public interface IShareService
+    public interface IShareService
 	{
 		Task<decimal> GetUserShareAsync(Guid userId);
 		Task<List<UserShare>> GetUsersSharesAsync();

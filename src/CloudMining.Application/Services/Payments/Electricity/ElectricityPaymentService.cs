@@ -1,4 +1,4 @@
-﻿using CloudMining.Application.Models.Payments.Electricity;
+﻿using CloudMining.Application.DTO.Payments.Electricity;
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Shares;
 using CloudMining.Domain.Enums;

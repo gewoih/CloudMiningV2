@@ -1,13 +1,15 @@
 ﻿namespace CloudMining.Application.Models.Shares
 {
-    public sealed class UserShare
+    public sealed class UserCalculatedShare
     {
         public Guid UserId { get; set; }
+        public decimal Amount { get; set; }
         public decimal Share { get; set; }
 
-        public UserShare(Guid userId, decimal share)
+        public UserCalculatedShare(Guid userId, decimal amount, decimal share)
         {
             UserId = userId;
+            Amount = amount;
             Share = share;
         }
     }

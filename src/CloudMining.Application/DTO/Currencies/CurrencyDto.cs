@@ -1,6 +1,6 @@
 ﻿using CloudMining.Domain.Enums;
 
-namespace CloudMining.Application.Models.Currencies
+namespace CloudMining.Application.DTO.Currencies
 {
     public sealed class CurrencyDto
     {
