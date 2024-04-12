@@ -29,7 +29,6 @@ namespace CloudMining.Application.Services.Payments.Electricity
                 Amount = paymentDto.Amount,
                 CurrencyId = rubCurrency.Id,
                 Type = PaymentType.Electricity,
-                IsCompleted = false,
                 PaymentShares = usersPaymentShares
 			};
 
