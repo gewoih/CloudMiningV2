@@ -1,4 +1,5 @@
-﻿using CloudMining.Domain.Models.Base;
+﻿using CloudMining.Domain.Enums;
+using CloudMining.Domain.Models.Base;
 
 namespace CloudMining.Domain.Models
 {
