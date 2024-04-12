@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CloudMining.Domain\CloudMining.Domain.csproj" />
+    <ProjectReference Include="..\CloudMining.Infrastructure\CloudMining.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
