@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CloudMining.Application.Models.Currencies;
+﻿using CloudMining.Application.Models.Currencies;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace CloudMining.Application.Services.Currencies
 {
