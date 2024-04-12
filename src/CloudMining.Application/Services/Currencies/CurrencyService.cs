@@ -28,13 +28,24 @@ namespace CloudMining.Application.Services.Currencies
             await _context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<Currency> GetCurrencyByCodeAsync(CurrencyCode code)
+        public async Task<Currency> GetAsync(CurrencyCode code)
         {
             var foundCurrency = await _context.Currencies
-                .FirstOrDefaultAsync(c => c.Code == code)
+                .FirstOrDefaultAsync(currency => currency.Code == code)
                 .ConfigureAwait(false);
 
             return foundCurrency;
+        }
+
+        public async Task<Guid> GetIdAsync(CurrencyCode code)
+        {
+	        var currencyId = await _context.Currencies
+		        .Where(currency => currency.Code == code)
+		        .Select(currency => currency.Id)
+		        .FirstOrDefaultAsync()
+		        .ConfigureAwait(false);
+
+	        return currencyId;
         }
     }
 }
