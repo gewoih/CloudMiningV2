@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CloudMining.Infrastructure.Migrations
 {
     [DbContext(typeof(CloudMiningContext))]
-    [Migration("20240410144728_UserFieldsAdded")]
-    partial class UserFieldsAdded
+    [Migration("20240412151456_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,9 +35,8 @@ namespace CloudMining.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Code")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -228,7 +227,7 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<decimal>("Percent")
+                    b.Property<decimal>("Share")
                         .HasColumnType("numeric");
 
                     b.Property<Guid?>("ShareablePaymentId")
@@ -247,6 +246,44 @@ namespace CloudMining.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PaymentShares");
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.ShareChange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("After")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Before")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Caption")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DeletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ShareChanges");
                 });
 
             modelBuilder.Entity("CloudMining.Domain.Models.ShareablePayment", b =>
@@ -418,6 +455,17 @@ namespace CloudMining.Infrastructure.Migrations
                         .WithMany("PaymentShares")
                         .HasForeignKey("ShareablePaymentId");
 
+                    b.HasOne("CloudMining.Domain.Models.Identity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.ShareChange", b =>
+                {
                     b.HasOne("CloudMining.Domain.Models.Identity.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")

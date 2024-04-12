@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CloudMining.App.Controllers
 {
+    [Route("[controller]")]
     public class CurrencyController : Controller
     {
         private readonly ICurrencyService _currencyService;

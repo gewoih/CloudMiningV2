@@ -23,7 +23,7 @@ namespace CloudMining.Application.Services.Payments.Electricity
         public async Task<ShareablePayment> CreateAsync(CreateElectricityPaymentDto paymentDto)
         {
 	        var rubCurrency = await _currencyService.GetAsync(CurrencyCode.RUB);
-	        var usersPaymentShares = await _shareService.CreatePaymentShares(paymentDto.Amount, rubCurrency, paymentDto.CreatedDate);
+	        var usersPaymentShares = await _shareService.CreatePaymentShares(paymentDto.Amount, rubCurrency, paymentDto.Date);
             var newPayment = new ShareablePayment
             {
                 Amount = paymentDto.Amount,

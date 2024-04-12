@@ -2,7 +2,7 @@
 {
 	public sealed class CreateElectricityPaymentDto
 	{
-		public DateTime CreatedDate { get; set; }
+		public DateTime Date { get; set; }
 		public decimal Amount { get; set; }
 	}
 }
