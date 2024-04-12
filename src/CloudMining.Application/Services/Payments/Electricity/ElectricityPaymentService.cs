@@ -1,12 +1,12 @@
 ﻿using CloudMining.Application.Models.Payments.Electricity;
-using CloudMining.Application.Services.ShareChanges;
+using CloudMining.Application.Services.Shares;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
 
 namespace CloudMining.Application.Services.Payments.Electricity
 {
-    public sealed class ElectricityPaymentService : IElectricityPaymentService
+	public sealed class ElectricityPaymentService : IElectricityPaymentService
     {
         private readonly CloudMiningContext _context;
         private readonly IShareService _shareService;

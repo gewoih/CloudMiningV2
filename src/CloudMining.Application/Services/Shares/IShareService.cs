@@ -1,7 +1,7 @@
 ﻿using CloudMining.Application.Models.Shares;
 using CloudMining.Domain.Models;
 
-namespace CloudMining.Application.Services.ShareChanges
+namespace CloudMining.Application.Services.Shares
 {
 	public interface IShareService
 	{

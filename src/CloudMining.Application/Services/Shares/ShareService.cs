@@ -4,7 +4,7 @@ using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace CloudMining.Application.Services.ShareChanges
+namespace CloudMining.Application.Services.Shares
 {
 	public sealed class ShareService : IShareService
 	{
