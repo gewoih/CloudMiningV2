@@ -4,7 +4,7 @@ namespace CloudMining.Domain.Models
 {
 	public class Currency : Entity
 	{
-		public string Code { get; set; }
-		public int Precision { get; set; }
+        public CurrencyCode Code { get; set; }
+        public int Precision { get; set; }
 	}
 }
