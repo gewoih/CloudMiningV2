@@ -1,6 +1,6 @@
-﻿namespace CloudMining.Application.Models.Users
+﻿namespace CloudMining.Application.DTO.Users
 {
-	public sealed class RegisterCredentials
+	public sealed class RegisterDto
 	{
 		public string FirstName { get; set; }
 		public string LastName { get; set; }

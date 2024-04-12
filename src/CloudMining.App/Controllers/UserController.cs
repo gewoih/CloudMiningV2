@@ -1,4 +1,4 @@
-﻿using CloudMining.Application.Models.Users;
+﻿using CloudMining.Application.DTO.Users;
 using CloudMining.Application.Services.Users;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,17 +15,17 @@ namespace CloudMining.App.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Register([FromBody] RegisterCredentials credentials)
+		public async Task<IActionResult> Register([FromBody] RegisterDto dto)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var registrationResult = await _userService.RegisterAsync(credentials);
+			var registrationResult = await _userService.RegisterAsync(dto);
 			return View(registrationResult);
 		}
 
 		[HttpPost("auth")]
-		public async Task<IActionResult> Login([FromBody] LoginCredentials credentials)
+		public async Task<IActionResult> Login([FromBody] LoginDto credentials)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);

@@ -1,6 +1,7 @@
-﻿using CloudMining.Application.Models.Users;
+﻿using CloudMining.Application.DTO.Users;
 using CloudMining.Domain.Models.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services.Users
 {
@@ -15,24 +16,34 @@ namespace CloudMining.Application.Services.Users
 			_signInManager = signInManager;
 		}
 
-		public async Task<IdentityResult> RegisterAsync(RegisterCredentials credentials)
+		public async Task<IdentityResult> RegisterAsync(RegisterDto dto)
 		{
 			var newUser = new User
 			{
-				Email = credentials.Email,
-				UserName = credentials.Email,
-				FirstName = credentials.FirstName,
-				LastName = credentials.LastName,
-				Patronymic = credentials.Patronymic
+				Email = dto.Email,
+				UserName = dto.Email,
+				FirstName = dto.FirstName,
+				LastName = dto.LastName,
+				Patronymic = dto.Patronymic
 			};
 
-			return await _userManager.CreateAsync(newUser, credentials.Password);
+			return await _userManager.CreateAsync(newUser, dto.Password);
 		}
 
-		public async Task<SignInResult> LoginAsync(LoginCredentials credentials)
+		public async Task<SignInResult> LoginAsync(LoginDto credentials)
 		{
 			var authResult = await _signInManager.PasswordSignInAsync(credentials.Email, credentials.Password, true, false);
 			return authResult;
 		}
+
+        public async Task<List<Guid>> GetAllUsersIdsAsync()
+        {
+            var usersIds = await _userManager.Users
+	            .Select(u => u.Id)
+	            .ToListAsync()
+	            .ConfigureAwait(false);
+
+            return usersIds;
+        }
 	}
 }

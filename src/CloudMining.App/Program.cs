@@ -1,3 +1,6 @@
+using CloudMining.Application.Services.Currencies;
+using CloudMining.Application.Services.Payments.Electricity;
+using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Database;
@@ -15,6 +18,9 @@ builder.Services.AddIdentity<User, Role>()
 	.AddEntityFrameworkStores<CloudMiningContext>();
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+builder.Services.AddScoped<IShareService, ShareService>();
+builder.Services.AddScoped<IElectricityPaymentService, ElectricityPaymentService>();
 
 var app = builder.Build();
 
@@ -32,7 +38,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapDefaultControllerRoute();
 
 var scope = app.Services.CreateScope();
 var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;

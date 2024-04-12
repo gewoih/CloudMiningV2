@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CloudMining.Application.Models.Currencies;
+﻿using CloudMining.Application.DTO.Currencies;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace CloudMining.Application.Services.Currencies
 {
@@ -34,13 +28,24 @@ namespace CloudMining.Application.Services.Currencies
             await _context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<Currency> GetCurrencyByCodeAsync(CurrencyCode code)
+        public async Task<Currency> GetAsync(CurrencyCode code)
         {
             var foundCurrency = await _context.Currencies
-                .FirstOrDefaultAsync(c => c.Code == code)
+                .FirstOrDefaultAsync(currency => currency.Code == code)
                 .ConfigureAwait(false);
 
             return foundCurrency;
+        }
+
+        public async Task<Guid> GetIdAsync(CurrencyCode code)
+        {
+	        var currencyId = await _context.Currencies
+		        .Where(currency => currency.Code == code)
+		        .Select(currency => currency.Id)
+		        .FirstOrDefaultAsync()
+		        .ConfigureAwait(false);
+
+	        return currencyId;
         }
     }
 }
