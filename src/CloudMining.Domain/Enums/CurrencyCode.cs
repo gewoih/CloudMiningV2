@@ -1,12 +1,12 @@
 ﻿namespace CloudMining.Domain.Enums
 {
-	public enum CurrencyCode
-	{
-		USD,
-		RUB,
-		BTC,
-		ETH,
-		LTC,
-		DOGE
-	}
+    public enum CurrencyCode
+    {
+        USD,
+        RUB,
+        BTC,
+        ETH,
+        LTC,
+        DOGE
+    }
 }
