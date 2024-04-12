@@ -1,5 +1,5 @@
 ﻿using CloudMining.Application.Models.Payments.Electricity;
-using CloudMining.Application.Services.Payments.Share;
+using CloudMining.Application.Services.ShareChanges;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
@@ -9,18 +9,18 @@ namespace CloudMining.Application.Services.Payments.Electricity
     public sealed class ElectricityPaymentService : IElectricityPaymentService
     {
         private readonly CloudMiningContext _context;
-        private readonly IPaymentShareService _paymentShareService;
+        private readonly IShareService _shareService;
 
-        public ElectricityPaymentService(CloudMiningContext context, IPaymentShareService paymentShareService)
+        public ElectricityPaymentService(CloudMiningContext context, IShareService shareService)
         {
 	        _context = context;
-	        _paymentShareService = paymentShareService;
+	        _shareService = shareService;
         }
 
         public async Task<ShareablePayment> CreateAsync(CreateElectricityPaymentDto paymentDto)
         {
             //TODO: Взять currency из CurrencyService
-	        var usersPaymentShares = await _paymentShareService.CreatePaymentShares(paymentDto.Amount, new(), paymentDto.CreatedDate);
+	        var usersPaymentShares = await _shareService.CreatePaymentShares(paymentDto.Amount, new(), paymentDto.CreatedDate);
             var newPayment = new ShareablePayment
             {
                 Amount = paymentDto.Amount,

@@ -1,15 +1,16 @@
-﻿using CloudMining.Application.Models.Shares;
+﻿using CloudMining.Application.Models;
+using CloudMining.Application.Models.Shares;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services.ShareChanges
 {
-	public sealed class UserShareService : IUserShareService
+	public sealed class ShareService : IShareService
 	{
 		private readonly CloudMiningContext _context;
 
-		public UserShareService(CloudMiningContext context)
+		public ShareService(CloudMiningContext context)
 		{
 			_context = context;
 		}
@@ -53,6 +54,43 @@ namespace CloudMining.Application.Services.ShareChanges
 
 			await _context.ShareChanges.AddRangeAsync(newSharesChanges).ConfigureAwait(false);
 			await _context.SaveChangesAsync().ConfigureAwait(false);
+		}
+
+		public async Task<List<PaymentShare>> CreatePaymentShares(decimal amount, Currency currency, DateTime date)
+		{
+			var usersShares = await CalculateUsersSharesAsync(amount, currency);
+
+			var paymentShares = new List<PaymentShare>();
+			foreach (var userShare in usersShares)
+			{
+				var paymentShare = new PaymentShare
+				{
+					UserId = userShare.UserId,
+					Amount = userShare.Amount,
+					Share = userShare.Share,
+					CreatedDate = date
+				};
+
+				paymentShares.Add(paymentShare);
+			}
+
+			return paymentShares;
+		}
+
+		private async Task<List<UserCalculatedShare>> CalculateUsersSharesAsync(decimal amount, Currency currency)
+		{
+			var usersShares = await GetUsersSharesAsync();
+
+			var usersCalculatedShares = new List<UserCalculatedShare>();
+			foreach (var userShare in usersShares)
+			{
+				var calculatedAmount =
+					Math.Round(userShare.Share * amount, currency.Precision, MidpointRounding.ToZero);
+
+				usersCalculatedShares.Add(new UserCalculatedShare(userShare.UserId, calculatedAmount, userShare.Share));
+			}
+
+			return usersCalculatedShares;
 		}
 	}
 }
