@@ -12,8 +12,9 @@ namespace CloudMining.App.Controllers
         {
             _currencyService = currencyService;
         }
+
         [HttpPost]
-        public async Task<IActionResult> AddCurrency([FromBody]CurrencyDTO currency)
+        public async Task<IActionResult> AddCurrency([FromBody] CurrencyDto currency)
         {
             await _currencyService.CreateAsync(currency);
             return Ok();
