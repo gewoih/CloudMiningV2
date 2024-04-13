@@ -29,7 +29,6 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Caption")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Code")
@@ -65,7 +64,6 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<string>("Caption")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedDate")
@@ -209,7 +207,6 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<string>("Caption")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedDate")
@@ -258,7 +255,6 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<string>("Caption")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedDate")
@@ -266,6 +262,9 @@ namespace CloudMining.Infrastructure.Migrations
 
                     b.Property<DateTime>("DeletedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DepositId")
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -277,6 +276,8 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepositId");
 
                     b.HasIndex("UserId");
 
@@ -293,7 +294,6 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<string>("Caption")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedDate")
@@ -463,11 +463,19 @@ namespace CloudMining.Infrastructure.Migrations
 
             modelBuilder.Entity("CloudMining.Domain.Models.ShareChange", b =>
                 {
+                    b.HasOne("CloudMining.Domain.Models.Deposit", "Deposit")
+                        .WithMany("ShareChanges")
+                        .HasForeignKey("DepositId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("CloudMining.Domain.Models.Identity.User", "User")
-                        .WithMany()
+                        .WithMany("ShareChanges")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Deposit");
 
                     b.Navigation("User");
                 });
@@ -532,6 +540,16 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.Deposit", b =>
+                {
+                    b.Navigation("ShareChanges");
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.Identity.User", b =>
+                {
+                    b.Navigation("ShareChanges");
                 });
 
             modelBuilder.Entity("CloudMining.Domain.Models.ShareablePayment", b =>

@@ -7,6 +7,8 @@ namespace CloudMining.Domain.Models
 	{
 		public User User { get; set; }
 		public Guid UserId { get; set; }
+		public Deposit Deposit { get; set; }
+		public Guid DepositId { get; set; }
 		public decimal Before { get; set; }
 		public decimal After { get; set; }
 		public decimal Change => After - Before;
