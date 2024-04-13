@@ -1,6 +1,4 @@
 ﻿using CloudMining.Application.DTO.Payments.Deposits;
-using CloudMining.Application.Models.Payments.Deposits;
-using CloudMining.Application.Models.Shares;
 using CloudMining.Application.Services.Shares;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
@@ -26,7 +24,7 @@ namespace CloudMining.Application.Services.Deposits
 				UserId = depositDto.UserId,
 				Amount = depositDto.Amount,
 				CurrencyId = depositDto.CurrencyId,
-				CreatedDate = depositDto.Date
+				Date = depositDto.Date
 			};
 
 			await using var transaction = await _context.Database.BeginTransactionAsync();
