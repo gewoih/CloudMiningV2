@@ -14,14 +14,27 @@ namespace CloudMining.App.Controllers
 			_userService = userService;
 		}
 
+		public IActionResult Register()
+		{
+			return View();
+		}
+
 		[HttpPost]
-		public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+		public async Task<IActionResult> Register(RegisterDto credentials)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
+				return View(credentials);
 
-			var registrationResult = await _userService.RegisterAsync(dto);
-			return View(registrationResult);
+			var registrationResult = await _userService.RegisterAsync(credentials);
+			if (!registrationResult.Succeeded)
+			{
+				foreach (var error in registrationResult.Errors)
+				{
+					ModelState.AddModelError(error.Code, error.Description);
+				}
+			}
+
+			return View(credentials);
 		}
 
 		[HttpPost("auth")]
