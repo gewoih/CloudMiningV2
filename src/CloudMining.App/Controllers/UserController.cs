@@ -14,6 +14,7 @@ namespace CloudMining.App.Controllers
 			_userService = userService;
 		}
 
+		[Route("register")]
 		public IActionResult Register()
 		{
 			return View();
@@ -37,14 +38,23 @@ namespace CloudMining.App.Controllers
 			return View(credentials);
 		}
 
+		[Route("login")]
+		public IActionResult Login()
+		{
+			return View();
+		}
+
 		[HttpPost("auth")]
-		public async Task<IActionResult> Login([FromBody] LoginDto credentials)
+		public async Task<IActionResult> Login(LoginDto credentials)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
+				return View(credentials);
 
 			var authResult = await _userService.LoginAsync(credentials);
-			return View(authResult);
+			if (!authResult.Succeeded)
+				ModelState.AddModelError("", "Неверная почта или пароль.");
+			
+			return View(credentials);
 		}
 	}
 }
