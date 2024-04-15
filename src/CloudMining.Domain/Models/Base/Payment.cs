@@ -5,5 +5,6 @@
         public decimal Amount { get; set; }
         public Guid CurrencyId { get; set; }
         public Currency Currency { get; set; }
+        public DateTime Date { get; set; }
     }
 }
