@@ -1,6 +1,6 @@
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
-using CloudMining.Application.Services.Payments.Electricity;
+using CloudMining.Application.Services.Payments;
 using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
@@ -21,7 +21,7 @@ builder.Services.AddIdentity<User, Role>()
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IShareService, ShareService>();
-builder.Services.AddScoped<IElectricityPaymentService, ElectricityPaymentService>();
+builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
 
 var app = builder.Build();
