@@ -28,31 +28,51 @@ namespace CloudMining.Application.Services.Shares
 
 		public async Task<List<UserShare>> GetUsersSharesAsync()
 		{
-			var usersShares = await _context.ShareChanges
-				.GroupBy(shareChange => shareChange.UserId)
-				.Select(group => group.OrderByDescending(group => group.CreatedDate).FirstOrDefault())
-				.Select(shareChange => new UserShare(shareChange.UserId, shareChange.After))
+			var usersWithShares = await _context.Users
+				.Select(user => new
+				{
+					User = user,
+					LastShareChange = user.ShareChanges
+						.OrderByDescending(shareChange => shareChange.CreatedDate)
+						.FirstOrDefault()
+				})
 				.ToListAsync()
 				.ConfigureAwait(false);
+
+			var usersShares = usersWithShares.Select(u => 
+				new UserShare(u.User.Id, u.LastShareChange?.After ?? 0)).ToList();
 
 			return usersShares;
 		}
 
-		public async Task UpdateUsersSharesAsync(Deposit deposit)
+		public async Task<List<ShareChange>> GetUpdatedUsersSharesAsync(Dictionary<Guid, decimal> usersDeposits, DateTime newDepositDate)
 		{
-			//TODO: Нужно узнать сумму депозитов по всем юзерам чтобы рассчитать новую долю
+			var totalDepositsAmount = usersDeposits.Sum(userDeposits => userDeposits.Value);
+
 			var currentShares = await GetUsersSharesAsync();
-			var newSharesChanges = currentShares.Select(userShare =>
-				new ShareChange
+			var sharesChanges = new List<ShareChange>();
+			foreach (var userShare in currentShares)
+			{
+				var userTotalDeposit = usersDeposits[userShare.UserId];
+				var newShare = 0m;
+				if (userTotalDeposit != 0)
+					newShare = userTotalDeposit / totalDepositsAmount * 100;
+				
+				if (newShare == userShare.Share)
+					continue;
+
+				var newShareChange = new ShareChange
 				{
 					UserId = userShare.UserId,
 					Before = userShare.Share,
-					After = 0,
-					CreatedDate = deposit.CreatedDate
-				});
+					After = newShare,
+					CreatedDate = newDepositDate
+				};
 
-			await _context.ShareChanges.AddRangeAsync(newSharesChanges).ConfigureAwait(false);
-			await _context.SaveChangesAsync().ConfigureAwait(false);
+				sharesChanges.Add(newShareChange);
+			}
+
+			return sharesChanges;
 		}
 
 		public async Task<List<PaymentShare>> CreatePaymentShares(decimal amount, Currency currency, DateTime date)

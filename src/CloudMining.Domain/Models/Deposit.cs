@@ -6,5 +6,7 @@ namespace CloudMining.Domain.Models
 	public class Deposit : Payment
 	{
 		public User User { get; set; }
+		public Guid UserId { get; set; }
+		public List<ShareChange> ShareChanges { get; set; }
 	}
 }

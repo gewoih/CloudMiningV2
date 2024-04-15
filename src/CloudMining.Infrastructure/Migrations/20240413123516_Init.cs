@@ -61,7 +61,7 @@ namespace CloudMining.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Code = table.Column<int>(type: "integer", nullable: false),
                     Precision = table.Column<int>(type: "integer", nullable: false),
-                    Caption = table.Column<string>(type: "text", nullable: false),
+                    Caption = table.Column<string>(type: "text", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -179,37 +179,12 @@ namespace CloudMining.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ShareChanges",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Before = table.Column<decimal>(type: "numeric", nullable: false),
-                    After = table.Column<decimal>(type: "numeric", nullable: false),
-                    Caption = table.Column<string>(type: "text", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ShareChanges", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ShareChanges_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Deposits",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Caption = table.Column<string>(type: "text", nullable: false),
+                    Caption = table.Column<string>(type: "text", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -241,7 +216,7 @@ namespace CloudMining.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
-                    Caption = table.Column<string>(type: "text", nullable: false),
+                    Caption = table.Column<string>(type: "text", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -261,6 +236,38 @@ namespace CloudMining.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ShareChanges",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DepositId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Before = table.Column<decimal>(type: "numeric", nullable: false),
+                    After = table.Column<decimal>(type: "numeric", nullable: false),
+                    Caption = table.Column<string>(type: "text", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShareChanges", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShareChanges_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ShareChanges_Deposits_DepositId",
+                        column: x => x.DepositId,
+                        principalTable: "Deposits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PaymentShares",
                 columns: table => new
                 {
@@ -270,7 +277,7 @@ namespace CloudMining.Infrastructure.Migrations
                     Share = table.Column<decimal>(type: "numeric", nullable: false),
                     IsCompleted = table.Column<bool>(type: "boolean", nullable: false),
                     ShareablePaymentId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Caption = table.Column<string>(type: "text", nullable: false),
+                    Caption = table.Column<string>(type: "text", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -355,6 +362,11 @@ namespace CloudMining.Infrastructure.Migrations
                 column: "CurrencyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ShareChanges_DepositId",
+                table: "ShareChanges",
+                column: "DepositId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ShareChanges_UserId",
                 table: "ShareChanges",
                 column: "UserId");
@@ -379,9 +391,6 @@ namespace CloudMining.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Deposits");
-
-            migrationBuilder.DropTable(
                 name: "PaymentShares");
 
             migrationBuilder.DropTable(
@@ -392,6 +401,9 @@ namespace CloudMining.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "ShareablePayments");
+
+            migrationBuilder.DropTable(
+                name: "Deposits");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

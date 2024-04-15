@@ -10,5 +10,5 @@
             UserId = userId;
             Share = share;
         }
-    }
+	}
 }
