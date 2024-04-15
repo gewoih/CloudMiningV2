@@ -1,3 +1,4 @@
+﻿using CloudMining.App.Middleware;
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Payments;
@@ -15,14 +16,26 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<CloudMiningContext>(options =>
 	options.UseNpgsql(connectionString));
 
-builder.Services.AddIdentity<User, Role>()
+builder.Services.AddIdentity<User, Role>(options =>
+	{
+		options.User.RequireUniqueEmail = true;
+		options.SignIn.RequireConfirmedAccount = true;
+	})
 	.AddEntityFrameworkStores<CloudMiningContext>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+	options.LoginPath = "/user/login";
+	options.AccessDeniedPath = "/Account/AccessDenied";
+});
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IShareService, ShareService>();
 builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
+
+builder.Services.AddScoped<AuthenticationMiddleware>();
 
 var app = builder.Build();
 
@@ -36,6 +49,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseMiddleware<AuthenticationMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
