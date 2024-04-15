@@ -17,7 +17,7 @@ namespace CloudMining.Application.Services.Shares
 		public async Task<decimal> GetUserShareAsync(Guid userId)
 		{
 			var userShare = await _context.ShareChanges
-				.OrderByDescending(shareChange => shareChange.CreatedDate)
+				.OrderByDescending(shareChange => shareChange.Date)
 				.Where(shareChange => shareChange.UserId == userId)
 				.Select(shareChange => shareChange.After)
 				.FirstOrDefaultAsync()
@@ -33,7 +33,7 @@ namespace CloudMining.Application.Services.Shares
 				{
 					User = user,
 					LastShareChange = user.ShareChanges
-						.OrderByDescending(shareChange => shareChange.CreatedDate)
+						.OrderByDescending(shareChange => shareChange.Date)
 						.FirstOrDefault()
 				})
 				.ToListAsync()
@@ -66,7 +66,7 @@ namespace CloudMining.Application.Services.Shares
 					UserId = userShare.UserId,
 					Before = userShare.Share,
 					After = newShare,
-					CreatedDate = newDepositDate
+					Date = newDepositDate
 				};
 
 				sharesChanges.Add(newShareChange);
@@ -87,7 +87,7 @@ namespace CloudMining.Application.Services.Shares
 					UserId = userShare.UserId,
 					Amount = userShare.Amount,
 					Share = userShare.Share,
-					CreatedDate = date
+					Date = date
 				};
 
 				paymentShares.Add(paymentShare);

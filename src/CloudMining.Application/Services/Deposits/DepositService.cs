@@ -24,7 +24,7 @@ namespace CloudMining.Application.Services.Deposits
 				UserId = depositDto.UserId,
 				Amount = depositDto.Amount,
 				CurrencyId = depositDto.CurrencyId,
-				CreatedDate = depositDto.Date
+				Date = depositDto.Date
 			};
 
 			var usersDeposits = await GetUsersDeposits();
