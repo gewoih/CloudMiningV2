@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CloudMining.Application.DTO.Payments.Purchase;
+﻿using CloudMining.Application.DTO.Payments.Purchase;
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Shares;
 using CloudMining.Domain.Enums;
