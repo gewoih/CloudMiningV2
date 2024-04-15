@@ -14,13 +14,13 @@ namespace CloudMining.App.Controllers
 			_userService = userService;
 		}
 
-		[Route("register")]
+		[HttpGet("register")]
 		public IActionResult Register()
 		{
 			return View();
 		}
 
-		[HttpPost]
+		[HttpPost("register")]
 		public async Task<IActionResult> Register(RegisterDto credentials)
 		{
 			if (!ModelState.IsValid)
