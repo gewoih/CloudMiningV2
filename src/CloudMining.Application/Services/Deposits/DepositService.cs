@@ -1,6 +1,4 @@
 ﻿using CloudMining.Application.DTO.Payments.Deposits;
-using CloudMining.Application.Models.Payments.Deposits;
-using CloudMining.Application.Models.Shares;
 using CloudMining.Application.Services.Shares;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;

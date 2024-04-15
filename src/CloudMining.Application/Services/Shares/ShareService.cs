@@ -1,5 +1,4 @@
-﻿using CloudMining.Application.Models.Payments.Deposits;
-using CloudMining.Application.Models.Shares;
+﻿using CloudMining.Application.Models.Shares;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
