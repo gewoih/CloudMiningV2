@@ -55,7 +55,6 @@ namespace CloudMining.Infrastructure.Database
 							break;
 						case EntityState.Added:
 							trackable.CreatedDate = utcNow;
-							trackable.UpdatedDate = utcNow;
 							break;
 						case EntityState.Deleted:
 							entry.State = EntityState.Modified;
