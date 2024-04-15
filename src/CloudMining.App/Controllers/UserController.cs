@@ -14,24 +14,47 @@ namespace CloudMining.App.Controllers
 			_userService = userService;
 		}
 
-		[HttpPost]
-		public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+		[HttpGet("register")]
+		public IActionResult Register()
+		{
+			return View();
+		}
+
+		[HttpPost("register")]
+		public async Task<IActionResult> Register(RegisterDto credentials)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
+				return View(credentials);
 
-			var registrationResult = await _userService.RegisterAsync(dto);
-			return View(registrationResult);
+			var registrationResult = await _userService.RegisterAsync(credentials);
+			if (!registrationResult.Succeeded)
+			{
+				foreach (var error in registrationResult.Errors)
+				{
+					ModelState.AddModelError(error.Code, error.Description);
+				}
+			}
+
+			return View(credentials);
+		}
+
+		[Route("login")]
+		public IActionResult Login()
+		{
+			return View();
 		}
 
 		[HttpPost("auth")]
-		public async Task<IActionResult> Login([FromBody] LoginDto credentials)
+		public async Task<IActionResult> Login(LoginDto credentials)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
+				return View(credentials);
 
 			var authResult = await _userService.LoginAsync(credentials);
-			return View(authResult);
+			if (!authResult.Succeeded)
+				ModelState.AddModelError("", "Неверная почта или пароль.");
+			
+			return View(credentials);
 		}
 	}
 }
