@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace CloudMining.Application.DTO.Payments.Purchase
 {
-    internal class CreatePurchaseDto
+    public sealed class CreatePurchaseDto
     {
+        public DateTime Date { get; set; }
+        public decimal Amount { get; set; }
+        public string Purpose { get; set; }
     }
 }
