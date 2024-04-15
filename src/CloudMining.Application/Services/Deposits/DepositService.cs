@@ -29,24 +29,14 @@ namespace CloudMining.Application.Services.Deposits
 				CreatedDate = depositDto.Date
 			};
 
-			await using var transaction = await _context.Database.BeginTransactionAsync();
-			try
-			{
-				var usersDeposits = await GetUsersDeposits();
-				usersDeposits[depositDto.UserId] += depositDto.Amount;
+			var usersDeposits = await GetUsersDeposits();
+			usersDeposits[depositDto.UserId] += depositDto.Amount;
 
-				var newShareChanges = await _shareService.GetUpdatedUsersSharesAsync(usersDeposits, depositDto.Date);
-				deposit.ShareChanges = newShareChanges;
+			var newShareChanges = await _shareService.GetUpdatedUsersSharesAsync(usersDeposits, depositDto.Date);
+			deposit.ShareChanges = newShareChanges;
 
-				await _context.Deposits.AddAsync(deposit);
-				await _context.SaveChangesAsync();
-
-				await transaction.CommitAsync();
-			}
-			catch
-			{
-				await transaction.RollbackAsync();
-			}
+			await _context.Deposits.AddAsync(deposit);
+			await _context.SaveChangesAsync();
 
 			return deposit;
 		}
