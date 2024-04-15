@@ -1,0 +1,84 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<CloudMining.Domain.Models.ShareablePayment>
+
+@{
+	ViewData["Title"] = "Платежи";
+}
+
+<select id="paymentType" class="form-control">
+	<option value="Electricity">Электричество</option>
+	<option value="Purchase">Покупки</option>
+</select>
+
+<table>
+	<thead>
+	<tr>
+		<th>Сумма</th>
+		<th>Дата</th>
+	</tr>
+	</thead>
+	<tbody>
+		@foreach (var payment in Model)
+		{
+			<tr>
+				<td>@payment.Amount.ToString("C")</td>
+				<td>@payment.Date</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Добавить платеж</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addPaymentModalLabel">Добавление нового платежа</h5>
+			</div>
+			<div class="modal-body">
+				<form id="addPaymentForm">
+					<div class="form-group">
+						<label for="paymentCaption">Комментарий</label>
+						<input type="text" class="form-control" id="paymentCaption" required>
+					</div>
+					<div class="form-group">
+						<label for="paymentDate">Дата</label>
+						<input type="date" class="form-control" id="paymentDate" required>
+					</div>
+					<div class="form-group">
+						<label for="paymentAmount">Сумма</label>
+						<input type="number" class="form-control" id="paymentAmount" required>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+						<button type="submit" class="btn btn-primary">Сохранить</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script>
+	$(document).ready(function () {
+		$('#addPaymentForm').on('submit', function (e) {
+			e.preventDefault();
+			var data = {
+				caption: $('#paymentCaption').val(),
+				amount: $('#paymentAmount').val(),
+				date: $('#paymentDate').val()
+			};
+			$.ajax({
+				type: 'POST',
+				url: '/payments',
+				data: data,
+				success: function (response) {
+					$('#addPayment').modal('hide');
+				}
+			});
+		});
+	});
+</script>

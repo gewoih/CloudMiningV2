@@ -6,6 +6,8 @@ using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Database;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,18 +18,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<CloudMiningContext>(options =>
 	options.UseNpgsql(connectionString));
 
-builder.Services.AddIdentity<User, Role>(options =>
-	{
-		options.User.RequireUniqueEmail = true;
-		options.SignIn.RequireConfirmedAccount = true;
-	})
-	.AddEntityFrameworkStores<CloudMiningContext>();
-
-builder.Services.ConfigureApplicationCookie(options =>
-{
-	options.LoginPath = "/user/login";
-	options.AccessDeniedPath = "/Account/AccessDenied";
-});
+builder.Services.AddIdentity<User, Role>()
+	.AddEntityFrameworkStores<CloudMiningContext>()
+	.AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
@@ -50,10 +43,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseMiddleware<AuthenticationMiddleware>();
-
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<AuthenticationMiddleware>();
 
 app.MapDefaultControllerRoute();
 
