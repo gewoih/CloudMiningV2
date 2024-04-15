@@ -1,7 +1,9 @@
 ﻿using CloudMining.Application.DTO.Users;
 using CloudMining.Domain.Models.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CloudMining.Application.Services.Users
 {
@@ -9,11 +11,13 @@ namespace CloudMining.Application.Services.Users
 	{
 		private readonly UserManager<User> _userManager;
 		private readonly SignInManager<User> _signInManager;
+		private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public UserService(UserManager<User> userManager, SignInManager<User> signInManager)
+		public UserService(UserManager<User> userManager, SignInManager<User> signInManager, IHttpContextAccessor httpContextAccessor)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
+			_httpContextAccessor = httpContextAccessor;
 		}
 
 		public async Task<IdentityResult> RegisterAsync(RegisterDto dto)
@@ -44,6 +48,13 @@ namespace CloudMining.Application.Services.Users
 	            .ConfigureAwait(false);
 
             return usersIds;
+        }
+
+        public Guid GetCurrentUserId()
+        {
+			var httpContext = _httpContextAccessor.HttpContext;
+			var userId = httpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+			return Guid.Parse(userId);
         }
 	}
 }
