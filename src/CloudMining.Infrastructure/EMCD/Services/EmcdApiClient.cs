@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Nodes;
 using CloudMining.Domain.Enums;
-using CloudMining.Infrastructure.EMCD.Models;
+using CloudMining.Infrastructure.Emcd.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
-namespace CloudMining.Infrastructure.EMCD.Services
+namespace CloudMining.Infrastructure.Emcd.Services
 {
 	public sealed class EmcdApiClient
 	{

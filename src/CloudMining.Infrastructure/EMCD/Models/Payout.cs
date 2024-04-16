@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CloudMining.Infrastructure.EMCD.Models
+namespace CloudMining.Infrastructure.Emcd.Models
 {
 	public sealed class Payout
 	{

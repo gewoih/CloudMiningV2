@@ -6,7 +6,7 @@ using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Database;
-using CloudMining.Infrastructure.EMCD.Services;
+using CloudMining.Infrastructure.Emcd.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

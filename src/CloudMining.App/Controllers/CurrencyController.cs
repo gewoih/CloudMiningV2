@@ -1,6 +1,6 @@
 ﻿using CloudMining.Application.DTO.Currencies;
 using CloudMining.Application.Services.Currencies;
-using CloudMining.Infrastructure.EMCD.Services;
+using CloudMining.Infrastructure.Emcd.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudMining.App.Controllers
