@@ -2,6 +2,7 @@
 using CloudMining.Application.Services.Payments;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Enums;
+using CloudMining.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudMining.App.Controllers
@@ -18,22 +19,28 @@ namespace CloudMining.App.Controllers
 			_userService = userService;
 		}
 
-		public async Task<IActionResult> Index(PaymentType paymentType = PaymentType.Electricity)
+		public IActionResult Index()
 		{
-			var currentUserId = _userService.GetCurrentUserId(); 
-			var payments = await _shareablePaymentService.GetAsync(paymentType, currentUserId);
-
-			return View(payments);
+			return View();
 		}
 
-		[HttpPost]
+		[HttpGet("/api/payments")]
+		public async Task<List<ShareablePayment>> Get(PaymentType paymentType)
+		{
+			var currentUserId = _userService.GetCurrentUserId();
+			var payments = await _shareablePaymentService.GetAsync(paymentType, currentUserId);
+
+			return payments;
+		}
+
+		[HttpPost("/api/payments")]
 		public async Task<IActionResult> Create(CreateShareablePaymentDto paymentDto)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var payment = await _shareablePaymentService.CreateAsync(paymentDto);
-			return View(payment);
+			_ = await _shareablePaymentService.CreateAsync(paymentDto);
+			return RedirectToAction("Index");
 		}
 	}
 }

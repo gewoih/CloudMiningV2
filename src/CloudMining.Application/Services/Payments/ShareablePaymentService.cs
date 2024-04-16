@@ -57,7 +57,10 @@ namespace CloudMining.Application.Services.Payments
 				paymentsQuery = paymentsQuery.Where(payment =>
 					payment.PaymentShares.Any(paymentShare => paymentShare.UserId == userId));
 
-			var payments = await paymentsQuery.ToListAsync();
+			var payments = await paymentsQuery
+				.OrderByDescending(payment => payment.Date)
+				.ToListAsync();
+
 			return payments;
 		}
 	}
