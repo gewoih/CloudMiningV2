@@ -37,9 +37,11 @@ namespace CloudMining.Infrastructure.Emcd.Services
 ;			foreach (var httpResponseMessage in getPayoutsTasks.Select(task => task.Result))
 			{
 				var stringResponse = await httpResponseMessage.Content.ReadAsStringAsync();
-				var jsonPayouts = JsonObject.Parse(stringResponse)["payouts"].ToJsonString();
-				var newPayouts = JsonConvert.DeserializeObject<List<Payout>>(jsonPayouts);
+				var jsonPayouts = JsonNode.Parse(stringResponse)?["payouts"]?.ToJsonString();
+				if (string.IsNullOrEmpty(jsonPayouts))
+					continue;
 
+				var newPayouts = JsonConvert.DeserializeObject<List<Payout>>(jsonPayouts);
 				if (newPayouts is not null)
 					payouts.AddRange(newPayouts);
 			}
