@@ -1,5 +1,6 @@
 ﻿using CloudMining.Application.DTO.Currencies;
 using CloudMining.Application.Services.Currencies;
+using CloudMining.Infrastructure.EMCD.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudMining.App.Controllers
@@ -8,10 +9,12 @@ namespace CloudMining.App.Controllers
     public class CurrencyController : Controller
     {
         private readonly ICurrencyService _currencyService;
+        private readonly EmcdApiClient _emcdApiClient;
 
-        public CurrencyController(ICurrencyService currencyService)
+        public CurrencyController(ICurrencyService currencyService, EmcdApiClient emcdApiClient)
         {
-            _currencyService = currencyService;
+	        _currencyService = currencyService;
+	        _emcdApiClient = emcdApiClient;
         }
 
         [HttpPost]
@@ -19,6 +22,13 @@ namespace CloudMining.App.Controllers
         {
             await _currencyService.CreateAsync(currency);
             return Ok();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPayouts()
+        {
+	        var result = await _emcdApiClient.GetPayouts();
+	        return Json(result);
         }
     }
 }
