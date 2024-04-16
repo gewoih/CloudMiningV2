@@ -6,6 +6,7 @@ using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Infrastructure.Emcd.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,8 @@ builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
 
 builder.Services.AddScoped<AuthenticationMiddleware>();
+
+builder.Services.AddHttpClient<EmcdApiClient>();
 
 var app = builder.Build();
 
