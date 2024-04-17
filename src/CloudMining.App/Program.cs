@@ -53,6 +53,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+if (!app.Environment.IsDevelopment())
 app.UseMiddleware<AuthenticationMiddleware>();
 
 app.UseAuthentication();
