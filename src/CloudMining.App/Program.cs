@@ -2,11 +2,12 @@
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Payments;
+using CloudMining.Application.Services.Payouts;
 using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Database;
-using CloudMining.Infrastructure.Emcd.Services;
+using CloudMining.Infrastructure.Emcd;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,8 @@ builder.Services.AddScoped<IShareService, ShareService>();
 builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
 
+builder.Services.AddHostedService<PayoutsLoaderService>();
+
 builder.Services.AddScoped<AuthenticationMiddleware>();
 
 builder.Services.AddHttpClient<EmcdApiClient>();
@@ -53,7 +56,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseMiddleware<AuthenticationMiddleware>();
+if (!app.Environment.IsDevelopment())
+	app.UseMiddleware<AuthenticationMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
