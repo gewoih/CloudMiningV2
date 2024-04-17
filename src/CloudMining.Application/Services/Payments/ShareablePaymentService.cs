@@ -20,9 +20,12 @@ namespace CloudMining.Application.Services.Payments
 			_shareService = shareService;
 		}
 
-		public async Task<ShareablePayment> CreateAsync(CreateShareablePaymentDto createPaymentDto)
+		public async Task<ShareablePayment?> CreateAsync(CreateShareablePaymentDto createPaymentDto)
 		{
-			var rubCurrency = await _currencyService.GetAsync(CurrencyCode.RUB);
+			var rubCurrency = await _currencyService.GetAsync(createPaymentDto.CurrencyCode);
+			if (rubCurrency is null)
+				return null;
+
 			var usersPaymentShares = 
 				await _shareService.CreatePaymentShares(createPaymentDto.Amount, rubCurrency, createPaymentDto.Date);
 			
