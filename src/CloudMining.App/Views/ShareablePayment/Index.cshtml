@@ -99,6 +99,9 @@
 
             async mounted() {
                 await this.fetchPayments();
+                await window.addEventListener('paymentAdded', (event) => {
+                 this.fetchPayments();
+                });
             },
 
             methods: {
@@ -115,6 +118,7 @@
                     }
                 },
 
+
                 showModal() {
                     $("#exampleModal").modal('show');
                 },
@@ -127,6 +131,7 @@
             }
         });
 
+
         app.mount('#app');
 
         $(document).ready(function () {
@@ -137,6 +142,7 @@
                     amount: $('#paymentAmount').val(),
                     date: $('#paymentDate').val()
                 };
+
                 $.ajax({
                     url: '/api/payments',
                     type: 'POST',
@@ -144,7 +150,7 @@
                     success: function (response) {
                         $('#exampleModal').modal('hide');
                         $('#successModal').modal('show');
-
+                        window.dispatchEvent(new CustomEvent('paymentAdded', { detail: response }));
                     }
                 });
             });
