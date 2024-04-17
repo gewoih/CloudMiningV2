@@ -1,5 +1,6 @@
 ﻿using CloudMining.Application.DTO.Payments;
 using CloudMining.Application.Services.Payments;
+using CloudMining.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudMining.App.Controllers
