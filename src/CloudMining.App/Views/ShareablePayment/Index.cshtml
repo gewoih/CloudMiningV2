@@ -38,9 +38,7 @@
 		</div>
 	</div>
 
-
 	<button type="button" class="btn btn-primary float-end m-3" v-on:click="showModal()">Добавить платеж</button>
-
 
 	<!-- Modal -->
 	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
@@ -53,35 +51,21 @@
 					<form id="addPaymentForm">
 						<div class="form-group">
 							<label for="paymentCaption">Комментарий</label>
-							<input type="text" class="form-control" id="paymentCaption">
+							<input type="text" class="form-control" id="paymentCaption" v-model="newPayment.caption">
 						</div>
 						<div class="form-group">
 							<label for="paymentDate">Дата</label>
-							<input type="date" class="form-control" id="paymentDate" required>
+							<input type="date" class="form-control" id="paymentDate" required v-model="newPayment.date">
 						</div>
 						<div class="form-group">
 							<label for="paymentAmount">Сумма</label>
-							<input type="number" class="form-control" id="paymentAmount" required>
+							<input type="number" class="form-control" id="paymentAmount" required v-model="newPayment.amount">
 						</div>
 						<div class="modal-footer border-top-0">
 							<button type="button" class="btn btn-secondary" v-on:click="closeModal()">Отмена</button>
-							<button type="submit" class="btn btn-primary">Сохранить</button>
+							<button type="submit" class="btn btn-primary" v-on:click="createPayment()">Сохранить</button>
 						</div>
 					</form>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Success message -->
-	<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered" role="document">
-			<div class="modal-content">
-				<div class="modal-body">
-					<h5 class="modal-title" id="successModalLabel">Платеж успешно добавлен!</h5>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" v-on:click="confirmModal()">Хорошо!</button>
 				</div>
 			</div>
 		</div>
@@ -97,14 +81,20 @@
 					payments: [],
 					selectedPaymentType: 'Electricity',
 					isLoading: true,
-					tableMaxHeight: 0
+					tableMaxHeight: 0,
+					newPayment: {
+						currencyCode: 1,
+						caption: null,
+						amount: null,
+						date: null
+					},
+					headers: {
+						'Content-Type': 'application/json'
+					}
 				};
 			},
 			async mounted() {
 				await this.fetchPayments();
-				await window.addEventListener('paymentAdded', (event) => {
-					this.fetchPayments();
-				});
 				this.setTableMaxHeight();
 			},
 
@@ -122,14 +112,23 @@
 					}
 				},
 
+				async createPayment() {
+					try {
+						const headers = this.headers;
+						const serializedPaymentData = JSON.stringify(this.newPayment);
+						const response = await axios.post('/api/payments', serializedPaymentData, { headers });
+						await this.fetchPayments();
+					}
+					catch (error) {
+						console.error('Ошибка при создании платежа', error)
+					}
+				},
+
 				showModal() {
 					$("#exampleModal").modal('show');
 				},
 				closeModal() {
 					$("#exampleModal").modal('hide');
-				},
-				confirmModal() {
-					$("#successModal").modal('hide');
 				},
 
 				setTableMaxHeight() {
@@ -143,27 +142,5 @@
 		});
 
 		app.mount('#app');
-
-		$(document).ready(function () {
-			$('#addPaymentForm').on('submit', function (e) {
-				e.preventDefault();
-				var data = {
-					caption: $('#paymentCaption').val(),
-					amount: $('#paymentAmount').val(),
-					date: $('#paymentDate').val()
-				};
-
-				$.ajax({
-					url: '/api/payments',
-					type: 'POST',
-					data: data,
-					success: function (response) {
-						$('#exampleModal').modal('hide');
-						$('#successModal').modal('show');
-						window.dispatchEvent(new CustomEvent('paymentAdded', { detail: response }));
-					}
-				});
-			});
-		});
 	</script>
 }

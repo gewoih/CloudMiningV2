@@ -27,7 +27,6 @@ namespace CloudMining.App.Controllers
 		[HttpGet("/api/payments")]
 		public async Task<List<ShareablePayment>> Get(PaymentType paymentType)
 		{
-			await Task.Delay(5000);
 			var currentUserId = _userService.GetCurrentUserId();
 			var payments = await _shareablePaymentService.GetAsync(paymentType, currentUserId);
 
@@ -35,7 +34,7 @@ namespace CloudMining.App.Controllers
 		}
 
 		[HttpPost("/api/payments")]
-		public async Task<IActionResult> Create(CreateShareablePaymentDto paymentDto)
+		public async Task<IActionResult> Create([FromBody] CreateShareablePaymentDto paymentDto)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
