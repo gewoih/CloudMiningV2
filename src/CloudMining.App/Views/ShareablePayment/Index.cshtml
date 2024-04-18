@@ -14,8 +14,8 @@
 
 	<div v-else>
 		<select class="form-select m-3" v-model="selectedPaymentType" @@change="fetchPayments">
-			<option selected value="Electricity">Электричество</option>
-			<option value="Purchase">Покупки</option>
+            <option :value="0" :selected="selectedPaymentType === 0">Электричество</option>
+            <option :value="2" :selected="selectedPaymentType === 2">Покупки</option>
 		</select>
 
 		<div class="table-responsive m-3" :style="{ maxHeight: tableMaxHeight + 'px', overflowY: 'auto' }">
@@ -79,7 +79,7 @@
 			data() {
 				return {
 					payments: [],
-					selectedPaymentType: 'Electricity',
+					selectedPaymentType: 0,
 					isLoading: true,
 					tableMaxHeight: 0,
 					newPayment: {
