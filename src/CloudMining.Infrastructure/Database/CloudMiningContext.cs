@@ -16,6 +16,14 @@ namespace CloudMining.Infrastructure.Database
 
 		public CloudMiningContext(DbContextOptions<CloudMiningContext> options) : base(options) { }
 
+		protected override void OnModelCreating(ModelBuilder builder)
+		{
+			builder.Entity<Currency>().HasData(DatabaseInitializer.GetCurrencies());
+			builder.Entity<Currency>().HasIndex(currency => currency.Code).IsUnique();
+
+			base.OnModelCreating(builder);
+		}
+
 		public override int SaveChanges()
 		{
 			OnBeforeSaving();
