@@ -28,7 +28,7 @@ namespace CloudMining.Application.Services.Currencies
             await _context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<Currency> GetAsync(CurrencyCode code)
+        public async Task<Currency?> GetAsync(CurrencyCode code)
         {
             var foundCurrency = await _context.Currencies
                 .FirstOrDefaultAsync(currency => currency.Code == code)

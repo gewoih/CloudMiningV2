@@ -11,7 +11,7 @@ namespace CloudMining.App.Controllers
 
         public CurrencyController(ICurrencyService currencyService)
         {
-            _currencyService = currencyService;
+	        _currencyService = currencyService;
         }
 
         [HttpPost]

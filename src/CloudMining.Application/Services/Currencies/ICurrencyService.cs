@@ -7,7 +7,7 @@ namespace CloudMining.Application.Services.Currencies
     public interface ICurrencyService
     {
         Task CreateAsync(CurrencyDto currency);
-        Task<Currency> GetAsync(CurrencyCode code);
+        Task<Currency?> GetAsync(CurrencyCode code);
         Task<Guid> GetIdAsync(CurrencyCode code);
     }
 }

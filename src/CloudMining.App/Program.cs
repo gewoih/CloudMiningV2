@@ -2,10 +2,12 @@
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Payments;
+using CloudMining.Application.Services.Payouts;
 using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Infrastructure.Emcd;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +30,11 @@ builder.Services.AddScoped<IShareService, ShareService>();
 builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
 
+builder.Services.AddHostedService<PayoutsLoaderService>();
+
 builder.Services.AddScoped<AuthenticationMiddleware>();
+
+builder.Services.AddHttpClient<EmcdApiClient>();
 
 var app = builder.Build();
 
@@ -46,7 +52,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseMiddleware<AuthenticationMiddleware>();
+if (!app.Environment.IsDevelopment())
+	app.UseMiddleware<AuthenticationMiddleware>();
 
 app.MapDefaultControllerRoute();
 
