@@ -25,4 +25,8 @@
     <ProjectReference Include="..\CloudMining.Domain\CloudMining.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

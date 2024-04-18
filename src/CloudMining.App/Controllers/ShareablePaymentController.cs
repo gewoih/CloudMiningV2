@@ -27,6 +27,7 @@ namespace CloudMining.App.Controllers
 		[HttpGet("/api/payments")]
 		public async Task<List<ShareablePayment>> Get(PaymentType paymentType)
 		{
+			await Task.Delay(5000);
 			var currentUserId = _userService.GetCurrentUserId();
 			var payments = await _shareablePaymentService.GetAsync(paymentType, currentUserId);
 

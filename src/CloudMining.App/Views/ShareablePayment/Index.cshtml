@@ -1,165 +1,169 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@using System.Collections.Specialized
 @model IEnumerable<CloudMining.Domain.Models.ShareablePayment>
 
 @{
-    ViewData["Title"] = "Платежи";
+	ViewData["Title"] = "Платежи";
 }
 
 <div id="app" v-cloak>
 
-    <div class="loading-container" v-if="isLoading">
-        <div class="loading-spinner"></div>
-        <p class="loading-message">Загрузка данных...</p>
-    </div>
+	<div class="loading-container" v-if="isLoading">
+		<div class="loading-spinner"></div>
+		<p class="loading-message">Загрузка данных...</p>
+	</div>
 
-    <div v-else>
-        <select class="form-select m-3" v-model="selectedPaymentType">
-            <option selected value="Electricity">Электричество</option>
-            <option value="Purchase">Покупки</option>
-        </select>
+	<div v-else>
+		<select class="form-select m-3" v-model="selectedPaymentType">
+			<option selected value="Electricity">Электричество</option>
+			<option value="Purchase">Покупки</option>
+		</select>
 
-        <div class="table-responsive m-3" :style="{ maxHeight: tableMaxHeight + 'px', overflowY: 'auto' }">
-            <table class="table table-striped table-hover display">
-                <thead class="sticky-top">
-                <tr>
-                    <th>Сумма</th>
-                    <th>Дата</th>
-                    <th>Комментарий</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="payment in payments" :class="{ 'table-success': payment.isCompleted, 'table-danger': !payment.isCompleted }">
-                    <td>{{ payment.amount }}</td>
-                    <td>{{ payment.date }}</td>
-                    <td>{{ payment.caption }}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-
-    <button type="button" class="btn btn-primary float-end m-3" v-on:click="showModal()">Добавить платеж</button>
+		<div class="table-responsive m-3" :style="{ maxHeight: tableMaxHeight + 'px', overflowY: 'auto' }">
+			<table class="table table-striped table-hover display">
+				<thead class="sticky-top">
+					<tr>
+						<th>Сумма</th>
+						<th>Дата</th>
+						<th>Комментарий</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="payment in payments" :class="{ 'table-success': payment.isCompleted, 'table-danger': !payment.isCompleted }">
+						<td>{{ payment.amount }}</td>
+						<td>{{ moment(payment.date).format('DD.MM.YYYY') }}</td>
+						<td>{{ payment.caption }}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
 
 
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addPaymentModalLabel">Добавление нового платежа</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="addPaymentForm">
-                        <div class="form-group">
-                            <label for="paymentCaption">Комментарий</label>
-                            <input type="text" class="form-control" id="paymentCaption">
-                        </div>
-                        <div class="form-group">
-                            <label for="paymentDate">Дата</label>
-                            <input type="date" class="form-control" id="paymentDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="paymentAmount">Сумма</label>
-                            <input type="number" class="form-control" id="paymentAmount" required>
-                        </div>
-                        <div class="modal-footer border-top-0">
-                            <button type="button" class="btn btn-secondary" v-on:click="closeModal()">Отмена</button>
-                            <button type="submit" class="btn btn-primary">Сохранить</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+	<button type="button" class="btn btn-primary float-end m-3" v-on:click="showModal()">Добавить платеж</button>
 
-    <!-- Success message -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <h5 class="modal-title" id="successModalLabel">Платеж успешно добавлен!</h5>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" v-on:click="confirmModal()">Хорошо!</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="addPaymentModalLabel">Добавление нового платежа</h5>
+				</div>
+				<div class="modal-body">
+					<form id="addPaymentForm">
+						<div class="form-group">
+							<label for="paymentCaption">Комментарий</label>
+							<input type="text" class="form-control" id="paymentCaption">
+						</div>
+						<div class="form-group">
+							<label for="paymentDate">Дата</label>
+							<input type="date" class="form-control" id="paymentDate" required>
+						</div>
+						<div class="form-group">
+							<label for="paymentAmount">Сумма</label>
+							<input type="number" class="form-control" id="paymentAmount" required>
+						</div>
+						<div class="modal-footer border-top-0">
+							<button type="button" class="btn btn-secondary" v-on:click="closeModal()">Отмена</button>
+							<button type="submit" class="btn btn-primary">Сохранить</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Success message -->
+	<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body">
+					<h5 class="modal-title" id="successModalLabel">Платеж успешно добавлен!</h5>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" v-on:click="confirmModal()">Хорошо!</button>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+
 @section Scripts
 {
-         <script>
-            const app = Vue.createApp({
-                data() {
-                    return {
-                        payments: [],
-                        selectedPaymentType: 'Electricity',
-                        isLoading: true,
-                        tableMaxHeight: 0
-                    };
-                },
-                async mounted() {
-                    await this.fetchPayments();
-                    await window.addEventListener('paymentAdded', (event) => {
-                        this.fetchPayments();
-                    });
-                    this.setTableMaxHeight();
-                },
+	<script>
+		const app = Vue.createApp({
+			data() {
+				return {
+					payments: [],
+					selectedPaymentType: 'Electricity',
+					isLoading: true,
+					tableMaxHeight: 0
+				};
+			},
+			async mounted() {
+				await this.fetchPayments();
+				await window.addEventListener('paymentAdded', (event) => {
+					this.fetchPayments();
+				});
+				this.setTableMaxHeight();
+			},
 
-                methods: {
-                    async fetchPayments() {
-                        this.isLoading = true;
+			methods: {
+				async fetchPayments() {
+					this.isLoading = true;
 
-                        try {
-                            const response = await axios.get('/api/payments');
-                            this.payments = response.data;
-                        } catch (error) {
-                            console.error('Error fetching data:', error);
-                        } finally {
-                            this.isLoading = false;
-                        }
-                    },
+					try {
+						const response = await axios.get('/api/payments');
+						this.payments = response.data;
+					} catch (error) {
+						console.error('Error fetching data:', error);
+					} finally {
+						this.isLoading = false;
+					}
+				},
 
-                    showModal() {
-                        $("#exampleModal").modal('show');
-                    },
-                    closeModal() {
-                        $("#exampleModal").modal('hide');
-                    },
-                    confirmModal() {
-                        $("#successModal").modal('hide');
-                    },
+				showModal() {
+					$("#exampleModal").modal('show');
+				},
+				closeModal() {
+					$("#exampleModal").modal('hide');
+				},
+				confirmModal() {
+					$("#successModal").modal('hide');
+				},
 
-                    setTableMaxHeight() {
-                        this.tableMaxHeight = window.innerHeight - 300;
-                    }
-                }
-            });
+				setTableMaxHeight() {
+					this.tableMaxHeight = window.innerHeight - 300;
+				},
 
-            app.mount('#app');
+				moment(date) {
+					return moment(date);
+				},
+			}
+		});
 
-            $(document).ready(function () {
-                $('#addPaymentForm').on('submit', function (e) {
-                    e.preventDefault();
-                    var data = {
-                        caption: $('#paymentCaption').val(),
-                        amount: $('#paymentAmount').val(),
-                        date: $('#paymentDate').val()
-                    };
+		app.mount('#app');
 
-                    $.ajax({
-                        url: '/api/payments',
-                        type: 'POST',
-                        data: data,
-                        success: function (response) {
-                            $('#exampleModal').modal('hide');
-                            $('#successModal').modal('show');
-                            window.dispatchEvent(new CustomEvent('paymentAdded', { detail: response }));
-                        }
-                    });
-                });
-            });
-        </script>
+		$(document).ready(function () {
+			$('#addPaymentForm').on('submit', function (e) {
+				e.preventDefault();
+				var data = {
+					caption: $('#paymentCaption').val(),
+					amount: $('#paymentAmount').val(),
+					date: $('#paymentDate').val()
+				};
+
+				$.ajax({
+					url: '/api/payments',
+					type: 'POST',
+					data: data,
+					success: function (response) {
+						$('#exampleModal').modal('hide');
+						$('#successModal').modal('show');
+						window.dispatchEvent(new CustomEvent('paymentAdded', { detail: response }));
+					}
+				});
+			});
+		});
+	</script>
 }
