@@ -1,11 +1,4 @@
-﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model IEnumerable<CloudMining.Domain.Models.ShareablePayment>
-
-@{
-	ViewData["Title"] = "Платежи";
-}
-
-<div id="app" v-cloak>
+﻿<div id="app" v-cloak>
 
 	<div class="loading-container" v-if="isLoading">
 		<div class="loading-spinner"></div>
@@ -14,8 +7,8 @@
 
 	<div v-else>
 		<select class="form-select m-3" v-model="selectedPaymentType" @@change="fetchPayments">
-            <option :value="0" :selected="selectedPaymentType === 0">Электричество</option>
-            <option :value="2" :selected="selectedPaymentType === 2">Покупки</option>
+            <option value="Electricity">Электричество</option>
+            <option value="Purchase">Покупки</option>
 		</select>
 
 		<div class="table-responsive m-3" :style="{ maxHeight: tableMaxHeight + 'px', overflowY: 'auto' }">
@@ -48,7 +41,7 @@
 					<h5 class="modal-title" id="addPaymentModalLabel">Добавление нового платежа</h5>
 				</div>
 				<div class="modal-body">
-					<form id="addPaymentForm">
+					<div class="mb-3" id="addPaymentForm">
 						<div class="form-group">
 							<label for="paymentCaption">Комментарий</label>
 							<input type="text" class="form-control" id="paymentCaption" v-model="newPayment.caption">
@@ -62,10 +55,10 @@
 							<input type="number" class="form-control" id="paymentAmount" required v-model="newPayment.amount">
 						</div>
 						<div class="modal-footer border-top-0">
-							<button type="button" class="btn btn-secondary" v-on:click="closeModal()">Отмена</button>
-							<button type="submit" class="btn btn-primary" v-on:click="createPayment()">Сохранить</button>
+							<button type="button" class="btn btn-secondary" v-on:click="closeModal">Отмена</button>
+							<button type="button" class="btn btn-primary" v-on:click="createPayment">Сохранить</button>
 						</div>
-					</form>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -79,7 +72,7 @@
 			data() {
 				return {
 					payments: [],
-					selectedPaymentType: 0,
+					selectedPaymentType: 'Electricity',
 					isLoading: true,
 					tableMaxHeight: 0,
 					newPayment: {
@@ -121,8 +114,12 @@
 						const headers = this.headers;
 						this.newPayment.paymentType = this.selectedPaymentType;
 						const serializedPaymentData = JSON.stringify(this.newPayment);
-						await axios.post('/api/payments', serializedPaymentData, { headers });
-						await this.fetchPayments();
+
+						const response = await axios.post('/api/payments', serializedPaymentData, { headers });
+						const createdPayment = response.data;
+						this.payments.push(createdPayment);
+
+						this.closeModal();
 					}
 					catch (error) {
 						console.error('Ошибка при создании платежа', error)
