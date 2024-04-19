@@ -36,11 +36,8 @@ namespace CloudMining.App.Controllers
 		[HttpPost("/api/payments")]
 		public async Task<IActionResult> Create([FromBody] CreateShareablePaymentDto paymentDto)
 		{
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
-
-			_ = await _shareablePaymentService.CreateAsync(paymentDto);
-			return RedirectToAction("Index");
+			var createdPayment = await _shareablePaymentService.CreateAsync(paymentDto);
+			return Ok(createdPayment);
 		}
 	}
 }
