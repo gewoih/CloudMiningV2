@@ -5,10 +5,8 @@
 		public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 		{
 			const string authPath = "/user/login";
-			const string registerPath = "/user/register";
 			if (context.User.Identity?.IsAuthenticated == false && 
-			    context.Request.Path != authPath && 
-			    context.Request.Path != registerPath)
+			    !context.Request.Path.StartsWithSegments("/user"))
 			{
 				context.Response.Redirect(authPath);
 				return;
