@@ -36,7 +36,8 @@ namespace CloudMining.Application.Services.Payments
 				Caption = createPaymentDto.Caption,
 				CurrencyId = foundCurrency.Id,
 				Type = createPaymentDto.PaymentType,
-				PaymentShares = usersPaymentShares
+				PaymentShares = usersPaymentShares,
+				Date = createPaymentDto.Date.ToUniversalTime()
 			};
 			
 			await _context.ShareablePayments.AddAsync(newPayment).ConfigureAwait(false);
@@ -54,6 +55,24 @@ namespace CloudMining.Application.Services.Payments
 				.FirstOrDefaultAsync();
 
 			return latestPaymentDate;
+		}
+
+		public async Task<List<ShareablePayment>> GetAsync(PaymentType? paymentType = null, Guid? userId = null)
+		{
+			var paymentsQuery = _context.ShareablePayments
+				.Include(payment => payment.PaymentShares)
+				.AsQueryable();
+
+			if (paymentType != null)
+				paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
+
+			//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
+			if (userId != null)
+				paymentsQuery = paymentsQuery.Where(payment =>
+					payment.PaymentShares.Any(paymentShare => paymentShare.UserId == userId));
+
+			var payments = await paymentsQuery.ToListAsync();
+			return payments;
 		}
 	}
 }

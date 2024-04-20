@@ -8,5 +8,6 @@ namespace CloudMining.Application.Services.Users
 		Task<IdentityResult> RegisterAsync(RegisterDto dto);
 		Task<SignInResult> LoginAsync(LoginDto credentials);
         Task<List<Guid>> GetAllUsersIdsAsync();
-    }
+        Guid GetCurrentUserId();
+	}
 }

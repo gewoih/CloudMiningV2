@@ -87,7 +87,7 @@ namespace CloudMining.Application.Services.Shares
 					UserId = userShare.UserId,
 					Amount = userShare.Amount,
 					Share = userShare.Share,
-					Date = date
+					Date = date.ToUniversalTime()
 				};
 
 				paymentShares.Add(paymentShare);
