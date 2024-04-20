@@ -22,7 +22,6 @@ builder.Services.AddDbContext<CloudMiningContext>(options =>
 builder.Services.AddIdentity<User, Role>(options =>
 	{
 		options.User.RequireUniqueEmail = true;
-		options.SignIn.RequireConfirmedAccount = true;
 	})
 	.AddEntityFrameworkStores<CloudMiningContext>();
 
