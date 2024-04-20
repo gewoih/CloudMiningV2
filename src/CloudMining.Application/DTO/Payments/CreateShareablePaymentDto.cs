@@ -10,6 +10,10 @@ namespace CloudMining.Application.DTO.Payments
 		public DateTime Date { get; set; }
 		public decimal Amount { get; set; }
 
+		public CreateShareablePaymentDto()
+		{
+		}
+
 		public CreateShareablePaymentDto(string? caption, CurrencyCode currencyCode, PaymentType paymentType, DateTime dateTime, decimal amount)
 		{
 			Caption = caption;
