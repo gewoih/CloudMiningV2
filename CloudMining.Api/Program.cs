@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Payments;
@@ -11,7 +12,11 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+	options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
