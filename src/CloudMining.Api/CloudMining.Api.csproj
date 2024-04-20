@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\CloudMining.Application\CloudMining.Application.csproj" />
+    <ProjectReference Include="..\CloudMining.Application\CloudMining.Application.csproj" />
   </ItemGroup>
 
 </Project>

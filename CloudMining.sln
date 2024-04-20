@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudMining.Infrastructure"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudMining.Api", "src\CloudMining.Api\CloudMining.Api.csproj", "{3842C04B-59B0-465F-AC1E-3DD0DE0CDCDA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{858CEB31-F9E2-43F0-B101-538E464AF593}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,9 +36,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{3842C04B-59B0-465F-AC1E-3DD0DE0CDCDA} = {858CEB31-F9E2-43F0-B101-538E464AF593}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CCB28C0E-19F2-4A9F-BD68-EACAC2496CD2}
