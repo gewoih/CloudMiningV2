@@ -15,7 +15,7 @@ namespace CloudMining.Application.Services.Currencies
             _context = context;
         }
 
-        public async Task CreateAsync(CurrencyDto currency)
+        public async Task<Currency> CreateAsync(CurrencyDto currency)
         {
             var newCurrency = new Currency
             {
@@ -26,6 +26,8 @@ namespace CloudMining.Application.Services.Currencies
 
             await _context.Currencies.AddAsync(newCurrency).ConfigureAwait(false);
             await _context.SaveChangesAsync().ConfigureAwait(false);
+
+            return newCurrency;
         }
 
         public async Task<Currency?> GetAsync(CurrencyCode code)
