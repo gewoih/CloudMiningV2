@@ -103,10 +103,11 @@ namespace CloudMining.Application.Services.Shares
 			var usersCalculatedShares = new List<UserCalculatedShare>();
 			foreach (var userShare in usersShares)
 			{
-				var calculatedAmount =
-					Math.Round(userShare.Share * amount, currency.Precision, MidpointRounding.ToZero);
+				var userSharePercent = userShare.Share / 100;
+				var userNetAmount = userSharePercent * amount;
 
-				usersCalculatedShares.Add(new UserCalculatedShare(userShare.UserId, calculatedAmount, userShare.Share));
+				var roundedAmount = Math.Round(userNetAmount, currency.Precision, MidpointRounding.ToZero);
+				usersCalculatedShares.Add(new UserCalculatedShare(userShare.UserId, roundedAmount, userShare.Share));
 			}
 
 			return usersCalculatedShares;
