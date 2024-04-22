@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using CloudMining.Application.Services.Currencies;
+﻿using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Payments;
 using CloudMining.Application.Services.Payouts;
@@ -11,6 +10,8 @@ using CloudMining.Infrastructure.Emcd;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
 {
