@@ -50,11 +50,12 @@ namespace CloudMining.Application.Services.Users
             return usersIds;
         }
 
-        public Guid GetCurrentUserId()
+        public Guid? GetCurrentUserId()
         {
 			var httpContext = _httpContextAccessor.HttpContext;
 			var userId = httpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-			return Guid.Parse(userId);
+
+			return string.IsNullOrEmpty(userId) ? null : Guid.Parse(userId);
         }
 	}
 }

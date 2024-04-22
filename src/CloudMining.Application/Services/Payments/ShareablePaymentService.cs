@@ -1,6 +1,7 @@
 ﻿using CloudMining.Application.DTO.Payments;
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Shares;
+using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
@@ -13,12 +14,17 @@ namespace CloudMining.Application.Services.Payments
 		private readonly CloudMiningContext _context;
 		private readonly ICurrencyService _currencyService;
 		private readonly IShareService _shareService;
+		private readonly IUserService _userService;
 
-		public ShareablePaymentService(CloudMiningContext context, ICurrencyService currencyService, IShareService shareService)
+		public ShareablePaymentService(CloudMiningContext context, 
+			ICurrencyService currencyService, 
+			IShareService shareService, 
+			IUserService userService)
 		{
 			_context = context;
 			_currencyService = currencyService;
 			_shareService = shareService;
+			_userService = userService;
 		}
 
 		public async Task<ShareablePayment?> CreateAsync(CreateShareablePaymentDto createPaymentDto)
@@ -57,8 +63,12 @@ namespace CloudMining.Application.Services.Payments
 			return latestPaymentDate;
 		}
 
-		public async Task<List<ShareablePayment>> GetAsync(PaymentType? paymentType = null, Guid? userId = null)
+		public async Task<List<ShareablePayment>> GetAsync(PaymentType? paymentType = null)
 		{
+			var currentUserId = _userService.GetCurrentUserId();
+			if (currentUserId == null)
+				return [];
+
 			var paymentsQuery = _context.ShareablePayments
 				.Include(payment => payment.PaymentShares)
 				.AsQueryable();
@@ -67,9 +77,8 @@ namespace CloudMining.Application.Services.Payments
 				paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
 
 			//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
-			if (userId != null)
-				paymentsQuery = paymentsQuery.Where(payment =>
-					payment.PaymentShares.Any(paymentShare => paymentShare.UserId == userId));
+			paymentsQuery = paymentsQuery.Where(payment =>
+				payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
 
 			var payments = await paymentsQuery.ToListAsync();
 			return payments;
