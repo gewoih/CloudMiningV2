@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Payments;
@@ -15,6 +15,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
 	options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
+
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("AllowSpecificOrigin", configure =>
+		configure.WithOrigins("http://localhost:8080")
+			.AllowAnyMethod()
+			.AllowAnyHeader());
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -51,6 +59,8 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+
+app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
 
