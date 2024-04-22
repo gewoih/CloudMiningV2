@@ -35,7 +35,7 @@
 			  <input type="password" class="form-control" id="confirmPassword" v-model="user.confirmPassword" required>
 			</div>
   
-			<button type="submit" :disabled="!isValid" class="btn btn-primary">Создать аккаунт</button>
+			<button type="submit" class="btn btn-primary">Создать аккаунт</button>
 		  </form>
 		</div>
 	  </div>
@@ -43,36 +43,40 @@
 </template>
 
 <script lang="ts">
-	export default {
-		name: 'Registration',
-		data() {
-			return {
-				user: {
-					firstName: '',
-					lastName: '',
-					patronymic: '',
-					email: '',
-					password: '',
-					confirmPassword: ''					
-				}
-			};
-		},
-		
-		computed: {
-			isValid() {
-				return this.user.firstName && 
-				this.user.lastName && 
-				this.user.patronymic && 
-				this.user.email && 
-				this.user.password && 
-				this.user.password === this.user.confirmPassword;
-			}
-		},
-		
-		methods: {
-			register() {
-				alert('Пользователь зарегестрирован!' + JSON.stringify(this.user));
-			}
-		}
-	}
+import { defineComponent, ref, computed } from 'vue';
+import { RegisterUser } from '@/models/RegisterUser';
+import { usersService } from '@/services/users.api';
+
+export default defineComponent({
+    name: 'Registration',
+    setup() {
+        const user = ref<RegisterUser>({
+            firstName: '',
+            lastName: '',
+            patronymic: '',
+            email: '',
+            password: '',
+            confirmPassword: ''
+        });
+
+        const isValid = computed(() => {
+            return user.value.firstName &&
+                   user.value.lastName &&
+                   user.value.patronymic &&
+                   user.value.email &&
+                   user.value.password &&
+                   user.value.password === user.value.confirmPassword;
+        });
+
+        async function register() {
+            await usersService.createUser(user.value);
+        }
+
+        return {
+            user,
+            isValid,
+            register
+        };
+    }
+});
 </script>
