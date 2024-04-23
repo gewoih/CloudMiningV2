@@ -1,5 +1,6 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { RegisterUser } from '@/models/RegisterUser';
+import {LoginUser} from "@/models/LoginUser.ts";
 
 export default class UsersService {
   private axiosInstance: AxiosInstance;
@@ -13,12 +14,12 @@ export default class UsersService {
     })
   }
 
-  private async axiosCall<T>(config: AxiosRequestConfig) {
-    return await this.axiosInstance.request<T>(config);
-  }
-
   async createUser(userData: RegisterUser) {
-    return this.axiosCall<string>({ method: "post", url: "/users", data: userData })
+    return this.axiosInstance.post("/users", userData);
+  }
+  
+  async loginUser(userData: LoginUser){
+    return this.axiosInstance.post("/users/login", userData);
   }
 }
 
