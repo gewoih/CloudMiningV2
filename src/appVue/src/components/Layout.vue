@@ -8,6 +8,12 @@
       <hr>
       <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
+          <router-link to="/payments" class="nav-link" active-class="active">
+            <i class="bi bi-currency-bitcoin"></i>
+            <span class="fs-4">Платежи</span>
+          </router-link>
+        </li>
+        <li class="nav-item">
           <router-link to="/user/register" class="nav-link" active-class="active">
             <i class="bi bi-currency-bitcoin"></i>
             <span class="fs-4">Регистрация</span>
