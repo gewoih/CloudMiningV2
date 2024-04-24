@@ -58,8 +58,8 @@ fetchPayments();
 
   <div >
     <select class="form-select m-3" v-model="selectedPaymentType" @change="fetchPayments">
-      <option value="PaymentType.Electricity">Электричество</option>
-      <option value="PaymentType.Purchase">Покупки</option>
+      <option :value="PaymentType.Electricity">Электричество</option>
+      <option :value="PaymentType.Purchase">Покупки</option>
     </select>
 
     <div class="table-responsive m-3">
