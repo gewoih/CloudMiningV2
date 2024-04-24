@@ -19,7 +19,7 @@ export default class ShareablePaymentsService{
       }
 
       async getPayments(paymentType: PaymentType): Promise<ShareablePayment[]> {
-        const response = await this.axiosInstance.get("/api/payments", {params: {paymentType}});
+          const response = await this.axiosInstance.get("/Payments",{ data: { paymentType } });
         return response.data;
       }
 }
