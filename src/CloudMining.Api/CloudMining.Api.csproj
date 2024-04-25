@@ -29,10 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Duende.IdentityServer" Version="7.0.4" />
-    <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="7.0.4" />
-    <PackageReference Include="Duende.IdentityServer.EntityFramework.Storage" Version="7.0.4" />
-    <PackageReference Include="Duende.IdentityServer.Storage" Version="7.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
   </ItemGroup>
