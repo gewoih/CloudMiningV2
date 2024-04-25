@@ -1,5 +1,4 @@
-﻿using CloudMining.Api.IdentityServer;
-using CloudMining.Application.Services.Currencies;
+﻿using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Payments;
 using CloudMining.Application.Services.Payouts;
@@ -10,7 +9,10 @@ using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Emcd;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
+using System.Text;
+using CloudMining.Application.Services.JWT;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -37,25 +39,29 @@ builder.Services.AddIdentity<User, Role>(options =>
 	.AddEntityFrameworkStores<CloudMiningContext>()
 	.AddDefaultTokenProviders();
 
-builder.Services
-	.AddIdentityServer(options =>
+builder.Services.AddAuthentication(options =>
+{
+	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+	options.TokenValidationParameters = new TokenValidationParameters
 	{
-		options.UserInteraction.LoginUrl = "http://localhost:8080/user/login";
-	})
-	.AddInMemoryApiScopes(IdentityServerConfig.GetApiScopes())
-	.AddInMemoryApiResources(IdentityServerConfig.GetApiResources())
-	.AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources())
-	.AddInMemoryClients(IdentityServerConfig.GetClients())
-	.AddAspNetIdentity<User>()
-	.AddDeveloperSigningCredential();
-
-builder.Services.AddAuthentication();
+		ValidateIssuerSigningKey = true,
+		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"])),
+		ValidateIssuer = false,
+		ValidateAudience = false,
+		ValidateLifetime = true
+	};
+});
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IShareService, ShareService>();
 builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
+builder.Services.AddSingleton<JwtService>();
 
 builder.Services.AddHttpClient<EmcdApiClient>();
 builder.Services.AddHostedService<PayoutsLoaderService>();
@@ -75,7 +81,7 @@ app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
 
-app.UseIdentityServer();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
