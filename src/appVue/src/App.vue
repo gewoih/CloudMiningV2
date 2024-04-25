@@ -1,13 +1,7 @@
-<script lang="ts">
-import Registration from './components/Registration.vue'
-
-export default {
-  components: {
-    Registration
-  }
-}
+<script setup lang="ts">
+import Layout from "@/components/Layout.vue";
 </script>
 
 <template>
-  <Registration />
+  <Layout/>
 </template>
