@@ -1,4 +1,5 @@
-﻿using CloudMining.Application.Services.Currencies;
+﻿using CloudMining.Api.IdentityServer;
+using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Payments;
 using CloudMining.Application.Services.Payouts;
@@ -7,10 +8,11 @@ using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Emcd;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
@@ -32,12 +34,22 @@ builder.Services.AddIdentity<User, Role>(options =>
 	{
 		options.User.RequireUniqueEmail = true;
 	})
-	.AddEntityFrameworkStores<CloudMiningContext>();
+	.AddEntityFrameworkStores<CloudMiningContext>()
+	.AddDefaultTokenProviders();
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-	options.LoginPath = "/user/login";
-});
+builder.Services
+	.AddIdentityServer(options =>
+	{
+		options.UserInteraction.LoginUrl = "http://localhost:8080/user/login";
+	})
+	.AddInMemoryApiScopes(IdentityServerConfig.GetApiScopes())
+	.AddInMemoryApiResources(IdentityServerConfig.GetApiResources())
+	.AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources())
+	.AddInMemoryClients(IdentityServerConfig.GetClients())
+	.AddAspNetIdentity<User>()
+	.AddDeveloperSigningCredential();
+
+builder.Services.AddAuthentication();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
@@ -49,6 +61,9 @@ builder.Services.AddHttpClient<EmcdApiClient>();
 builder.Services.AddHostedService<PayoutsLoaderService>();
 
 var app = builder.Build();
+var scope = app.Services.CreateScope();
+var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
+await database.MigrateAsync();
 
 if (app.Environment.IsDevelopment())
 {
@@ -60,13 +75,9 @@ app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
+app.UseIdentityServer();
 app.UseAuthorization();
 
 app.MapControllers();
-
-var scope = app.Services.CreateScope();
-var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
-await database.MigrateAsync();
 
 app.Run();
