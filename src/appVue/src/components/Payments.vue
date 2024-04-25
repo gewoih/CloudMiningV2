@@ -21,6 +21,7 @@ const isModalOpen = ref(false);
 const fetchPayments = async () => {
   // isLoading.value = true;
   payments.value = await shareablePaymentsService.getPayments(selectedPaymentType.value);
+  console.log(payments.value);
   // isLoading.value = false;
 };
 
@@ -56,33 +57,43 @@ fetchPayments();
 <!--    <p class="loading-message">Загрузка данных...</p>-->
 <!--  </div>-->
 
-  <div >
-    <select class="form-select m-3" v-model="selectedPaymentType" @change="fetchPayments">
-      <option :value="PaymentType.Electricity">Электричество</option>
-      <option :value="PaymentType.Purchase">Покупки</option>
-    </select>
-
-    <div class="table-responsive m-3">
-      <table class="table table-striped table-hover display">
-        <thead class="sticky-top">
-        <tr>
-          <th>Сумма</th>
-          <th>Дата</th>
-          <th>Комментарий</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-for="payment in payments" :class="{ 'table-success': payment.isCompleted, 'table-danger': !payment.isCompleted }">
-          <td>{{ payment.amount }}</td>
-          <td>{{ new Date(payment.date).toLocaleDateString('ru-RU') }}</td>
-          <td>{{ payment.caption }}</td>
-        </tr>
-        </tbody>
-      </table>
+  <div class="container-fluid">
+    <div class="row justify-content-end">
+      <div class="col-auto">
+        <select class="form-select" v-model="selectedPaymentType" @change="fetchPayments">
+          <option :value="PaymentType.Electricity">Электричество</option>
+          <option :value="PaymentType.Purchase">Покупки</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="table-responsive m-3">
+          <table class="table table-striped table-hover display">
+            <thead class="sticky-top">
+            <tr>
+              <th>Сумма</th>
+              <th>Дата</th>
+              <th>Комментарий</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="payment in payments" :class="{ 'table-success': payment.isCompleted, 'table-danger': !payment.isCompleted }">
+              <td>{{ payment.amount }}</td>
+              <td>{{ new Date(payment.date).toLocaleDateString('ru-RU') }}</td>
+              <td>{{ payment.caption }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-end">
+      <div class="col-auto">
+        <button type="button" class="btn btn-primary m-3" v-on:click="showModal()">Добавить платеж</button>
+      </div>
     </div>
   </div>
-
-  <button type="button" class="btn btn-primary float-end m-3" v-on:click="showModal()">Добавить платеж</button>
 
   <!-- Modal -->
   <div class="modal fade" :class="{ 'show': isModalOpen }" id="exampleModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
