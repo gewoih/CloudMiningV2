@@ -13,8 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-var migrationsAssembly = typeof(Program).GetTypeInfo().Assembly.FullName;
-
 builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
@@ -42,7 +40,7 @@ builder.Services.AddIdentity<User, Role>(options =>
 builder.Services
 	.AddIdentityServer(options =>
 	{
-		options.UserInteraction.LoginUrl = "/users/login";
+		options.UserInteraction.LoginUrl = "http://localhost:8080/user/login";
 	})
 	.AddInMemoryApiScopes(IdentityServerConfig.GetApiScopes())
 	.AddInMemoryApiResources(IdentityServerConfig.GetApiResources())
