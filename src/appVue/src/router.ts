@@ -3,8 +3,8 @@ import Registration from './components/Registration.vue';
 import Authentication from './components/Authentication.vue';
 
 const routes = [
-    {path: '/user/register', component: Registration},
-    {path: '/user/login', component: Authentication},
+    {path: '/user/register', name: 'Registration', component: Registration},
+    {path: '/user/login', name: 'Authentication', component: Authentication},
 ];
 
 const router = createRouter({
