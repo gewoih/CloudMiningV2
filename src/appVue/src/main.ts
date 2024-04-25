@@ -2,5 +2,12 @@ import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
 import router from './router';
+import {createBootstrap} from 'bootstrap-vue-next'
 
-createApp(App).use(router).mount('#app');
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
+
+createApp(App)
+    .use(router)
+    .use(createBootstrap)
+    .mount('#app');
