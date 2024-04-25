@@ -1,12 +1,11 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import Registration from './components/Registration.vue';
 import Authentication from './components/Authentication.vue';
-import Payments from "@/components/Payments.vue";
 
 const routes = [
-    {path: '/user/register', component: Registration},
-    {path: '/user/login', component: Authentication},
-    {path: '/payments', component: Payments}
+    {path: '/user/register', name: 'Registration', component: Registration},
+    {path: '/user/login', name: 'Authentication', component: Authentication},
+    {path: '/payments', name: 'Payments', component: Payments}
 ];
 
 const router = createRouter({

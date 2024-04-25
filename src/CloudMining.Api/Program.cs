@@ -7,10 +7,14 @@ using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Emcd;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using CloudMining.Application.Services.JWT;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
@@ -32,11 +36,24 @@ builder.Services.AddIdentity<User, Role>(options =>
 	{
 		options.User.RequireUniqueEmail = true;
 	})
-	.AddEntityFrameworkStores<CloudMiningContext>();
+	.AddEntityFrameworkStores<CloudMiningContext>()
+	.AddDefaultTokenProviders();
 
-builder.Services.ConfigureApplicationCookie(options =>
+builder.Services.AddAuthentication(options =>
 {
-	options.LoginPath = "/user/login";
+	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+	options.TokenValidationParameters = new TokenValidationParameters
+	{
+		ValidateIssuerSigningKey = true,
+		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"])),
+		ValidateIssuer = false,
+		ValidateAudience = false,
+		ValidateLifetime = true
+	};
 });
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -44,11 +61,15 @@ builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IShareService, ShareService>();
 builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
+builder.Services.AddSingleton<JwtService>();
 
 builder.Services.AddHttpClient<EmcdApiClient>();
 builder.Services.AddHostedService<PayoutsLoaderService>();
 
 var app = builder.Build();
+var scope = app.Services.CreateScope();
+var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
+await database.MigrateAsync();
 
 if (app.Environment.IsDevelopment())
 {
@@ -64,9 +85,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-var scope = app.Services.CreateScope();
-var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
-await database.MigrateAsync();
 
 app.Run();

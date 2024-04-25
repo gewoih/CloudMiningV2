@@ -2,7 +2,6 @@
 using CloudMining.Application.Services.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace CloudMining.Api.Controllers
 {
@@ -25,10 +24,10 @@ namespace CloudMining.Api.Controllers
 		}
 
 		[HttpPost("login")]
-		public async Task<SignInResult> Login([FromBody] LoginDto credentials)
+		public async Task<IActionResult> Login([FromBody] LoginDto credentials)
 		{
-			var authResult = await _userService.LoginAsync(credentials);
-			return authResult;
+			var userJwt = await _userService.LoginAsync(credentials);
+			return new JsonResult(userJwt);
 		}
 	}
 }
