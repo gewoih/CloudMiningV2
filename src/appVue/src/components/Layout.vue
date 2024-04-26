@@ -1,8 +1,8 @@
 <template>
-  <div class="m-4">
+  <div class="m-3">
     <Menubar :model="items">
       <template #start>
-        <i class="pi pi-bitcoin" style="font-size: 2.5rem"/>
+        <i class="pi pi-bitcoin ml-2" style="font-size: 2.5rem"/>
       </template>
 
       <template #item="{ item, props }">
@@ -15,19 +15,10 @@
       </template>
 
       <template #end>
-          <div>
-            <Button icon="pi pi-user" severity="" rounded outlined dropdown>
-              <template #dropdown>
-                  <Menu>
-                    <menubar command="" @click="">Регистрация</menubar>
-                    <menubar command="" @click="">Вход</menubar>
-                    <menubar command="" @click="">Профиль</menubar>
-                    <menubar command="" @click="">Настройки</menubar>
-                    <menubar command="" @click="">Выход</menubar>
-                  </Menu>
-              </template>
-            </Button>
-          </div>
+        <div class="flex justify-content-center mr-2">
+          <Button type="button" icon="pi pi-user" @click="toggleMenu" aria-haspopup="true" aria-controls="menu" rounded outlined/>
+            <Menu ref="menu" id="menu" :model="settingsMenuItems" :popup="true"></Menu>
+        </div>
       </template>
     </Menubar>
   </div>
@@ -39,7 +30,8 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import router from "@/router";
+import router from "@/router.ts";
+import Menu from "primevue/menu";
 
 const items = ref([
   {
@@ -58,4 +50,37 @@ const items = ref([
     route: 'payments',
   }
 ]);
+
+const settingsMenuItems = ref([
+  {
+    label: 'Регистрация', icon: 'pi pi-user-plus', command: () => {
+      router.push({name: "register"});
+    }
+  },
+  {
+    label: 'Вход', icon: 'pi pi-sign-in', command: () => {
+      router.push({name: "login"});
+    }
+  },
+  // {
+  //   label: 'Профиль', icon: 'pi pi-user-edit', command: () => {
+  //     router.push({name: "register"});
+  //   }
+  // },
+  // {
+  //   label: 'Настройки', icon: 'pi pi-cog', command: () => {
+  //     router.push({name: "register"});
+  //   }
+  // },
+  // {
+  //   label: 'Выйти', icon: 'pi pi-sign-out', command: () => {
+  //     router.push({name: "register"});
+  //   }
+  // }
+]);
+
+const menu = ref();
+const toggleMenu = (event) => {
+  menu.value.toggle(event);
+};
 </script>
