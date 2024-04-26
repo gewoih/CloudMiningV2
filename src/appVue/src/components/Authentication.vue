@@ -20,19 +20,23 @@ async function login() {
 </script>
 
 <template>
-  <div class="flex justify-content-center flex-wrap">
-    <div class="p-fluid align-content-center" style="height: 60vh">
-      <h3>Вход в аккаунт</h3>
-      <div class="field">
-        <label for="email">EMail</label>
-        <InputText id="email" v-model="user.email"/>
-      </div>
-      <div class="field">
-        <label for="password">Пароль</label>
-        <Password id="password" v-model="user.password" toggleMask/>
-      </div>
-      <div class="field">
-        <Button class="align-items-center justify-content-center" :disabled="!isValid" type="submit" @click="login">Войти</Button>
+  <div class="wrapper pt-8">
+    <div class="flex justify-content-center flex-wrap pt-8">
+      <div class="p-fluid align-content-center">
+        <h3 class="text-center">Вход в аккаунт</h3>
+        <div class="field">
+          <label for="email">EMail</label>
+          <InputText id="email" v-model="user.email"/>
+        </div>
+        <div class="field">
+          <label for="password">Пароль</label>
+          <Password id="password" v-model="user.password" toggleMask/>
+        </div>
+        <div class="field">
+          <Button class="align-items-center justify-content-center" :disabled="!isValid" type="submit" @click="login">
+            Войти
+          </Button>
+        </div>
       </div>
     </div>
   </div>
