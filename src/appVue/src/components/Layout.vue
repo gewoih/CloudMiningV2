@@ -1,14 +1,26 @@
 <template>
-  <Menu :model="items">
-    <template #item="{ item, props }">
-      <router-link v-slot="{ href, navigate }" :to="{ name: item.route }" custom>
-        <a :href="href" v-bind="props.action" @click="navigate">
-          <span :class="item.icon"/>
-          <span class="ml-2">{{ item.label }}</span>
-        </a>  
-      </router-link>
-    </template>
-  </Menu>
+  <div>
+    <Menubar :model="items">
+      <template #start>
+        <i class="pi pi-bitcoin" style="font-size: 2.5rem"/>
+      </template>
+
+      <template #item="{ item, props }">
+        <router-link v-slot="{ href, navigate }" :to="{ name: item.route }" custom>
+          <a class="flex align-items-center" :href="href" v-bind="props.action" @click="navigate">
+            <span :class="item.icon"/>
+            <span class="ml-2">{{ item.label }}</span>
+          </a>
+        </router-link>
+      </template>
+
+      <template #end>
+        <div>
+          <Button icon="pi pi-user" severity="secondary" rounded outlined/>
+        </div>
+      </template>
+    </Menubar>
+  </div>
 
   <div class="content">
     <router-view></router-view>
