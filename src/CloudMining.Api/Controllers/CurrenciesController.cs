@@ -1,12 +1,14 @@
 ﻿using CloudMining.Application.DTO.Currencies;
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudMining.Api.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class CurrenciesController : ControllerBase
 	{
 		private readonly ICurrencyService _currencyService;

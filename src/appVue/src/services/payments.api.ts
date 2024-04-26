@@ -1,27 +1,18 @@
-import axios, { AxiosInstance } from 'axios';
-import { ShareablePayment } from '@/models/ShareablePayment';
-import { PaymentType } from '@/enums/PaymentType';
+import {ShareablePayment} from '@/models/ShareablePayment';
+import {PaymentType} from '@/enums/PaymentType';
+import {apiService} from '@/services/api.ts';
 
-export default class ShareablePaymentsService{
-    private axiosInstance: AxiosInstance;
+class PaymentsService {
+    async createPayment(paymentData: ShareablePayment) {
+        return apiService.axiosInstance.post("/api/payments", paymentData)
+    }
 
-    constructor() {
-        this.axiosInstance = axios.create({
-          baseURL: 'https://localhost:5000/api',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-      }
-    
-      async createPayment(paymentData: ShareablePayment) {
-        return this.axiosInstance.post("/api/payments", paymentData)
-      }
-
-      async getPayments(paymentType: PaymentType): Promise<ShareablePayment[]> {
-        const response = await this.axiosInstance.get("/api/payments", {params: {paymentType}});
+    async getPayments(paymentType: PaymentType): Promise<ShareablePayment[]> {
+        const response = await apiService.axiosInstance
+            .get("/api/payments", {params: {paymentType}});
+        
         return response.data;
-      }
+    }
 }
 
-export const shareablePaymentsService = new ShareablePaymentsService();
+export const paymentsService = new PaymentsService();
