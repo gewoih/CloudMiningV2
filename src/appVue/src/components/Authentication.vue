@@ -25,7 +25,7 @@ async function login() {
       <div class="p-fluid align-content-center">
         <h3 class="text-center">Вход в аккаунт</h3>
         <div class="field">
-          <label for="email">EMail</label>
+          <label for="email">Email</label>
           <InputText id="email" v-model="user.email"/>
         </div>
         <div class="field">
