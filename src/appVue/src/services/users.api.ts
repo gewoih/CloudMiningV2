@@ -24,7 +24,7 @@ export default class UsersService {
         const token = response.data;
 
         localStorage.setItem('access_token', token);
-        await router.push({ name: 'Registration' });
+        await router.push({ name: 'payments' });
     }
 }
 

@@ -2,6 +2,8 @@
 import {ref, computed} from 'vue';
 import {LoginUser} from '@/models/LoginUser.ts';
 import {usersService} from '@/services/users.api';
+import InputGroup from "primevue/inputgroup";
+import InputGroupAddon from "primevue/inputgroupaddon";
 
 const user = ref<LoginUser>({
   email: '',
@@ -18,25 +20,22 @@ async function login() {
 </script>
 
 <template>
-  <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <form @submit.prevent="login" class="card p-4 shadow">
-          <h2 class="mb-4">Вход в аккаунт</h2>
+  <div class="card flex justify-content-center">
+    <InputGroup>
 
-          <div class="mb-2">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" v-model="user.email" required>
-          </div>
+      <InputGroupAddon>
+        <label for="email">EMail</label>
+        <InputText id="email" v-model="user.email"/>
+      </InputGroupAddon>
 
-          <div class="mb-2">
-            <label for="password" class="form-label">Пароль</label>
-            <input type="password" class="form-control" id="password" v-model="user.password" required>
-          </div>
+      <InputGroupAddon>
+        <label for="password">Пароль</label>
+        <Password id="password" v-model="user.password" toggleMask/>
+      </InputGroupAddon>
 
-          <button type="submit" :disabled="!isValid" class="btn btn-primary">Войти</button>
-        </form>
-      </div>
-    </div>
+      <InputGroupAddon>
+        <Button :disabled="!isValid" type="submit" @click="login">Войти</Button>
+      </InputGroupAddon>
+    </InputGroup>
   </div>
 </template>
