@@ -4,9 +4,9 @@ import Authentication from './components/Authentication.vue';
 import Payments from './components/Payments.vue';
 
 const routes = [
-    {path: '/user/register', name: 'Registration', component: Registration},
-    {path: '/user/login', name: 'Authentication', component: Authentication},
-    {path: '/payments', name: 'Payments', component: Payments}
+    {path: '/user/register', name: 'register', component: Registration},
+    {path: '/user/login', name: 'login', component: Authentication},
+    {path: '/payments', name: 'payments', component: Payments}
 ];
 
 const router = createRouter({
