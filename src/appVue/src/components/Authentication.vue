@@ -20,8 +20,8 @@ async function login() {
 </script>
 
 <template>
-  <div class="wrapper pt-8">
-    <div class="flex justify-content-center flex-wrap pt-8">
+  <div class="wrapper p-8 m-7">
+    <div class="flex justify-content-center flex-wrap p-8">
       <div class="p-fluid align-content-center">
         <h3 class="text-center">Вход в аккаунт</h3>
         <div class="field">
