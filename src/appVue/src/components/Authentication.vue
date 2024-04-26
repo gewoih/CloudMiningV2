@@ -20,22 +20,20 @@ async function login() {
 </script>
 
 <template>
-  <div class="card flex justify-content-center">
-    <InputGroup>
-
-      <InputGroupAddon>
+  <div class="flex justify-content-center flex-wrap">
+    <div class="p-fluid align-content-center" style="height: 60vh">
+      <h3>Вход в аккаунт</h3>
+      <div class="field">
         <label for="email">EMail</label>
         <InputText id="email" v-model="user.email"/>
-      </InputGroupAddon>
-
-      <InputGroupAddon>
+      </div>
+      <div class="field">
         <label for="password">Пароль</label>
         <Password id="password" v-model="user.password" toggleMask/>
-      </InputGroupAddon>
-
-      <InputGroupAddon>
-        <Button :disabled="!isValid" type="submit" @click="login">Войти</Button>
-      </InputGroupAddon>
-    </InputGroup>
+      </div>
+      <div class="field">
+        <Button class="align-items-center justify-content-center" :disabled="!isValid" type="submit" @click="login">Войти</Button>
+      </div>
+    </div>
   </div>
 </template>
