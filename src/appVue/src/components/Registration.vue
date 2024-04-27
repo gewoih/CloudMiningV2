@@ -1,8 +1,8 @@
 <template>
-  <div class="wrapper p-4 m-3">
-    <div class="flex justify-content-center flex-wrap p-8">
-      <div class="p-fluid align-content-center">
-        <h3 class="text-center">Регистрация</h3>
+  <div>
+    <div class="flex justify-content-center flex-wrap">
+      <div class="p-fluid align-content-center p-card p-3">
+        <h3 class="text-center mt-1">Регистрация</h3>
         <div class="field">
           <label for="firstName">Имя</label>
           <InputText id="firstName" v-model="user.firstName"/>
@@ -19,6 +19,7 @@
           <label for="email">Email</label>
           <InputText id="email" v-model="user.email"/>
         </div>
+        
         <div class="field">
           <label for="password">Пароль</label>
           <Password id="password" v-model="user.password" toggleMask/>
