@@ -18,13 +18,21 @@ public class JwtService
         _jwtLifetimeInDays = configuration.GetValue<int>("Jwt:LifetimeInDays");
     }
 
+    public string GetSubClaim(string token)
+    {
+        if (new JwtSecurityTokenHandler().ReadToken(token) is not JwtSecurityToken jwt) 
+            return null;
+	        
+        var sub = jwt.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
+        return sub;
+    }
+    
     public string Generate(User user)
     {
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString())
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_signingKey));

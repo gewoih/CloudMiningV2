@@ -1,4 +1,5 @@
-﻿using CloudMining.Application.DTO.Users;
+﻿using System.IdentityModel.Tokens.Jwt;
+using CloudMining.Application.DTO.Users;
 using CloudMining.Application.Services.JWT;
 using CloudMining.Domain.Models.Identity;
 using Microsoft.AspNetCore.Http;
@@ -46,7 +47,7 @@ namespace CloudMining.Application.Services.Users
 			
 			if (authResult.Succeeded)
 			{
-				var user = await GetCurrentUserAsync();
+				var user = await _userManager.FindByEmailAsync(credentials.Email);
 				jwt = _jwtService.Generate(user);
 			}
 
@@ -65,18 +66,13 @@ namespace CloudMining.Application.Services.Users
 
         public Guid? GetCurrentUserId()
         {
-			var httpContext = _httpContextAccessor.HttpContext;
-	        var userId = _userManager.GetUserId(httpContext.User);
-
-	        return string.IsNullOrEmpty(userId) ? Guid.Empty : Guid.Parse(userId);
-        }
-
-        public async Task<User?> GetCurrentUserAsync()
-        {
-	        var httpContext = _httpContextAccessor.HttpContext;
-	        var user = await _userManager.GetUserAsync(httpContext.User);
-
-	        return user;
+	        var authHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+	        if (string.IsNullOrEmpty(authHeader))
+		        return null;
+	        
+	        var jwt = authHeader.Split(' ')[1];
+	        var subClaim = _jwtService.GetSubClaim(jwt);
+	        return Guid.Parse(subClaim);
         }
 	}
 }
