@@ -1,61 +1,87 @@
 <template>
-  <div class="d-flex">
-    <div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark side-menu">
-      <router-link to="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <i class="bi bi-currency-bitcoin"></i>
-        <span class="fs-4">CloudMining</span>
-      </router-link>
-      <hr>
-      <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-          <router-link to="/user/register" class="nav-link" active-class="active">
-            <i class="bi bi-currency-bitcoin"></i>
-            <span class="fs-4">Регистрация</span>
-          </router-link>
-        </li>
-        <router-link to="/user/login" class="nav-link" active-class="active">
-          <i class="bi bi-currency-bitcoin"></i>
-          <span class="fs-4">Вход</span>
+  <div class="m-3">
+    <Menubar :model="items">
+      <template #start>
+        <i class="pi pi-bitcoin ml-2" style="font-size: 2.5rem"/>
+      </template>
+
+      <template #item="{ item, props }">
+        <router-link v-slot="{ navigate }" :to="{ name: item.route }" custom>
+          <a class="flex align-items-center" v-bind="props.action" @click="navigate">
+            <span :class="item.icon"/>
+            <span class="ml-2">{{ item.label }}</span>
+          </a>
         </router-link>
-      </ul>
-      <hr>
-      <div class="dropdown">
-        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-           data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-person-circle"></i>
-          <strong>Мой профиль</strong>
-        </a>
-        <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-          <li><a class="dropdown-item" href="#">Настройки</a></li>
-          <li>
-            <hr class="dropdown-divider">
-          </li>
-          <li><a class="dropdown-item" href="#">Выйти</a></li>
-        </ul>
-      </div>
-    </div>
+      </template>
 
-    <div class="content">
-      <router-view></router-view>
-    </div>
+      <template #end>
+        <div class="flex justify-content-center mr-2">
+          <Button type="button" icon="pi pi-user" @click="toggleMenu" aria-haspopup="true" aria-controls="menu"
+                  rounded outlined/>
+          <Menu ref="menu" id="menu" :model="settingsMenuItems" :popup="true"></Menu>
+        </div>
+      </template>
+    </Menubar>
+  </div>
 
+  <div class="flex align-items-center justify-content-center">
+    <router-view></router-view>
   </div>
 </template>
 
 <script setup lang="ts">
+import {ref} from "vue";
+import router from "@/router.ts";
+import Menu from "primevue/menu";
+
+const items = ref([
+  {
+    label: 'Статистика',
+    icon: 'pi pi-chart-line',
+    route: 'payments',
+  },
+  {
+    label: 'Участники',
+    icon: 'pi pi-users',
+    route: 'payments',
+  },
+  {
+    label: 'Платежи',
+    icon: 'pi pi-wallet',
+    route: 'payments',
+  }
+]);
+
+const settingsMenuItems = ref([
+  {
+    label: 'Регистрация', icon: 'pi pi-user-plus', command: () => {
+      router.push({name: "register"});
+    }
+  },
+  {
+    label: 'Вход', icon: 'pi pi-sign-in', command: () => {
+      router.push({name: "login"});
+    }
+  },
+  // {
+  //   label: 'Профиль', icon: 'pi pi-user-edit', command: () => {
+  //     router.push({name: "register"});
+  //   }
+  // },
+  // {
+  //   label: 'Настройки', icon: 'pi pi-cog', command: () => {
+  //     router.push({name: "register"});
+  //   }
+  // },
+  // {
+  //   label: 'Выйти', icon: 'pi pi-sign-out', command: () => {
+  //     router.push({name: "register"});
+  //   }
+  // }
+]);
+
+const menu = ref();
+const toggleMenu = (event) => {
+  menu.value.toggle(event);
+};
 </script>
-
-<style>
-.side-menu {
-  width: 20vw;
-  height: 100vh;
-}
-
-.content {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: lightgray;
-}
-</style>

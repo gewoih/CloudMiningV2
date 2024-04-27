@@ -7,6 +7,7 @@ export interface ShareablePayment{
     paymentType: PaymentType;
     date: Date;
     amount: number;
+    isCompleted: boolean;
 }
 
 
