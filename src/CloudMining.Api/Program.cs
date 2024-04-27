@@ -10,7 +10,10 @@ using CloudMining.Infrastructure.Emcd;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using AutoMapper;
+using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.JWT;
+using CloudMining.Domain.Models.Base;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -55,6 +58,12 @@ builder.Services.AddAuthentication(options =>
 		ValidateLifetime = true
 	};
 });
+
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+var config = new MapperConfiguration(cfg => {
+	cfg.AddProfile<GlobalMappingProfile>();
+});
+
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
