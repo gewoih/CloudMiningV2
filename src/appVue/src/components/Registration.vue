@@ -1,39 +1,35 @@
 <template>
-  <div>
-    <div class="px-4 py-8 md:px-6 lg:px-8 flex align-items-center justify-content-center">
-      <div class="p-fluid align-content-center p-card p-3">
-        <h3 class="text-center mt-1">Регистрация</h3>
-        <div class="field">
-          <label for="firstName">Имя</label>
-          <InputText id="firstName" v-model="user.firstName"/>
-        </div>
-        <div class="field">
-          <label for="lastName">Фамилия</label>
-          <InputText id="lastName" v-model="user.lastName"/>
-        </div>
-        <div class="field">
-          <label for="patronymic">Отчество</label>
-          <InputText id="patronymic" v-model="user.patronymic"/>
-        </div>
-        <div class="field">
-          <label for="email">Email</label>
-          <InputText id="email" v-model="user.email"/>
-        </div>
-        
-        <div class="field">
-          <label for="password">Пароль</label>
-          <Password id="password" v-model="user.password" toggleMask/>
-        </div>
-        <div class="field">
-          <label for="confirmPassword">Подтверждение пароля</label>
-          <Password id="confirmPassword" v-model="user.confirmPassword" toggleMask/>
-        </div>
-        <div class="field">
-          <Button class="align-items-center justify-content-center" :disabled="!isValid" type="submit" @click="register">
-            Создать аккаунт
-          </Button>
-        </div>
-      </div>
+  <div class="p-fluid align-content-center p-card p-3 m-2">
+    <h3 class="text-center mt-1">Регистрация</h3>
+    <div class="field">
+      <label for="firstName">Имя</label>
+      <InputText id="firstName" v-model="user.firstName"/>
+    </div>
+    <div class="field">
+      <label for="lastName">Фамилия</label>
+      <InputText id="lastName" v-model="user.lastName"/>
+    </div>
+    <div class="field">
+      <label for="patronymic">Отчество</label>
+      <InputText id="patronymic" v-model="user.patronymic"/>
+    </div>
+    <div class="field">
+      <label for="email">Email</label>
+      <InputText id="email" v-model="user.email"/>
+    </div>
+
+    <div class="field">
+      <label for="password">Пароль</label>
+      <Password id="password" v-model="user.password" toggleMask/>
+    </div>
+    <div class="field">
+      <label for="confirmPassword">Подтверждение пароля</label>
+      <Password id="confirmPassword" v-model="user.confirmPassword" toggleMask/>
+    </div>
+    <div class="field">
+      <Button class="align-items-center justify-content-center" :disabled="!isValid" type="submit" @click="register">
+        Создать аккаунт
+      </Button>
     </div>
   </div>
 </template>

@@ -16,14 +16,15 @@
 
       <template #end>
         <div class="flex justify-content-center mr-2">
-          <Button type="button" icon="pi pi-user" @click="toggleMenu" aria-haspopup="true" aria-controls="menu" rounded outlined/>
-            <Menu ref="menu" id="menu" :model="settingsMenuItems" :popup="true"></Menu>
+          <Button type="button" icon="pi pi-user" @click="toggleMenu" aria-haspopup="true" aria-controls="menu"
+                  rounded outlined/>
+          <Menu ref="menu" id="menu" :model="settingsMenuItems" :popup="true"></Menu>
         </div>
       </template>
     </Menubar>
   </div>
 
-  <div class="content">
+  <div class="flex align-items-center justify-content-center">
     <router-view></router-view>
   </div>
 </template>
