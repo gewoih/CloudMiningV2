@@ -26,7 +26,7 @@ namespace CloudMining.Api.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create([FromBody] CreateShareablePaymentDto paymentDto)
+		public async Task<IActionResult> Create([FromBody] CreatePaymentDto paymentDto)
 		{
 			_ = await _shareablePaymentService.CreateAsync(paymentDto);
 			return Ok();
