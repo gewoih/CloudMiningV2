@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex justify-content-center flex-wrap">
+    <div class="px-4 py-8 md:px-6 lg:px-8 flex align-items-center justify-content-center">
       <div class="p-fluid align-content-center p-card p-3">
         <h3 class="text-center mt-1">Регистрация</h3>
         <div class="field">
