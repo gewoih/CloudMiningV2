@@ -20,9 +20,22 @@ namespace CloudMining.Api.Controllers
 		}
 
 		[HttpGet]
-		public async Task<List<ShareablePayment>> Get(PaymentType paymentType)
+		public async Task<List<PaymentDto>> Get(PaymentType paymentType)
 		{
-			return await _shareablePaymentService.GetAsync(paymentType);
+			var payments = await _shareablePaymentService.GetAsync(paymentType);
+			var paymentsDto = new List<PaymentDto>(payments.Count);
+			paymentsDto.AddRange(payments.Select(payment => 
+				new PaymentDto
+				{
+					Id = payment.Id, 
+					Caption = payment.Caption, 
+					Date = payment.Date, 
+					Amount = payment.Amount,
+					//TODO: Обязательно должны быть доли внутри payment + подумать как это будет работать с ролями
+					IsCompleted = payment.IsCompleted
+				}));
+
+			return paymentsDto;
 		}
 
 		[HttpPost]
