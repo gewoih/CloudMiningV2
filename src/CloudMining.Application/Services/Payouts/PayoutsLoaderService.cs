@@ -40,7 +40,7 @@ namespace CloudMining.Application.Services.Payouts
 
             foreach (var payout in latestPayouts.Take(10))
             {
-                var createPaymentDto = new CreateShareablePaymentDto(
+                var createPaymentDto = new CreatePaymentDto(
                     caption: null,
                     currencyCode: Enum.Parse<CurrencyCode>(payout.CoinName),
                     paymentType: PaymentType.Crypto,

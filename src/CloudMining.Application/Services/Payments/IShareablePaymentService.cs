@@ -7,7 +7,7 @@ namespace CloudMining.Application.Services.Payments
     public interface IShareablePaymentService
     {
         Task<List<ShareablePayment>> GetAsync(PaymentType? paymentType = null);
-	    Task<ShareablePayment?> CreateAsync(CreateShareablePaymentDto createPaymentDto);
+	    Task<ShareablePayment?> CreateAsync(CreatePaymentDto createPaymentDto);
 	    Task<DateTime> GetLatestPaymentDateAsync(PaymentType paymentType);
     }
 }
