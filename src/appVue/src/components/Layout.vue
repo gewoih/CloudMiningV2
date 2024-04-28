@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen overflow-auto">
+  <div class="h-screen overflow-auto flex flex-column">
     <div class="m-3">
       <Menubar :model="items">
         <template #start>
@@ -24,9 +24,10 @@
         </template>
       </Menubar>
     </div>
-      <div class="container flex align-items-center justify-content-center">
-        <router-view></router-view>
-      </div>
+    
+    <div class="flex flex-1 align-items-center justify-content-center">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
