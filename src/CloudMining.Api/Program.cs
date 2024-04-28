@@ -10,6 +10,7 @@ using CloudMining.Infrastructure.Emcd;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using CloudMining.Api.Filters;
 using CloudMining.Application.DTO.Payments;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.JWT;
@@ -18,7 +19,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers();
+
+builder.Services.AddControllers(options =>
+{
+	options.Filters.Add<GlobalExceptionFilter>();
+});
+
+builder.Services.AddProblemDetails();
 
 builder.Services.AddCors(options =>
 {
@@ -72,6 +79,10 @@ builder.Services.AddHttpClient<EmcdApiClient>();
 builder.Services.AddHostedService<PayoutsLoaderService>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 var scope = app.Services.CreateScope();
 var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
 await database.MigrateAsync();
