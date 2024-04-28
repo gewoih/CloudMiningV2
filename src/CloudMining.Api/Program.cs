@@ -10,10 +10,10 @@ using CloudMining.Infrastructure.Emcd;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
-using AutoMapper;
+using CloudMining.Application.DTO.Payments;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.JWT;
-using CloudMining.Domain.Models.Base;
+using CloudMining.Domain.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -59,18 +59,14 @@ builder.Services.AddAuthentication(options =>
 	};
 });
 
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
-var config = new MapperConfiguration(cfg => {
-	cfg.AddProfile<GlobalMappingProfile>();
-});
-
-
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IShareService, ShareService>();
 builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
 builder.Services.AddSingleton<JwtService>();
+
+builder.Services.AddSingleton<IMapper<ShareablePayment, PaymentDto>, PaymentMapper>();
 
 builder.Services.AddHttpClient<EmcdApiClient>();
 builder.Services.AddHostedService<PayoutsLoaderService>();

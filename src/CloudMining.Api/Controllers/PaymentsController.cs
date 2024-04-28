@@ -1,5 +1,5 @@
-﻿using AutoMapper;
-using CloudMining.Application.DTO.Payments;
+﻿using CloudMining.Application.DTO.Payments;
+using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.Payments;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
@@ -14,19 +14,19 @@ namespace CloudMining.Api.Controllers
 	public class PaymentsController : ControllerBase
 	{
 		private readonly IShareablePaymentService _shareablePaymentService;
-		private readonly IMapper _mapper;
+		private readonly IMapper<ShareablePayment, PaymentDto> _mapper;
 
-		public PaymentsController(IShareablePaymentService shareablePaymentService, IMapper mapper)
+		public PaymentsController(IShareablePaymentService shareablePaymentService, IMapper<ShareablePayment, PaymentDto> mapper)
 		{
 			_shareablePaymentService = shareablePaymentService;
 			_mapper = mapper;
 		}
 
 		[HttpGet]
-		public async Task<List<PaymentDto>> Get(PaymentType paymentType)
+		public async Task<IEnumerable<PaymentDto>> Get(PaymentType paymentType)
 		{
 			var payments = await _shareablePaymentService.GetAsync(paymentType);
-			var paymentDtos = _mapper.Map<List<ShareablePayment>, List<PaymentDto>>(payments);
+			var paymentDtos = payments.Select(payment => _mapper.ToDto(payment));
 			return paymentDtos;
 		}
 
