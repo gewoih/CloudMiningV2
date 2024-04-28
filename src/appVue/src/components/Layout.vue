@@ -1,31 +1,33 @@
 <template>
-  <div class="m-3">
-    <Menubar :model="items">
-      <template #start>
-        <i class="pi pi-bitcoin ml-2" style="font-size: 2.5rem"/>
-      </template>
+  <div class="h-screen overflow-auto flex flex-column">
+    <div class="m-3">
+      <Menubar :model="items">
+        <template #start>
+          <i class="pi pi-bitcoin ml-2" style="font-size: 2.5rem"/>
+        </template>
 
-      <template #item="{ item, props }">
-        <router-link v-slot="{ navigate }" :to="{ name: item.route }" custom>
-          <a class="flex align-items-center" v-bind="props.action" @click="navigate">
-            <span :class="item.icon"/>
-            <span class="ml-2">{{ item.label }}</span>
-          </a>
-        </router-link>
-      </template>
+        <template #item="{ item, props }">
+          <router-link v-slot="{ navigate }" :to="{ name: item.route }" custom>
+            <a class="flex align-items-center" v-bind="props.action" @click="navigate">
+              <span :class="item.icon"/>
+              <span class="ml-2">{{ item.label }}</span>
+            </a>
+          </router-link>
+        </template>
 
-      <template #end>
-        <div class="flex justify-content-center mr-2">
-          <Button type="button" icon="pi pi-user" @click="toggleMenu" aria-haspopup="true" aria-controls="menu"
-                  rounded outlined/>
-          <Menu ref="menu" id="menu" :model="settingsMenuItems" :popup="true"></Menu>
-        </div>
-      </template>
-    </Menubar>
-  </div>
-
-  <div class="flex align-items-center justify-content-center">
-    <router-view></router-view>
+        <template #end>
+          <div class="flex justify-content-center mr-2">
+            <Button type="button" icon="pi pi-user" @click="toggleMenu" aria-haspopup="true" aria-controls="menu"
+                    rounded outlined/>
+            <Menu ref="menu" id="menu" :model="settingsMenuItems" :popup="true"></Menu>
+          </div>
+        </template>
+      </Menubar>
+    </div>
+    
+    <div class="flex flex-1 align-items-center justify-content-center">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 

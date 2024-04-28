@@ -18,7 +18,7 @@ async function login() {
 </script>
 
 <template>
-  <div class="p-fluid p-card p-3 h-fit m-2">
+  <div class="p-fluid p-card p-3 m-2">
     <h3 class="text-center mt-1">Вход в аккаунт</h3>
     <div class="field">
       <label for="email">Email</label>
