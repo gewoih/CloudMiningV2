@@ -1,4 +1,5 @@
 ﻿using CloudMining.Application.DTO.Payments;
+using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.Payments;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
@@ -13,29 +14,20 @@ namespace CloudMining.Api.Controllers
 	public class PaymentsController : ControllerBase
 	{
 		private readonly IShareablePaymentService _shareablePaymentService;
+		private readonly IMapper<ShareablePayment, PaymentDto> _mapper;
 
-		public PaymentsController(IShareablePaymentService shareablePaymentService)
+		public PaymentsController(IShareablePaymentService shareablePaymentService, IMapper<ShareablePayment, PaymentDto> mapper)
 		{
 			_shareablePaymentService = shareablePaymentService;
+			_mapper = mapper;
 		}
 
 		[HttpGet]
-		public async Task<List<PaymentDto>> Get(PaymentType paymentType)
+		public async Task<IEnumerable<PaymentDto>> Get(PaymentType paymentType)
 		{
 			var payments = await _shareablePaymentService.GetAsync(paymentType);
-			var paymentsDto = new List<PaymentDto>(payments.Count);
-			paymentsDto.AddRange(payments.Select(payment => 
-				new PaymentDto
-				{
-					Id = payment.Id, 
-					Caption = payment.Caption, 
-					Date = payment.Date, 
-					Amount = payment.Amount,
-					//TODO: Обязательно должны быть доли внутри payment + подумать как это будет работать с ролями
-					IsCompleted = payment.IsCompleted
-				}));
-
-			return paymentsDto;
+			var paymentDtos = payments.Select(payment => _mapper.ToDto(payment));
+			return paymentDtos;
 		}
 
 		[HttpPost]
