@@ -1,4 +1,5 @@
-﻿using CloudMining.Application.Services.Currencies;
+﻿using System.Reflection;
+using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Payments;
 using CloudMining.Application.Services.Payouts;
@@ -11,10 +12,17 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using CloudMining.Api.Filters;
+using CloudMining.Api.Validators.Deposit;
+using CloudMining.Api.Validators.Payment;
+using CloudMining.Api.Validators.User;
 using CloudMining.Application.DTO.Payments;
+using CloudMining.Application.DTO.Payments.Deposits;
+using CloudMining.Application.DTO.Users;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.JWT;
 using CloudMining.Domain.Models;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -26,6 +34,12 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddProblemDetails();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
+builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
+builder.Services.AddScoped<IValidator<CreatePaymentDto>, PaymentValidator>();
+builder.Services.AddScoped<IValidator<CreateDepositDto>, DepositValidator>();
 
 builder.Services.AddCors(options =>
 {
@@ -79,9 +93,6 @@ builder.Services.AddHttpClient<EmcdApiClient>();
 builder.Services.AddHostedService<PayoutsLoaderService>();
 
 var app = builder.Build();
-
-app.UseExceptionHandler();
-app.UseStatusCodePages();
 
 var scope = app.Services.CreateScope();
 var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
