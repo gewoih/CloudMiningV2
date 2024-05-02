@@ -14,12 +14,17 @@ namespace CloudMining.Api.Controllers
 	public class PaymentsController : ControllerBase
 	{
 		private readonly IShareablePaymentService _shareablePaymentService;
-		private readonly IMapper<ShareablePayment, PaymentDto> _mapper;
+		private readonly IMapper<ShareablePayment, PaymentDto> _paymentMapper;
+		private readonly IMapper<PaymentShare, PaymentShareDto> _paymentShareMapper;
 
-		public PaymentsController(IShareablePaymentService shareablePaymentService, IMapper<ShareablePayment, PaymentDto> mapper)
+		public PaymentsController(
+			IShareablePaymentService shareablePaymentService, 
+			IMapper<ShareablePayment, PaymentDto> paymentMapper, 
+			IMapper<PaymentShare, PaymentShareDto> paymentShareMapper)
 		{
 			_shareablePaymentService = shareablePaymentService;
-			_mapper = mapper;
+			_paymentMapper = paymentMapper;
+			_paymentShareMapper = paymentShareMapper;
 		}
 
 		[HttpGet]
@@ -29,15 +34,24 @@ namespace CloudMining.Api.Controllers
 			[FromQuery] int take = 10)
 		{
 			var payments = await _shareablePaymentService.GetAsync(skip, take, paymentType);
-			var paymentDtos = payments.Select(payment => _mapper.ToDto(payment));
+			var paymentDtos = payments.Select(payment => _paymentMapper.ToDto(payment));
 			return paymentDtos;
 		}
 
-		[HttpPost]
-		public async Task<IActionResult> Create([FromBody] CreatePaymentDto paymentDto)
+		[HttpGet("shares")]
+		public async Task<IEnumerable<PaymentShareDto>> GetShares([FromQuery] Guid paymentId)
 		{
-			_ = await _shareablePaymentService.CreateAsync(paymentDto);
-			return Ok();
+			var paymentShares = await _shareablePaymentService.GetPaymentShares(paymentId);
+			var paymentSharesDto = paymentShares.Select(paymentShare => _paymentShareMapper.ToDto(paymentShare));
+			return paymentSharesDto;
+		}
+
+		[HttpPost]
+		public async Task<PaymentDto> Create([FromBody] CreatePaymentDto createPaymentDto)
+		{
+			var payment = await _shareablePaymentService.CreateAsync(createPaymentDto);
+			var paymentDto = _paymentMapper.ToDto(payment);
+			return paymentDto;
 		}
 	}
 }

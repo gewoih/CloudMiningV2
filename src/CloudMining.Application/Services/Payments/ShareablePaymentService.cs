@@ -63,6 +63,20 @@ namespace CloudMining.Application.Services.Payments
 			return latestPaymentDate;
 		}
 
+		public async Task<List<PaymentShare>> GetPaymentShares(Guid paymentId)
+		{
+			var currentUserId = _userService.GetCurrentUserId();
+			
+			//TODO: Получать User (ФИО) не из БД, а из UserService
+			var userPaymentShares = await _context.PaymentShares
+				.Include(paymentShare => paymentShare.User)
+				.Where(paymentShare => paymentShare.ShareablePaymentId == paymentId && 
+				                       paymentShare.UserId == currentUserId)
+				.ToListAsync();
+
+			return userPaymentShares;
+		}
+
 		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, PaymentType? paymentType = null)
 		{
 			var currentUserId = _userService.GetCurrentUserId();

@@ -9,5 +9,6 @@ namespace CloudMining.Application.Services.Payments
         Task<List<ShareablePayment>> GetAsync(int skip, int take, PaymentType? paymentType = null);
 	    Task<ShareablePayment?> CreateAsync(CreatePaymentDto createPaymentDto);
 	    Task<DateTime> GetLatestPaymentDateAsync(PaymentType paymentType);
+        Task<List<PaymentShare>> GetPaymentShares(Guid paymentId);
     }
 }
