@@ -63,7 +63,21 @@ namespace CloudMining.Application.Services.Payments
 			return latestPaymentDate;
 		}
 
-		public async Task<List<ShareablePayment>> GetAsync(PaymentType? paymentType = null)
+		public async Task<List<PaymentShare>> GetPaymentShares(Guid paymentId)
+		{
+			var currentUserId = _userService.GetCurrentUserId();
+			
+			//TODO: Получать User (ФИО) не из БД, а из UserService
+			var userPaymentShares = await _context.PaymentShares
+				.Include(paymentShare => paymentShare.User)
+				.Where(paymentShare => paymentShare.ShareablePaymentId == paymentId && 
+				                       paymentShare.UserId == currentUserId)
+				.ToListAsync();
+
+			return userPaymentShares;
+		}
+
+		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, PaymentType? paymentType = null)
 		{
 			var currentUserId = _userService.GetCurrentUserId();
 			if (currentUserId == null)
@@ -80,7 +94,12 @@ namespace CloudMining.Application.Services.Payments
 			paymentsQuery = paymentsQuery.Where(payment =>
 				payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
 
-			var payments = await paymentsQuery.ToListAsync();
+			var payments = await paymentsQuery
+				.OrderByDescending(payment => payment.Date)
+				.Skip(skip)
+				.Take(take)
+				.ToListAsync();
+			
 			return payments;
 		}
 	}

@@ -59,7 +59,7 @@ namespace CloudMining.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f0e8d117-097a-420c-b7e7-372a9d943dd9"),
+                            Id = new Guid("4290a63d-69e6-4713-a1ba-70fed195acc1"),
                             Caption = "Рубль",
                             Code = 1,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -70,7 +70,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("c3495f44-8ad1-4788-945a-26def77591ec"),
+                            Id = new Guid("b5faee0f-04d1-40e0-bad8-d7b245d6dbf7"),
                             Caption = "Доллар",
                             Code = 0,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -81,7 +81,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("d917e647-eb9b-4900-8655-85571ae4a9ad"),
+                            Id = new Guid("02e25a7e-f70d-4df4-a974-39292a613e52"),
                             Caption = "Bitcoin",
                             Code = 2,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -92,7 +92,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("220504fd-3038-4ca3-9d55-3b0625c4b2c6"),
+                            Id = new Guid("104e465e-63d2-487e-89c7-91c5b63e7088"),
                             Caption = "Etherium",
                             Code = 3,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -103,7 +103,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("8b6a2523-b19a-457a-aafc-d4efa81a1be0"),
+                            Id = new Guid("31b85ae5-4d40-42ac-b419-9be974c9bd45"),
                             Caption = "Litecoin",
                             Code = 4,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -114,7 +114,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("3a0bc1d3-9a66-4efa-ad64-ddd605c6e7a7"),
+                            Id = new Guid("33cd0228-7a50-4fcb-908e-2a2f6df198f7"),
                             Caption = "Dogecoin",
                             Code = 5,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -301,7 +301,7 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Property<decimal>("Share")
                         .HasColumnType("numeric");
 
-                    b.Property<Guid?>("ShareablePaymentId")
+                    b.Property<Guid>("ShareablePaymentId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedDate")
@@ -531,15 +531,19 @@ namespace CloudMining.Infrastructure.Migrations
 
             modelBuilder.Entity("CloudMining.Domain.Models.PaymentShare", b =>
                 {
-                    b.HasOne("CloudMining.Domain.Models.ShareablePayment", null)
+                    b.HasOne("CloudMining.Domain.Models.ShareablePayment", "ShareablePayment")
                         .WithMany("PaymentShares")
-                        .HasForeignKey("ShareablePaymentId");
+                        .HasForeignKey("ShareablePaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("CloudMining.Domain.Models.Identity.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ShareablePayment");
 
                     b.Navigation("User");
                 });
