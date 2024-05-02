@@ -19,10 +19,10 @@ namespace CloudMining.Api.Controllers
 		}
 
 		[HttpPost]
-		public async Task<Deposit> Create([FromBody] CreateDepositDto depositDto)
+		public async Task<IActionResult> Create([FromBody] CreateDepositDto depositDto)
 		{
-			var newDeposit = await _depositService.AddDepositAndRecalculateShares(depositDto);
-			return newDeposit;
+			_ = await _depositService.AddDepositAndRecalculateShares(depositDto);
+			return Ok();
 		}
 	}
 }
