@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using CloudMining.Api.Filters;
+using CloudMining.Api.Settings;
 using CloudMining.Application.DTO.Payments;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.JWT;
@@ -37,6 +38,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<EmcdSettings>(builder.Configuration.GetSection(EmcdSettings.SectionName));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<CloudMiningContext>(options =>
