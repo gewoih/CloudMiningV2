@@ -3,7 +3,6 @@
 public class EmcdSettings
 {
     public static readonly string SectionName = "Emcd";
-    
     public string ApiKey { get; set; }
     public string BaseUrl { get; set; }
     public Endpoints Endpoints { get; set; }

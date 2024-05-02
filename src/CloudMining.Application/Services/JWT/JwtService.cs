@@ -2,7 +2,8 @@
 using System.Security.Claims;
 using System.Text;
 using CloudMining.Domain.Models.Identity;
-using Microsoft.Extensions.Configuration;
+using CloudMining.Infrastructure.Settings;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CloudMining.Application.Services.JWT;
@@ -12,10 +13,10 @@ public class JwtService
     private readonly string _signingKey;
     private readonly int _jwtLifetimeInDays;
 
-    public JwtService(IConfiguration configuration)
+    public JwtService(IOptions<JwtSettings> settings)
     {
-        _signingKey = configuration.GetValue<string>("Jwt:SigningKey");
-        _jwtLifetimeInDays = configuration.GetValue<int>("Jwt:LifetimeInDays");
+        _signingKey = settings.Value.SigningKey;
+        _jwtLifetimeInDays = settings.Value.LifetimeInDays;
     }
 
     public string GetSubClaim(string token)

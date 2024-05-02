@@ -41,6 +41,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<EmcdSettings>(builder.Configuration.GetSection(EmcdSettings.SectionName));
 builder.Services.Configure<PayoutsLoaderSettings>(builder.Configuration.GetSection(PayoutsLoaderSettings.SectionName));
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<CloudMiningContext>(options =>
