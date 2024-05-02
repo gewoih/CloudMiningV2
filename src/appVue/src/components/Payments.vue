@@ -1,14 +1,16 @@
 ﻿<template>
 <div class="w-8">
+  
   <Toolbar class="mb-4">
     <template #start>
-      <Button label="New" icon="pi pi-plus" severity="success" class="mr-2" @click="" />
+      <Button label="Добавить платеж" icon="pi pi-plus" severity="success" class="mr-2" @click="isModalVisible = true" />
     </template>
 
     <template #end>
       <Dropdown v-model="selectedPaymentType" :options="paymentTypes" optionLabel="name" optionValue="value" @change="fetchPayments" class="w-full md:w-14rem" />
     </template>
   </Toolbar>
+  
   <DataTable :value="payments" dataKey="id">
     <Column expander/>
     <Column field="isCompleted" header="Статус">
@@ -25,6 +27,24 @@
     <Column field="caption" header="Комментарий"></Column>
   </DataTable>
 </div>
+  
+  <Dialog v-model:visible="isModalVisible" modal header="Добавление платежа" :draggable="false" :dismissableMask="true">
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="amount" class="font-semibold w-6rem">Сумма</label>
+      <InputNumber v-model="newPayment.amount" id="amount" class="flex-auto" autocomplete="off" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label for="date" class="font-semibold w-6rem">Дата</label>
+      <Calendar id="date" v-model="newPayment.date" date-format="dd.mm.yy" show-icon class="flex-auto" autocomplete="off" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-5">
+      <label for="caption" class="font-semibold w-6rem">Комментарий</label>
+      <InputText id="caption" v-model="newPayment.caption" class="flex-auto" autocomplete="off" />
+    </div>
+    <div class="flex justify-content-end gap-2">
+      <Button type="submit" label="Сохранить" @click="createPayment"></Button>
+    </div>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -35,6 +55,7 @@ import {format} from 'date-fns'
 import {CurrencyCode} from "@/enums/CurrencyCode.ts";
 import {PaymentType} from "@/enums/PaymentType.ts";
 
+const isModalVisible = ref(false);
 const selectedPaymentType = ref(PaymentType.Electricity);
 const paymentTypes = ref([
   { name: 'Электричество', value: 'Electricity' },
@@ -65,6 +86,7 @@ const fetchPayments = async () => {
 const createPayment = async () => {
   newPayment.value.paymentType = selectedPaymentType.value;
   await paymentsService.createPayment(newPayment.value);
+  //TODO: Заменить на получение созданного платежа
   await fetchPayments();
   newPayment.value = {
     caption: null,
@@ -74,6 +96,7 @@ const createPayment = async () => {
     amount: 0,
     isCompleted: false
   };
+  isModalVisible.value = false;
 };
 
 fetchPayments();
