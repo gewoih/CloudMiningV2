@@ -2,9 +2,10 @@
 using CloudMining.Application.Services.Payments;
 using CloudMining.Domain.Enums;
 using CloudMining.Infrastructure.Emcd;
-using Microsoft.Extensions.Configuration;
+using CloudMining.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace CloudMining.Application.Services.Payouts
 {
@@ -14,11 +15,11 @@ namespace CloudMining.Application.Services.Payouts
         private readonly EmcdApiClient _emcdApiClient;
         private readonly int _delayInMinutes;
 
-        public PayoutsLoaderService(IServiceScopeFactory scopeFactory, EmcdApiClient emcdApiClient, IConfiguration configuration)
+        public PayoutsLoaderService(IServiceScopeFactory scopeFactory, EmcdApiClient emcdApiClient, IOptions<PayoutsLoaderSettings> settings)
         {
             _emcdApiClient = emcdApiClient;
             _scopeFactory = scopeFactory;
-            _delayInMinutes = configuration.GetSection("PayoutsLoaderDelayInMinutes").Get<int>();
+            _delayInMinutes = settings.Value.DelayInMinutes;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -47,7 +48,7 @@ namespace CloudMining.Application.Services.Payouts
                     dateTime: payout.GmtTime,
                     amount: payout.Amount);
 
-                var createdPayment = await shareablePaymentService.CreateAsync(createPaymentDto);
+                _ = await shareablePaymentService.CreateAsync(createPaymentDto);
             }
         }
     }

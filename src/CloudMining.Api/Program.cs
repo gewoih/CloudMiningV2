@@ -40,6 +40,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<EmcdSettings>(builder.Configuration.GetSection(EmcdSettings.SectionName));
+builder.Services.Configure<PayoutsLoaderSettings>(builder.Configuration.GetSection(PayoutsLoaderSettings.SectionName));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<CloudMiningContext>(options =>
