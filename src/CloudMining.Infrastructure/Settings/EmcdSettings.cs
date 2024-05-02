@@ -1,4 +1,4 @@
-﻿namespace CloudMining.Api.Settings;
+﻿namespace CloudMining.Infrastructure.Settings;
 
 public class EmcdSettings
 {

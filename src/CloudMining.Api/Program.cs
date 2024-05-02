@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using CloudMining.Api.Filters;
-using CloudMining.Api.Settings;
 using CloudMining.Application.DTO.Payments;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.JWT;
 using CloudMining.Domain.Models;
+using CloudMining.Infrastructure.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 

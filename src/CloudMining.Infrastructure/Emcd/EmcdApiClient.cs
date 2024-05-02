@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Nodes;
-using CloudMining.Api.Settings;
+using CloudMining.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
