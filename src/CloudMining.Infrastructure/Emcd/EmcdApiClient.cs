@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Nodes;
-using CloudMining.Domain.Enums;
-using Microsoft.Extensions.Configuration;
+using CloudMining.Infrastructure.Settings;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace CloudMining.Infrastructure.Emcd
@@ -12,14 +12,14 @@ namespace CloudMining.Infrastructure.Emcd
         private readonly string _getPayoutsUrl;
         private readonly List<string> _availableCoins;
 
-        public EmcdApiClient(HttpClient httpClient, IConfiguration configuration)
+        public EmcdApiClient(HttpClient httpClient, IOptions<EmcdSettings> settings)
         {
-            _httpClient = httpClient;
+	        _httpClient = httpClient;
 
-            var baseUrl = configuration["Emcd:BaseUrl"];
-            _getPayoutsUrl = baseUrl + configuration["Emcd:Endpoints:GetPayoutsUrl"];
-            _apiKey = configuration["Emcd:ApiKey"];
-            _availableCoins = configuration.GetSection("Emcd:AvailableCoins").Get<List<string>>();
+            var baseUrl = settings.Value.BaseUrl;
+            _getPayoutsUrl = baseUrl + settings.Value.Endpoints.GetPayoutsUrl;
+            _apiKey = settings.Value.ApiKey;
+            _availableCoins = settings.Value.AvailableCoins;
         }
 
         public async Task<List<Payout>> GetPayouts(DateTime? fromDate = null, DateTime? toDate = null)

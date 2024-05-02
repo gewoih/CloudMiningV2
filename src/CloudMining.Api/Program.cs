@@ -23,6 +23,7 @@ using CloudMining.Application.Services.JWT;
 using CloudMining.Domain.Models;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using CloudMining.Infrastructure.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Converters;
@@ -56,6 +57,10 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<EmcdSettings>(builder.Configuration.GetSection(EmcdSettings.SectionName));
+builder.Services.Configure<PayoutsLoaderSettings>(builder.Configuration.GetSection(PayoutsLoaderSettings.SectionName));
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<CloudMiningContext>(options =>
