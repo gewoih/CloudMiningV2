@@ -27,7 +27,7 @@ namespace CloudMining.Api.Controllers
 		public async Task<IActionResult> Login([FromBody] LoginDto credentials)
 		{
 			var userJwt = await _userService.LoginAsync(credentials);
-			return new JsonResult(userJwt);
+			return Ok(userJwt);
 		}
 	}
 }
