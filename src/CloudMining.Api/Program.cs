@@ -25,12 +25,17 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(options =>
 {
 	options.Filters.Add<GlobalExceptionFilter>();
+})
+.AddNewtonsoftJson(options =>
+{
+	options.SerializerSettings.Converters.Add(new StringEnumConverter());
 });
 
 builder.Services.AddProblemDetails();
