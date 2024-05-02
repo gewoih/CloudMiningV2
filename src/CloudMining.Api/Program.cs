@@ -126,6 +126,7 @@ builder.Services.AddScoped<IDepositService, DepositService>();
 builder.Services.AddSingleton<JwtService>();
 
 builder.Services.AddSingleton<IMapper<ShareablePayment, PaymentDto>, PaymentMapper>();
+builder.Services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
 
 builder.Services.AddHttpClient<EmcdApiClient>();
 builder.Services.AddHostedService<PayoutsLoaderService>();
