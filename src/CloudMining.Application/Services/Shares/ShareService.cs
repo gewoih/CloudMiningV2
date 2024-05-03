@@ -1,6 +1,7 @@
 ﻿using CloudMining.Application.Models.Shares;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services.Shares
@@ -77,7 +78,8 @@ namespace CloudMining.Application.Services.Shares
 
 		public async Task<List<PaymentShare>> CreatePaymentShares(decimal amount, Currency currency, DateTime date)
 		{
-			var usersShares = await CalculateUsersSharesAsync(amount, currency);
+			IEnumerable<UserCalculatedShare> usersShares = await CalculateUsersSharesAsync(amount, currency);
+			usersShares = usersShares.Where(userShare => userShare.Amount != 0);
 
 			var paymentShares = new List<PaymentShare>();
 			foreach (var userShare in usersShares)
