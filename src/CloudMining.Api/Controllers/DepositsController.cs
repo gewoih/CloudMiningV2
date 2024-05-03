@@ -1,6 +1,5 @@
 ﻿using CloudMining.Application.DTO.Payments.Deposits;
 using CloudMining.Application.Services.Deposits;
-using CloudMining.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
