@@ -7,6 +7,5 @@ namespace CloudMining.Application.Services.Deposits
 	public interface IDepositService
 	{
 		Task<Deposit> AddDepositAndRecalculateShares(CreateDepositDto depositDto);
-		Task<Dictionary<Guid, decimal>> GetUsersDeposits();
 	}
 }

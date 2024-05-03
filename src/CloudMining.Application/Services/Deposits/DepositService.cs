@@ -39,7 +39,7 @@ namespace CloudMining.Application.Services.Deposits
 			return deposit;
 		}
 
-		public async Task<Dictionary<Guid, decimal>> GetUsersDeposits()
+		private async Task<Dictionary<Guid, decimal>> GetUsersDeposits()
 		{
 			var usersDeposits = await _context.Users
 				.Include(user => user.Deposits)
