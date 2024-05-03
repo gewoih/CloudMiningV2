@@ -3,7 +3,6 @@
 	public sealed class CreateDepositDto
 	{
 		public Guid UserId { get; set; }
-		public Guid CurrencyId { get; set; }
 		public decimal Amount { get; set; }
 		public DateTime Date { get; set; }
 	}
