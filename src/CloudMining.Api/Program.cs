@@ -129,7 +129,7 @@ builder.Services.AddSingleton<IMapper<ShareablePayment, PaymentDto>, PaymentMapp
 builder.Services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
 
 builder.Services.AddHttpClient<EmcdApiClient>();
-builder.Services.AddHostedService<PayoutsLoaderService>();
+//builder.Services.AddHostedService<PayoutsLoaderService>();
 
 var app = builder.Build();
 
