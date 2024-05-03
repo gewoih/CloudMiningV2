@@ -1,5 +1,8 @@
 ﻿using CloudMining.Application.DTO.Payments.Deposits;
+using CloudMining.Application.Mappings;
+using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Shares;
+using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
@@ -10,22 +13,22 @@ namespace CloudMining.Application.Services.Deposits
 	{
 		private readonly CloudMiningContext _context;
 		private readonly IShareService _shareService;
+		private readonly ICurrencyService _currencyService;
+		private readonly IMapper<Deposit, CreateDepositDto> _depositMapper;
 
-		public DepositService(CloudMiningContext context, IShareService shareService)
+		public DepositService(CloudMiningContext context, IShareService shareService, ICurrencyService currencyService, IMapper<Deposit, CreateDepositDto> depositMapper)
 		{
 			_context = context;
 			_shareService = shareService;
+			_currencyService = currencyService;
+			_depositMapper = depositMapper;
 		}
 
 		public async Task<Deposit> AddDepositAndRecalculateShares(CreateDepositDto depositDto)
 		{
-			var deposit = new Deposit
-			{
-				UserId = depositDto.UserId,
-				Amount = depositDto.Amount,
-				CurrencyId = depositDto.CurrencyId,
-				Date = depositDto.Date
-			};
+			var currencyId = await _currencyService.GetIdAsync(CurrencyCode.RUB);
+			var deposit = _depositMapper.ToDomain(depositDto);
+			deposit.CurrencyId = currencyId;
 
 			var usersDeposits = await GetUsersDeposits();
 			usersDeposits[depositDto.UserId] += depositDto.Amount;
