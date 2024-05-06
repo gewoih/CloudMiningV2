@@ -77,11 +77,11 @@ namespace CloudMining.Application.Services.Payments
 			return userPaymentShares;
 		}
 
-		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, PaymentType? paymentType = null)
+		public async Task<(List<ShareablePayment>, int)> GetAsync(int skip, int take, PaymentType? paymentType = null)
 		{
 			var currentUserId = _userService.GetCurrentUserId();
 			if (currentUserId == null)
-				return [];
+				return (new List<ShareablePayment>(), 0);
 
 			var paymentsQuery = _context.ShareablePayments
 				.Include(payment => payment.PaymentShares)
@@ -93,6 +93,7 @@ namespace CloudMining.Application.Services.Payments
 			//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
 			paymentsQuery = paymentsQuery.Where(payment =>
 				payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
+			var totalRecords = await paymentsQuery.CountAsync();
 
 			var payments = await paymentsQuery
 				.OrderByDescending(payment => payment.Date)
@@ -100,7 +101,7 @@ namespace CloudMining.Application.Services.Payments
 				.Take(take)
 				.ToListAsync();
 			
-			return payments;
+			return (payments, totalRecords);
 		}
 	}
 }
