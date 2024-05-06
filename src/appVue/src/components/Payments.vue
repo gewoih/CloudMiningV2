@@ -11,7 +11,7 @@
     </template>
   </Toolbar>
   
-  <DataTable :value="payments" dataKey="id">
+  <DataTable :value="payments" @page="handlePageChange" paginator :pageCount="totalPages" :rows="10" :total-records="records"  dataKey="id">
     <Column expander/>
     <Column field="isCompleted" header="Статус">
       <template #body="slotProps">
@@ -61,7 +61,7 @@ const paymentTypes = ref([
   { name: 'Электричество', value: 'Electricity' },
   { name: 'Покупки', value: 'Purchase' }
 ]);
-const payments = ref<ShareablePayment[]>([]);
+const payments = ref<ShareablePayment[]>();
 const newPayment = ref<ShareablePayment>({
   caption: null,
   currencyCode: CurrencyCode.RUB,
@@ -70,6 +70,13 @@ const newPayment = ref<ShareablePayment>({
   amount: 0,
   isCompleted: false
 });
+const records = ref(0);
+const currentPage = ref(1);
+const totalPages = ref(0);
+
+const handlePageChange = (event) => {
+  currentPage.value = event.page + 1;
+}
 
 const getPaymentStatusSeverity = (isCompleted: boolean) => {
    return isCompleted ? 'success' : 'danger';
@@ -80,7 +87,11 @@ const getDateOnly = (date) => {
 };
 
 const fetchPayments = async () => {
-  payments.value = await paymentsService.getPayments(selectedPaymentType.value);
+  const response = await paymentsService.getPayments(currentPage.value, selectedPaymentType.value);
+  payments.value = response.payments;
+  records.value = response.totalRecords;
+  totalPages.value = Math.ceil(records.value / 10);
+  console.log(totalPages.value);
 };
 
 const createPayment = async () => {
@@ -100,6 +111,7 @@ const createPayment = async () => {
 };
 
 fetchPayments();
+console.log(totalPages.value)
 
 </script>
 
