@@ -11,7 +11,8 @@
     </template>
   </Toolbar>
   
-  <DataTable :value="payments" dataKey="id">
+  <DataTable :value="payments" v-model:expandedRows="expandedRows" dataKey="id"
+             @rowExpand="fetchShares">
     <Column expander/>
     <Column field="isCompleted" header="Статус">
       <template #body="slotProps">
@@ -25,6 +26,25 @@
       </template>
     </Column>
     <Column field="caption" header="Комментарий"></Column>
+    <template #expansion>
+      <div class="p-3">
+        <DataTable :value="paymentShares">
+          <Column field="id" header="Id"></Column>
+          <Column field="customer" header="Customer"></Column>
+          <Column field="date" header="Date" ></Column>
+          <Column field="status" header="Status">
+            <template #body="slotProps">
+              <Tag :value="slotProps.data.status.toLowerCase()" :severity="getOrderSeverity(slotProps.data)" />
+            </template>
+          </Column>
+          <Column headerStyle="width:4rem">
+            <template #body>
+              <Button icon="pi pi-search" />
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+    </template>
   </DataTable>
   <Paginator :rows="10" :totalRecords="totalRecords" @page="pageChange"></Paginator>
 </div>
@@ -56,8 +76,10 @@ import {CurrencyCode} from "@/enums/CurrencyCode.ts";
 import {PaymentType} from "@/enums/PaymentType.ts";
 import {Payment} from "@/models/Payment.ts";
 import {CreatePayment} from "@/models/CreatePayment.ts";
+import {PaymentShare} from "@/models/PaymentShare.ts";
 
 const isModalVisible = ref(false);
+const expandedRows = ref({});
 const selectedPaymentType = ref(PaymentType.Electricity);
 const paymentTypes = ref([
   { name: 'Электричество', value: 'Electricity' },
@@ -72,6 +94,7 @@ const newPayment = ref<CreatePayment>({
   amount: 0,
   isCompleted: false
 });
+const paymentShares = ref<PaymentShare[]>();
 const totalRecords = ref(0);
 const currentPage = ref(1);
 const totalPages = ref(0);
@@ -88,6 +111,11 @@ const getPaymentStatusSeverity = (isCompleted: boolean) => {
 const getDateOnly = (date) => {
   return format(date, 'dd.MM.yyyy');
 };
+
+const fetchShares = async  (event) => {
+  console.log(event.data.id);
+  paymentShares.value = await paymentsService.getShares(event.data.id);
+}
 
 const fetchPayments = async () => {
   const response = await paymentsService.getPayments(currentPage.value, selectedPaymentType.value);
