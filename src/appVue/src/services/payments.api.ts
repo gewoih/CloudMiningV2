@@ -1,11 +1,12 @@
-import {ShareablePayment} from '@/models/ShareablePayment';
+
 import {PaymentType} from '@/enums/PaymentType';
 import {apiService} from '@/services/api.ts';
 import {ShareablePaymentList} from "@/models/ShareablePaymentList.ts";
 import {PaymentShare} from "@/models/PaymentShare.ts";
+import {CreatePayment} from "@/models/CreatePayment.ts";
 
 class PaymentsService {
-    async createPayment(paymentData: ShareablePayment) {
+    async createPayment(paymentData: CreatePayment) {
         return apiService.axiosInstance.post("/payments", paymentData)
     }
 

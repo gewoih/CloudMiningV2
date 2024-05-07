@@ -1,5 +1,5 @@
-﻿import { ShareablePayment } from "./ShareablePayment";
+﻿import {Payment} from "@/models/Payment.ts";
 export interface ShareablePaymentList{
-    payments: ShareablePayment[];
+    payments: Payment[];
     totalRecords: number;
 }

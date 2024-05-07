@@ -50,11 +50,12 @@
 
 <script setup lang="ts">
 import {ref} from 'vue';
-import {ShareablePayment} from "@/models/ShareablePayment.ts";
 import {paymentsService} from "@/services/payments.api.ts";
 import {format} from 'date-fns'
 import {CurrencyCode} from "@/enums/CurrencyCode.ts";
 import {PaymentType} from "@/enums/PaymentType.ts";
+import {Payment} from "@/models/Payment.ts";
+import {CreatePayment} from "@/models/CreatePayment.ts";
 
 const isModalVisible = ref(false);
 const selectedPaymentType = ref(PaymentType.Electricity);
@@ -62,8 +63,8 @@ const paymentTypes = ref([
   { name: 'Электричество', value: 'Electricity' },
   { name: 'Покупки', value: 'Purchase' }
 ]);
-const payments = ref<ShareablePayment[]>();
-const newPayment = ref<ShareablePayment>({
+const payments = ref<Payment[]>();
+const newPayment = ref<CreatePayment>({
   caption: null,
   currencyCode: CurrencyCode.RUB,
   paymentType: PaymentType.Electricity,

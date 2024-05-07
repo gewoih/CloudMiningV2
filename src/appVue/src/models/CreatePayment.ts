@@ -1,7 +1,7 @@
-import { CurrencyCode } from '@/enums/CurrencyCode';
-import { PaymentType } from '@/enums/PaymentType';
+﻿import {CurrencyCode} from "@/enums/CurrencyCode.ts";
+import {PaymentType} from "@/enums/PaymentType.ts";
 
-export interface ShareablePayment{
+export interface CreatePayment{
     caption: string | null;
     currencyCode: CurrencyCode;
     paymentType: PaymentType;
@@ -9,5 +9,3 @@ export interface ShareablePayment{
     amount: number;
     isCompleted: boolean;
 }
-
-
