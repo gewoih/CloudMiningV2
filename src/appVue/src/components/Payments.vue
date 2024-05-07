@@ -11,7 +11,7 @@
     </template>
   </Toolbar>
   
-  <DataTable :value="payments" @page="handlePageChange" paginator :pageCount="totalPages" :rows="10" :total-records="records"  dataKey="id">
+  <DataTable :value="payments" dataKey="id">
     <Column expander/>
     <Column field="isCompleted" header="Статус">
       <template #body="slotProps">
@@ -26,6 +26,7 @@
     </Column>
     <Column field="caption" header="Комментарий"></Column>
   </DataTable>
+  <Paginator :rows="10" :totalRecords="totalRecords" @page="pageChange"></Paginator>
 </div>
   
   <Dialog v-model:visible="isModalVisible" modal header="Добавление платежа" :draggable="false" :dismissableMask="true">
@@ -70,12 +71,13 @@ const newPayment = ref<ShareablePayment>({
   amount: 0,
   isCompleted: false
 });
-const records = ref(0);
+const totalRecords = ref(0);
 const currentPage = ref(1);
 const totalPages = ref(0);
 
-const handlePageChange = (event) => {
-  currentPage.value = event.page + 1;
+const pageChange = async (event) => {
+  currentPage.value = event.page+1;
+  await fetchPayments();
 }
 
 const getPaymentStatusSeverity = (isCompleted: boolean) => {
@@ -89,9 +91,8 @@ const getDateOnly = (date) => {
 const fetchPayments = async () => {
   const response = await paymentsService.getPayments(currentPage.value, selectedPaymentType.value);
   payments.value = response.payments;
-  records.value = response.totalRecords;
-  totalPages.value = Math.ceil(records.value / 10);
-  console.log(totalPages.value);
+  totalRecords.value = response.totalRecords;
+  totalPages.value = Math.ceil(totalRecords.value / 10);
 };
 
 const createPayment = async () => {
@@ -111,7 +112,7 @@ const createPayment = async () => {
 };
 
 fetchPayments();
-console.log(totalPages.value)
+
 
 </script>
 
