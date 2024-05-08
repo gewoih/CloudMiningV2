@@ -34,11 +34,12 @@ namespace CloudMining.Api.Controllers
 			[FromQuery] int take = 10)
 		{
 			var payments = await _shareablePaymentService.GetAsync(skip, take, paymentType);
-			var paymentDtos = payments.Item1.Select(payment => _paymentMapper.ToDto(payment));
+			var totalRecords = await _shareablePaymentService.GetTotalRecords(paymentType);
+			var paymentDtos = payments.Select(payment => _paymentMapper.ToDto(payment)).ToList();
 			var paymentListDto = new PaymentListDto()
 			{
 				Payments = paymentDtos,
-				TotalRecords = payments.Item2
+				Count = totalRecords
 			};
 			return paymentListDto;
 		}

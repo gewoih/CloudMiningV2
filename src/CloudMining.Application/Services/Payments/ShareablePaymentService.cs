@@ -27,6 +27,26 @@ namespace CloudMining.Application.Services.Payments
 			_userService = userService;
 		}
 
+		public async Task<int> GetTotalRecords(PaymentType? paymentType = null)
+		{
+			var currentUserId = _userService.GetCurrentUserId();
+			if (currentUserId == null)
+				return 0;
+
+			var paymentsQuery = _context.ShareablePayments
+				.Include(payment => payment.PaymentShares)
+				.AsQueryable();
+
+			if (paymentType != null)
+				paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
+
+			//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
+			paymentsQuery = paymentsQuery.Where(payment =>
+				payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
+			var totalRecords = await paymentsQuery.CountAsync();
+			return totalRecords;
+		}
+
 		public async Task<ShareablePayment?> CreateAsync(CreatePaymentDto createPaymentDto)
 		{
 			var foundCurrency = await _currencyService.GetAsync(createPaymentDto.CurrencyCode);
@@ -77,11 +97,11 @@ namespace CloudMining.Application.Services.Payments
 			return userPaymentShares;
 		}
 
-		public async Task<(List<ShareablePayment>, int)> GetAsync(int skip, int take, PaymentType? paymentType = null)
+		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, PaymentType? paymentType = null)
 		{
 			var currentUserId = _userService.GetCurrentUserId();
 			if (currentUserId == null)
-				return (new List<ShareablePayment>(), 0);
+				return [];
 
 			var paymentsQuery = _context.ShareablePayments
 				.Include(payment => payment.PaymentShares)
@@ -93,7 +113,6 @@ namespace CloudMining.Application.Services.Payments
 			//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
 			paymentsQuery = paymentsQuery.Where(payment =>
 				payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
-			var totalRecords = await paymentsQuery.CountAsync();
 
 			var payments = await paymentsQuery
 				.OrderByDescending(payment => payment.Date)
@@ -101,7 +120,7 @@ namespace CloudMining.Application.Services.Payments
 				.Take(take)
 				.ToListAsync();
 			
-			return (payments, totalRecords);
+			return payments;
 		}
 	}
 }
