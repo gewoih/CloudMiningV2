@@ -2,6 +2,6 @@
 
 public class PaymentListDto
 {
-    public IEnumerable<PaymentDto> Payments { get; set; }
-    public int TotalRecords { get; set; }
+    public List<PaymentDto>  Payments { get; set; }
+    public int Count { get; set; }
 }
