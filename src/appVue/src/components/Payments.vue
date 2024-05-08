@@ -16,7 +16,7 @@
     <Column expander/>
     <Column field="isCompleted" header="Статус">
       <template #body="slotProps">
-        <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'" :severity="getPaymentStatusSeverity(slotProps.data.isCompleted)" />
+        <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'" :severity="getStatusSeverity(slotProps.data.isCompleted)" />
       </template>
     </Column>
     <Column field="amount" header="Сумма"/>
@@ -26,20 +26,20 @@
       </template>
     </Column>
     <Column field="caption" header="Комментарий"></Column>
-    <template #expansion>
+    <template #expansion="slotProps">
       <div class="p-3">
-        <DataTable :value="paymentShares">
-          <Column field="id" header="Id"></Column>
-          <Column field="customer" header="Customer"></Column>
-          <Column field="date" header="Date" ></Column>
-          <Column field="status" header="Status">
+        <h5>Платеж от {{ getDateOnly(slotProps.data.date) }}</h5>
+        <DataTable :value="paymentSharesMap[slotProps.data.id]">
+          <Column header="ФИО">
             <template #body="slotProps">
-              <Tag :value="slotProps.data.status.toLowerCase()" :severity="getOrderSeverity(slotProps.data)" />
+              {{ slotProps.data.user.lastName + ' ' + slotProps.data.user.firstName + ' ' + slotProps.data.user.patronymic }}
             </template>
           </Column>
-          <Column headerStyle="width:4rem">
-            <template #body>
-              <Button icon="pi pi-search" />
+          <Column field="amount" header="Сумма" ></Column>
+          <Column field="share" header="Доля" ></Column>
+          <Column field="isCompleted" header="Статус">
+            <template #body="slotProps">
+              <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'" :severity="getStatusSeverity(slotProps.data.isCompleted)" />
             </template>
           </Column>
         </DataTable>
@@ -80,6 +80,7 @@ import {PaymentShare} from "@/models/PaymentShare.ts";
 
 const isModalVisible = ref(false);
 const expandedRows = ref({});
+const paymentSharesMap = ref<{ [key: string]: PaymentShare[] }>({});
 const selectedPaymentType = ref(PaymentType.Electricity);
 const paymentTypes = ref([
   { name: 'Электричество', value: 'Electricity' },
@@ -104,7 +105,7 @@ const pageChange = async (event) => {
   await fetchPayments();
 }
 
-const getPaymentStatusSeverity = (isCompleted: boolean) => {
+const getStatusSeverity = (isCompleted: boolean) => {
    return isCompleted ? 'success' : 'danger';
 }
 
@@ -113,8 +114,11 @@ const getDateOnly = (date) => {
 };
 
 const fetchShares = async  (event) => {
-  console.log(event.data.id);
-  paymentShares.value = await paymentsService.getShares(event.data.id);
+  const paymentId = event.data.id;
+  if (!paymentSharesMap.value[paymentId]) {
+    paymentSharesMap.value[paymentId] = await paymentsService.getShares(paymentId);
+  }
+  paymentShares.value = paymentSharesMap.value[paymentId];
 }
 
 const fetchPayments = async () => {
