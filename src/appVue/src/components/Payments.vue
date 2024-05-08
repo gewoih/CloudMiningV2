@@ -126,7 +126,7 @@ const fetchShares = async  (event) => {
 const fetchPayments = async () => {
   const response = await paymentsService.getPayments(currentPage.value, rows.value, selectedPaymentType.value);
   payments.value = response.payments;
-  totalRecords.value = response.totalRecords;
+  totalRecords.value = response.count;
   totalPages.value = Math.ceil(totalRecords.value / rows.value);
 };
 
