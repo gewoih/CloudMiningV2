@@ -82,11 +82,12 @@ const isModalVisible = ref(false);
 const expandedRows = ref({});
 const paymentSharesMap = ref<{ [key: string]: PaymentShare[] }>({});
 const selectedPaymentType = ref(PaymentType.Electricity);
-const paymentTypes = ref([
-  { name: 'Электричество', value: 'Electricity' },
-  { name: 'Покупки', value: 'Purchase' }
-]);
 const payments = ref<Payment[]>();
+const paymentShares = ref<PaymentShare[]>();
+const totalRecords = ref(0);
+const rows = ref(10);
+const currentPage = ref(1);
+
 const newPayment = ref<CreatePayment>({
   caption: null,
   currencyCode: CurrencyCode.RUB,
@@ -95,11 +96,11 @@ const newPayment = ref<CreatePayment>({
   amount: 0,
   isCompleted: false
 });
-const paymentShares = ref<PaymentShare[]>();
-const totalRecords = ref(0);
-const rows = ref(10);
-const currentPage = ref(1);
-const totalPages = ref(0);
+
+const paymentTypes = ref([
+  { name: 'Электричество', value: 'Electricity' },
+  { name: 'Покупки', value: 'Purchase' }
+]);
 
 const pageChange = async (event) => {
   currentPage.value = event.page+1;
@@ -127,7 +128,6 @@ const fetchPayments = async () => {
   const response = await paymentsService.getPayments(currentPage.value, rows.value, selectedPaymentType.value);
   payments.value = response.payments;
   totalRecords.value = response.count;
-  totalPages.value = Math.ceil(totalRecords.value / rows.value);
 };
 
 const createPayment = async () => {
@@ -147,7 +147,6 @@ const createPayment = async () => {
 };
 
 fetchPayments();
-
 
 </script>
 
