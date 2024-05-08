@@ -46,7 +46,7 @@
       </div>
     </template>
   </DataTable>
-  <Paginator :rows="10" :totalRecords="totalRecords" @page="pageChange"></Paginator>
+  <Paginator :rows="rows"  :totalRecords="totalRecords" :rowsPerPageOptions="[5, 10, 15]" @page="pageChange"></Paginator>
 </div>
   
   <Dialog v-model:visible="isModalVisible" modal header="Добавление платежа" :draggable="false" :dismissableMask="true">
@@ -97,11 +97,13 @@ const newPayment = ref<CreatePayment>({
 });
 const paymentShares = ref<PaymentShare[]>();
 const totalRecords = ref(0);
+const rows = ref(10);
 const currentPage = ref(1);
 const totalPages = ref(0);
 
 const pageChange = async (event) => {
   currentPage.value = event.page+1;
+  rows.value = event.rows;
   await fetchPayments();
 }
 
@@ -122,10 +124,10 @@ const fetchShares = async  (event) => {
 }
 
 const fetchPayments = async () => {
-  const response = await paymentsService.getPayments(currentPage.value, selectedPaymentType.value);
+  const response = await paymentsService.getPayments(currentPage.value, rows.value, selectedPaymentType.value);
   payments.value = response.payments;
   totalRecords.value = response.totalRecords;
-  totalPages.value = Math.ceil(totalRecords.value / 10);
+  totalPages.value = Math.ceil(totalRecords.value / rows.value);
 };
 
 const createPayment = async () => {

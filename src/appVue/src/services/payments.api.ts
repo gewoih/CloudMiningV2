@@ -10,10 +10,10 @@ class PaymentsService {
         return apiService.axiosInstance.post("/payments", paymentData)
     }
 
-    async getPayments(skip: number, paymentType: PaymentType): Promise<ShareablePaymentList> {
-        skip = (skip-1)*10;
+    async getPayments(skip: number, take: number, paymentType: PaymentType): Promise<ShareablePaymentList> {
+        skip = (skip-1)*take;
         const response = await apiService.axiosInstance
-            .get("/payments", {params: {paymentType, skip}});
+            .get("/payments", {params: {paymentType, skip, take}});
         
         return response.data;
     }
