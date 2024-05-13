@@ -28,14 +28,20 @@ namespace CloudMining.Api.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IEnumerable<PaymentDto>> Get(
+		public async Task<PaymentsPageDto> Get(
 			[FromQuery] PaymentType paymentType, 
 			[FromQuery] int skip = 0, 
 			[FromQuery] int take = 10)
 		{
-			var payments = await _shareablePaymentService.GetAsync(skip, take, paymentType);
-			var paymentDtos = payments.Select(payment => _paymentMapper.ToDto(payment));
-			return paymentDtos;
+			var paginatedPayments = await _shareablePaymentService.GetAsync(skip, take, paymentType);
+			var totalPaymentsCount = await _shareablePaymentService.GetUserPaymentsCount(paymentType);
+			
+			var paymentsPageDto = new PaymentsPageDto
+			{
+				Items = paginatedPayments.Select(payment => _paymentMapper.ToDto(payment)).ToList(),
+				TotalCount = totalPaymentsCount
+			};
+			return paymentsPageDto;
 		}
 
 		[HttpGet("shares")]

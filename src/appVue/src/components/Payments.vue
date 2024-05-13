@@ -11,11 +11,12 @@
     </template>
   </Toolbar>
   
-  <DataTable :value="payments" dataKey="id">
+  <DataTable :value="payments" v-model:expandedRows="expandedRows" dataKey="id"
+             @rowExpand="fetchShares">
     <Column expander/>
     <Column field="isCompleted" header="Статус">
       <template #body="slotProps">
-        <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'" :severity="getPaymentStatusSeverity(slotProps.data.isCompleted)" />
+        <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'" :severity="getStatusSeverity(slotProps.data.isCompleted)" />
       </template>
     </Column>
     <Column field="amount" header="Сумма"/>
@@ -25,7 +26,26 @@
       </template>
     </Column>
     <Column field="caption" header="Комментарий"></Column>
+    <template #expansion="slotProps">
+      <div class="p-3">
+        <DataTable :value="paymentSharesMap[slotProps.data.id]">
+          <Column header="ФИО">
+            <template #body="slotProps">
+              {{ slotProps.data.user.lastName + ' ' + slotProps.data.user.firstName + ' ' + slotProps.data.user.patronymic }}
+            </template>
+          </Column>
+          <Column field="amount" header="Сумма" ></Column>
+          <Column field="share" header="Доля" ></Column>
+          <Column field="isCompleted" header="Статус">
+            <template #body="slotProps">
+              <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'" :severity="getStatusSeverity(slotProps.data.isCompleted)" />
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+    </template>
   </DataTable>
+  <Paginator :rows="pageSize" :totalRecords="totalPaymentsCount" :rowsPerPageOptions="[5, 10, 15]" @page="pageChange"></Paginator>
 </div>
   
   <Dialog v-model:visible="isModalVisible" modal header="Добавление платежа" :draggable="false" :dismissableMask="true">
@@ -49,20 +69,25 @@
 
 <script setup lang="ts">
 import {ref} from 'vue';
-import {ShareablePayment} from "@/models/ShareablePayment.ts";
 import {paymentsService} from "@/services/payments.api.ts";
 import {format} from 'date-fns'
 import {CurrencyCode} from "@/enums/CurrencyCode.ts";
 import {PaymentType} from "@/enums/PaymentType.ts";
+import {Payment} from "@/models/Payment.ts";
+import {CreatePayment} from "@/models/CreatePayment.ts";
+import {PaymentShare} from "@/models/PaymentShare.ts";
 
 const isModalVisible = ref(false);
+const expandedRows = ref({});
+const paymentSharesMap = ref<{ [key: string]: PaymentShare[] }>({});
 const selectedPaymentType = ref(PaymentType.Electricity);
-const paymentTypes = ref([
-  { name: 'Электричество', value: 'Electricity' },
-  { name: 'Покупки', value: 'Purchase' }
-]);
-const payments = ref<ShareablePayment[]>([]);
-const newPayment = ref<ShareablePayment>({
+const payments = ref<Payment[]>();
+const paymentShares = ref<PaymentShare[]>();
+const totalPaymentsCount = ref(0);
+const pageSize = ref(10);
+const pageNumber = ref(1);
+
+const newPayment = ref<CreatePayment>({
   caption: null,
   currencyCode: CurrencyCode.RUB,
   paymentType: PaymentType.Electricity,
@@ -71,7 +96,18 @@ const newPayment = ref<ShareablePayment>({
   isCompleted: false
 });
 
-const getPaymentStatusSeverity = (isCompleted: boolean) => {
+const paymentTypes = ref([
+  { name: 'Электричество', value: 'Electricity' },
+  { name: 'Покупки', value: 'Purchase' }
+]);
+
+const pageChange = async (event) => {
+  pageNumber.value = event.page+1;
+  pageSize.value = event.rows;
+  await fetchPayments();
+}
+
+const getStatusSeverity = (isCompleted: boolean) => {
    return isCompleted ? 'success' : 'danger';
 }
 
@@ -79,8 +115,18 @@ const getDateOnly = (date) => {
   return format(date, 'dd.MM.yyyy');
 };
 
+const fetchShares = async (event) => {
+  const paymentId = event.data.id;
+  if (!paymentSharesMap.value[paymentId]) {
+    paymentSharesMap.value[paymentId] = await paymentsService.getShares(paymentId);
+  }
+  paymentShares.value = paymentSharesMap.value[paymentId];
+}
+
 const fetchPayments = async () => {
-  payments.value = await paymentsService.getPayments(selectedPaymentType.value);
+  const response = await paymentsService.getPayments(pageNumber.value, pageSize.value, selectedPaymentType.value);
+  payments.value = response.items;
+  totalPaymentsCount.value = response.totalCount;
 };
 
 const createPayment = async () => {
