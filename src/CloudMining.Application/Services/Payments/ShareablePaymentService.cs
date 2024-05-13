@@ -27,24 +27,22 @@ namespace CloudMining.Application.Services.Payments
 			_userService = userService;
 		}
 
-		public async Task<int> GetTotalRecords(PaymentType? paymentType = null)
+		public async Task<int> GetUserPaymentsCount(PaymentType? paymentType = null)
 		{
 			var currentUserId = _userService.GetCurrentUserId();
 			if (currentUserId == null)
 				return 0;
 
-			var paymentsQuery = _context.ShareablePayments
-				.Include(payment => payment.PaymentShares)
-				.AsQueryable();
-
+			var paymentsQuery = _context.ShareablePayments.AsQueryable();
 			if (paymentType != null)
 				paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
 
-			//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
-			paymentsQuery = paymentsQuery.Where(payment =>
-				payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
-			var totalRecords = await paymentsQuery.CountAsync();
-			return totalRecords;
+			var paymentsCount = await paymentsQuery.Where(payment =>
+				payment.PaymentShares
+					.Any(paymentShare => paymentShare.UserId == currentUserId))
+				.CountAsync();
+
+			return paymentsCount;
 		}
 
 		public async Task<ShareablePayment?> CreateAsync(CreatePaymentDto createPaymentDto)
