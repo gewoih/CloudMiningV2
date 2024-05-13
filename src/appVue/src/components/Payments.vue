@@ -28,7 +28,6 @@
     <Column field="caption" header="Комментарий"></Column>
     <template #expansion="slotProps">
       <div class="p-3">
-        <h5>Платеж от {{ getDateOnly(slotProps.data.date) }}</h5>
         <DataTable :value="paymentSharesMap[slotProps.data.id]">
           <Column header="ФИО">
             <template #body="slotProps">
@@ -46,7 +45,7 @@
       </div>
     </template>
   </DataTable>
-  <Paginator :rows="rows"  :totalRecords="totalRecords" :rowsPerPageOptions="[5, 10, 15]" @page="pageChange"></Paginator>
+  <Paginator :rows="pageSize" :totalRecords="totalPaymentsCount" :rowsPerPageOptions="[5, 10, 15]" @page="pageChange"></Paginator>
 </div>
   
   <Dialog v-model:visible="isModalVisible" modal header="Добавление платежа" :draggable="false" :dismissableMask="true">
@@ -84,9 +83,9 @@ const paymentSharesMap = ref<{ [key: string]: PaymentShare[] }>({});
 const selectedPaymentType = ref(PaymentType.Electricity);
 const payments = ref<Payment[]>();
 const paymentShares = ref<PaymentShare[]>();
-const totalRecords = ref(0);
-const rows = ref(10);
-const currentPage = ref(1);
+const totalPaymentsCount = ref(0);
+const pageSize = ref(10);
+const pageNumber = ref(1);
 
 const newPayment = ref<CreatePayment>({
   caption: null,
@@ -103,8 +102,8 @@ const paymentTypes = ref([
 ]);
 
 const pageChange = async (event) => {
-  currentPage.value = event.page+1;
-  rows.value = event.rows;
+  pageNumber.value = event.page+1;
+  pageSize.value = event.rows;
   await fetchPayments();
 }
 
@@ -116,7 +115,7 @@ const getDateOnly = (date) => {
   return format(date, 'dd.MM.yyyy');
 };
 
-const fetchShares = async  (event) => {
+const fetchShares = async (event) => {
   const paymentId = event.data.id;
   if (!paymentSharesMap.value[paymentId]) {
     paymentSharesMap.value[paymentId] = await paymentsService.getShares(paymentId);
@@ -125,9 +124,9 @@ const fetchShares = async  (event) => {
 }
 
 const fetchPayments = async () => {
-  const response = await paymentsService.getPayments(currentPage.value, rows.value, selectedPaymentType.value);
-  payments.value = response.payments;
-  totalRecords.value = response.count;
+  const response = await paymentsService.getPayments(pageNumber.value, pageSize.value, selectedPaymentType.value);
+  payments.value = response.items;
+  totalPaymentsCount.value = response.totalCount;
 };
 
 const createPayment = async () => {
