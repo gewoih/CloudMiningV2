@@ -48,7 +48,7 @@ namespace CloudMining.Application.Services.Users
 			if (authResult.Succeeded)
 			{
 				var user = await _userManager.FindByEmailAsync(credentials.Email);
-				jwt = _jwtService.Generate(user);
+				jwt = await _jwtService.GenerateAsync(user);
 			}
 
 			return jwt;
