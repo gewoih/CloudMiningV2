@@ -1,6 +1,8 @@
 ﻿using CloudMining.Application.DTO.Payments;
+using CloudMining.Application.DTO.Payments.User;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.Payments;
+using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -14,33 +16,46 @@ namespace CloudMining.Api.Controllers
 	public class PaymentsController : ControllerBase
 	{
 		private readonly IShareablePaymentService _shareablePaymentService;
-		private readonly IMapper<ShareablePayment, PaymentDto> _paymentMapper;
+		private readonly IUserService _userService;
+		private readonly IMapper<ShareablePayment, AdminPaymentDto> _adminPaymentMapper;
+		private readonly IMapper<ShareablePayment, UserPaymentDto> _userPaymentMapper;
 		private readonly IMapper<PaymentShare, PaymentShareDto> _paymentShareMapper;
 
 		public PaymentsController(
 			IShareablePaymentService shareablePaymentService, 
-			IMapper<ShareablePayment, PaymentDto> paymentMapper, 
-			IMapper<PaymentShare, PaymentShareDto> paymentShareMapper)
+			IUserService userService,
+			IMapper<ShareablePayment, AdminPaymentDto> adminPaymentMapper, 
+			IMapper<PaymentShare, PaymentShareDto> paymentShareMapper, 
+			IMapper<ShareablePayment, UserPaymentDto> userPaymentMapper)
 		{
 			_shareablePaymentService = shareablePaymentService;
-			_paymentMapper = paymentMapper;
+			_userService = userService;
+			_adminPaymentMapper = adminPaymentMapper;
 			_paymentShareMapper = paymentShareMapper;
+			_userPaymentMapper = userPaymentMapper;
 		}
 
 		[HttpGet]
 		public async Task<PaymentsPageDto> Get(
 			[FromQuery] PaymentType paymentType, 
 			[FromQuery] int skip = 0, 
-			[FromQuery] int take = 10)
+			[FromQuery] int take = 10,
+			[FromQuery] bool withShares = false)
 		{
-			var paginatedPayments = await _shareablePaymentService.GetAsync(skip, take, paymentType);
+			var paginatedPayments = await _shareablePaymentService.GetAsync(skip, take, withShares, paymentType);
 			var totalPaymentsCount = await _shareablePaymentService.GetUserPaymentsCount(paymentType);
+			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
 			
 			var paymentsPageDto = new PaymentsPageDto
 			{
-				Items = paginatedPayments.Select(payment => _paymentMapper.ToDto(payment)).ToList(),
 				TotalCount = totalPaymentsCount
 			};
+
+			if (isCurrentUserAdmin)
+				paymentsPageDto.Items = paginatedPayments.Select(payment => (PaymentDto)_adminPaymentMapper.ToDto(payment)).ToList();
+			else
+				paymentsPageDto.Items = paginatedPayments.Select(payment => (PaymentDto)_userPaymentMapper.ToDto(payment)).ToList();
+			
 			return paymentsPageDto;
 		}
 
@@ -57,7 +72,7 @@ namespace CloudMining.Api.Controllers
 		public async Task<PaymentDto> Create([FromBody] CreatePaymentDto createPaymentDto)
 		{
 			var payment = await _shareablePaymentService.CreateAsync(createPaymentDto);
-			var paymentDto = _paymentMapper.ToDto(payment);
+			var paymentDto = _adminPaymentMapper.ToDto(payment);
 			return paymentDto;
 		}
 	}
