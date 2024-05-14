@@ -75,5 +75,11 @@ namespace CloudMining.Application.Services.Users
 
 			return roleClaims;
 		}
+
+		public bool IsCurrentUserAdmin()
+		{
+			var currentUserRoles = GetCurrentUserRoles();
+			return currentUserRoles.Contains(UserRole.Admin);
+		}
 	}
 }

@@ -10,5 +10,6 @@ namespace CloudMining.Application.Services.Users
 		Task<string> LoginAsync(LoginDto credentials);
         Guid? GetCurrentUserId();
         IEnumerable<UserRole> GetCurrentUserRoles();
+        bool IsCurrentUserAdmin();
 	}
 }
