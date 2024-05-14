@@ -84,14 +84,17 @@ namespace CloudMining.Application.Services.Payments
 		public async Task<List<PaymentShare>> GetPaymentShares(Guid paymentId)
 		{
 			var currentUserId = _userService.GetCurrentUserId();
-			
-			//TODO: Получать User (ФИО) не из БД, а из UserService
-			var userPaymentShares = await _context.PaymentShares
-				.Include(paymentShare => paymentShare.User)
-				.Where(paymentShare => paymentShare.ShareablePaymentId == paymentId && 
-				                       paymentShare.UserId == currentUserId)
-				.ToListAsync();
+			var currentUserRoles = _userService.GetCurrentUserRoles();
 
+			//TODO: Получать User (ФИО) не из БД, а из UserService
+			var userPaymentSharesQuery = _context.PaymentShares
+				.Include(paymentShare => paymentShare.User)
+				.Where(paymentShare => paymentShare.ShareablePaymentId == paymentId);
+			
+			if (!currentUserRoles.Contains(UserRole.Admin))
+				userPaymentSharesQuery = userPaymentSharesQuery.Where(paymentShare => paymentShare.UserId == currentUserId);
+
+			var userPaymentShares = await userPaymentSharesQuery.ToListAsync();
 			return userPaymentShares;
 		}
 
