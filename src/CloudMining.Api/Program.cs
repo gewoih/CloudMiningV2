@@ -140,6 +140,9 @@ await database.MigrateAsync();
 
 if (app.Environment.IsDevelopment())
 {
+	await DatabaseInitializer.CreateRolesAsync(scope.ServiceProvider);
+	await DatabaseInitializer.CreateUsersAsync(scope.ServiceProvider);
+	
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
