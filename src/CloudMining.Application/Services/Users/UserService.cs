@@ -1,5 +1,7 @@
-﻿using CloudMining.Application.DTO.Users;
+﻿using System.Security.Claims;
+using CloudMining.Application.DTO.Users;
 using CloudMining.Application.Services.JWT;
+using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +28,7 @@ namespace CloudMining.Application.Services.Users
 
 		public async Task<IdentityResult> RegisterAsync(RegisterDto dto)
 		{
+			//TODO: Добавить маппер
 			var newUser = new User
 			{
 				Email = dto.Email,
@@ -62,5 +65,15 @@ namespace CloudMining.Application.Services.Users
 	        var subClaim = _jwtService.GetSubClaim(jwt);
 	        return Guid.Parse(subClaim);
         }
+
+		public IEnumerable<UserRole> GetCurrentUserRoles()
+		{
+			var roleClaims = _httpContextAccessor.HttpContext.User.Claims
+				.Where(c => c.Type == ClaimTypes.Role)
+				.Select(c => Enum.Parse<UserRole>(c.Value))
+				.ToList();
+
+			return roleClaims;
+		}
 	}
 }
