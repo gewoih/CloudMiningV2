@@ -34,7 +34,7 @@ namespace CloudMining.Application.Services.Shares
 				{
 					User = user,
 					LastShareChange = user.ShareChanges
-						.OrderByDescending(shareChange => shareChange.Date)
+						.OrderByDescending(shareChange => shareChange.CreatedDate)
 						.FirstOrDefault()
 				})
 				.ToListAsync()
