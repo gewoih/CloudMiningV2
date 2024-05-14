@@ -1,10 +1,8 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using CloudMining.Application.DTO.Users;
+﻿using CloudMining.Application.DTO.Users;
 using CloudMining.Application.Services.JWT;
 using CloudMining.Domain.Models.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services.Users
 {
@@ -54,17 +52,7 @@ namespace CloudMining.Application.Services.Users
 			return jwt;
 		}
 
-        public async Task<List<Guid>> GetAllUsersIdsAsync()
-        {
-            var usersIds = await _userManager.Users
-	            .Select(u => u.Id)
-	            .ToListAsync()
-	            .ConfigureAwait(false);
-
-            return usersIds;
-        }
-
-        public Guid? GetCurrentUserId()
+		public Guid? GetCurrentUserId()
         {
 	        var authHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
 	        if (string.IsNullOrEmpty(authHeader))
