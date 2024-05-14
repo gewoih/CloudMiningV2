@@ -98,20 +98,21 @@ namespace CloudMining.Application.Services.Payments
 			return userPaymentShares;
 		}
 
-		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, PaymentType? paymentType = null)
+		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, bool withShares = false, PaymentType? paymentType = null)
 		{
 			var currentUserId = _userService.GetCurrentUserId();
 			if (currentUserId == null)
 				return [];
-
 			
 			var paymentsQuery = _context.ShareablePayments
 				.Include(payment => payment.PaymentShares)
 				.AsQueryable();
 
+			if (withShares)
+				paymentsQuery = paymentsQuery.Include(payment => payment.PaymentShares);
+			
 			if (paymentType != null)
 				paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
-
 			
 			//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
 			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
