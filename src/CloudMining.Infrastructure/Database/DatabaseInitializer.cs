@@ -26,9 +26,8 @@ namespace CloudMining.Infrastructure.Database
 		public static async Task CreateRolesAsync(IServiceProvider serviceProvider)
 		{
 			var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
-			string[] roleNames = { "Admin", "Manager", "User" };
         
-			foreach (var roleName in roleNames)
+			foreach (var roleName in Enum.GetNames(typeof(UserRole)))
 			{
 				var roleExist = await roleManager.RoleExistsAsync(roleName);
 				if (!roleExist)
