@@ -69,13 +69,13 @@
 
 <script setup lang="ts">
 import {ref} from 'vue';
-import {paymentsService} from "@/services/payments.api.ts";
 import {format} from 'date-fns'
 import {CurrencyCode} from "@/enums/CurrencyCode.ts";
 import {PaymentType} from "@/enums/PaymentType.ts";
 import {Payment} from "@/models/Payment.ts";
 import {CreatePayment} from "@/models/CreatePayment.ts";
 import {PaymentShare} from "@/models/PaymentShare.ts";
+import {adminService} from "@/services/admin.api.ts";
 
 const isModalVisible = ref(false);
 const expandedRows = ref({});
@@ -118,20 +118,20 @@ const getDateOnly = (date) => {
 const fetchShares = async (event) => {
   const paymentId = event.data.id;
   if (!paymentSharesMap.value[paymentId]) {
-    paymentSharesMap.value[paymentId] = await paymentsService.getShares(paymentId);
+    paymentSharesMap.value[paymentId] = await adminService.getShares(paymentId);
   }
   paymentShares.value = paymentSharesMap.value[paymentId];
 }
 
 const fetchPayments = async () => {
-  const response = await paymentsService.getPayments(pageNumber.value, pageSize.value, selectedPaymentType.value);
+  const response = await adminService.getPayments(pageNumber.value, pageSize.value, selectedPaymentType.value);
   payments.value = response.items;
   totalPaymentsCount.value = response.totalCount;
 };
 
 const createPayment = async () => {
   newPayment.value.paymentType = selectedPaymentType.value;
-  await paymentsService.createPayment(newPayment.value);
+  await adminService.createPayment(newPayment.value);
   //TODO: Заменить на получение созданного платежа
   await fetchPayments();
   newPayment.value = {
