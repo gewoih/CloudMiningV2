@@ -43,6 +43,21 @@ namespace CloudMining.Api.Controllers
 			};
 			return paymentsPageDto;
 		}
-		
+
+		[HttpGet("shares")]
+		public async Task<IEnumerable<PaymentShareDto>> GetShares([FromQuery] Guid paymentId)
+		{
+			var paymentShares = await _shareablePaymentService.GetPaymentShares(paymentId);
+			var paymentSharesDto = paymentShares.Select(paymentShare => _paymentShareMapper.ToDto(paymentShare));
+			return paymentSharesDto;
+		}
+
+		[HttpPost]
+		public async Task<PaymentDto> Create([FromBody] CreatePaymentDto createPaymentDto)
+		{
+			var payment = await _shareablePaymentService.CreateAsync(createPaymentDto);
+			var paymentDto = _paymentMapper.ToDto(payment);
+			return paymentDto;
+		}
 	}
 }
