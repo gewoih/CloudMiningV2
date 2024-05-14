@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Infrastructure.Settings;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -12,9 +13,11 @@ public class JwtService
 {
     private readonly string _signingKey;
     private readonly int _jwtLifetimeInDays;
+    private readonly UserManager<User> _userManager;
 
-    public JwtService(IOptions<JwtSettings> settings)
+    public JwtService(IOptions<JwtSettings> settings, UserManager<User> userManager)
     {
+        _userManager = userManager;
         _signingKey = settings.Value.SigningKey;
         _jwtLifetimeInDays = settings.Value.LifetimeInDays;
     }
@@ -28,14 +31,20 @@ public class JwtService
         return sub;
     }
     
-    public string Generate(User user)
+    public async Task<string> GenerateAsync(User user)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
         };
 
+        var roles = await _userManager.GetRolesAsync(user);
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+        
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_signingKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expires = DateTime.Now.AddDays(_jwtLifetimeInDays);

@@ -52,6 +52,7 @@ namespace CloudMining.Api.Controllers
 			return paymentSharesDto;
 		}
 
+		[Authorize(Roles = "Admin")]
 		[HttpPost]
 		public async Task<PaymentDto> Create([FromBody] CreatePaymentDto createPaymentDto)
 		{
