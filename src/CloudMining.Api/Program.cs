@@ -123,7 +123,7 @@ builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IShareService, ShareService>();
 builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
-builder.Services.AddSingleton<JwtService>();
+builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddSingleton<IMapper<ShareablePayment, PaymentDto>, PaymentMapper>();
 builder.Services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
@@ -140,6 +140,9 @@ await database.MigrateAsync();
 
 if (app.Environment.IsDevelopment())
 {
+	await DatabaseInitializer.CreateRolesAsync(scope.ServiceProvider);
+	await DatabaseInitializer.CreateUsersAsync(scope.ServiceProvider);
+	
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
