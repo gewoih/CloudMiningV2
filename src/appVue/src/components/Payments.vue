@@ -22,7 +22,7 @@
       </Column>
       <Column v-if="userRole !== UserRole.Admin" field="sharedAmount" header="Ваша сумма"/>
       <Column v-if="userRole !== UserRole.Admin" field="share" header="Ваша доля"/>
-      <Column field="amount" header="Общаяя сумма"/>
+      <Column field="amount" header="Общая сумма"/>
       <Column field="date" header="Дата">
         <template #body="slotProps">
           {{ getDateOnly(slotProps.data.date) }}
