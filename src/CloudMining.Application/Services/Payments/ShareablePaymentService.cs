@@ -84,33 +84,43 @@ namespace CloudMining.Application.Services.Payments
 		public async Task<List<PaymentShare>> GetPaymentShares(Guid paymentId)
 		{
 			var currentUserId = _userService.GetCurrentUserId();
-			
-			//TODO: Получать User (ФИО) не из БД, а из UserService
-			var userPaymentShares = await _context.PaymentShares
-				.Include(paymentShare => paymentShare.User)
-				.Where(paymentShare => paymentShare.ShareablePaymentId == paymentId && 
-				                       paymentShare.UserId == currentUserId)
-				.ToListAsync();
+			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
 
+			//TODO: Получать User (ФИО) не из БД, а из UserService
+			var userPaymentSharesQuery = _context.PaymentShares
+				.Include(paymentShare => paymentShare.User)
+				.Where(paymentShare => paymentShare.ShareablePaymentId == paymentId);
+			
+			if (!isCurrentUserAdmin)
+				userPaymentSharesQuery = userPaymentSharesQuery.Where(paymentShare => paymentShare.UserId == currentUserId);
+
+			var userPaymentShares = await userPaymentSharesQuery.ToListAsync();
 			return userPaymentShares;
 		}
 
-		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, PaymentType? paymentType = null)
+		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, bool withShares = false, PaymentType? paymentType = null)
 		{
 			var currentUserId = _userService.GetCurrentUserId();
 			if (currentUserId == null)
 				return [];
-
+			
 			var paymentsQuery = _context.ShareablePayments
 				.Include(payment => payment.PaymentShares)
 				.AsQueryable();
 
+			if (withShares)
+				paymentsQuery = paymentsQuery.Include(payment => payment.PaymentShares);
+			
 			if (paymentType != null)
 				paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
-
+			
 			//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
-			paymentsQuery = paymentsQuery.Where(payment =>
+			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
+			if (!isCurrentUserAdmin)
+			{
+				paymentsQuery = paymentsQuery.Where(payment =>
 				payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
+			}
 
 			var payments = await paymentsQuery
 				.OrderByDescending(payment => payment.Date)

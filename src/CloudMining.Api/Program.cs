@@ -17,6 +17,7 @@ using CloudMining.Api.Validators.Payment;
 using CloudMining.Api.Validators.User;
 using CloudMining.Application.DTO.Payments;
 using CloudMining.Application.DTO.Payments.Deposits;
+using CloudMining.Application.DTO.Payments.User;
 using CloudMining.Application.DTO.Users;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.JWT;
@@ -125,7 +126,8 @@ builder.Services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
 builder.Services.AddScoped<JwtService>();
 
-builder.Services.AddSingleton<IMapper<ShareablePayment, PaymentDto>, PaymentMapper>();
+builder.Services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();
+builder.Services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
 builder.Services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
 builder.Services.AddSingleton<IMapper<Deposit, CreateDepositDto>, DepositMapper>();
 

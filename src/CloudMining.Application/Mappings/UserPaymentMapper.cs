@@ -1,0 +1,39 @@
+﻿using CloudMining.Application.DTO.Payments.User;
+using CloudMining.Application.Services.Users;
+using CloudMining.Domain.Models;
+
+namespace CloudMining.Application.Mappings;
+
+public class UserPaymentMapper : IMapper<ShareablePayment, UserPaymentDto>
+{
+    private readonly IUserService _userService;
+
+    public UserPaymentMapper(IUserService userService)
+    {
+        _userService = userService;
+    }
+
+    public UserPaymentDto ToDto(ShareablePayment model)
+    {
+        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserPaymentShare = model.PaymentShares.Find(paymentShare => paymentShare.UserId == currentUserId);
+
+        var userShare = currentUserPaymentShare?.Share ?? 0;
+        var userSharedAmount = currentUserPaymentShare?.Amount ?? 0;
+
+        return new UserPaymentDto
+        {
+            Id = model.Id,
+            Amount = model.Amount,
+            Date = model.Date,
+            IsCompleted = model.IsCompleted,
+            Share = userShare,
+            SharedAmount = userSharedAmount
+        };
+    }
+
+    public ShareablePayment ToDomain(UserPaymentDto dto)
+    {
+        throw new NotImplementedException();
+    }
+}

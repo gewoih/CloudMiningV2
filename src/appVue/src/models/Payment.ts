@@ -1,13 +1,9 @@
-import { CurrencyCode } from '@/enums/CurrencyCode';
-import { PaymentType } from '@/enums/PaymentType';
-
-export interface Payment{
+﻿export interface Payment{
     id: string | null;
-    caption: string | null;
-    currencyCode: CurrencyCode;
-    paymentType: PaymentType;
-    date: Date;
     amount: number;
+    sharedAmount: number;
+    share: number;
+    date: Date;
     isCompleted: boolean;
 }
 

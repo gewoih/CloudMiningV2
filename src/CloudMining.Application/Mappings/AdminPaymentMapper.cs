@@ -3,11 +3,11 @@ using CloudMining.Domain.Models;
 
 namespace CloudMining.Application.Mappings;
 
-public class PaymentMapper : IMapper<ShareablePayment, PaymentDto>
+public class AdminPaymentMapper : IMapper<ShareablePayment, AdminPaymentDto>
 {
-    public PaymentDto ToDto(ShareablePayment model)
+    public AdminPaymentDto ToDto(ShareablePayment model)
     {
-        return new PaymentDto
+        return new AdminPaymentDto
         {
             Id = model.Id,
             Caption = model.Caption,
@@ -17,7 +17,7 @@ public class PaymentMapper : IMapper<ShareablePayment, PaymentDto>
         };
     }
 
-    public ShareablePayment ToDomain(PaymentDto dto)
+    public ShareablePayment ToDomain(AdminPaymentDto dto)
     {
         return new ShareablePayment
         {
