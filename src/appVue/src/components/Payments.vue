@@ -1,6 +1,6 @@
 ﻿<template>
   <div class="w-8">
-    <Toolbar class="mb-4" :class="{'border-none': userRole !== UserRole.Admin}">
+    <Toolbar class="mb-4 border-none">
       <template #start>
         <Dropdown v-model="selectedPaymentType" :options="paymentTypes" optionLabel="name" optionValue="value"
                   @change="fetchPayments" class="w-full md:w-14rem"/>
@@ -11,25 +11,26 @@
       </template>
     </Toolbar>
 
-    <DataTable v-if="userRole === UserRole.Admin" :value="payments" v-model:expandedRows="expandedRows" dataKey="id"
+    <DataTable :value="payments" v-model:expandedRows="expandedRows" dataKey="id"
                @rowExpand="fetchShares">
-      <Column expander/>
+      <Column v-if="userRole === UserRole.Admin" expander/>
       <Column field="isCompleted" header="Статус">
         <template #body="slotProps">
           <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'"
                :severity="getStatusSeverity(slotProps.data.isCompleted)"/>
         </template>
       </Column>
-      <Column field="amount" header="Сумма"/>
+      <Column v-if="userRole !== UserRole.Admin" field="sharedAmount" header="Ваша сумма"/>
+      <Column v-if="userRole !== UserRole.Admin" field="share" header="Ваша доля"/>
+      <Column field="amount" header="Общаяя сумма"/>
       <Column field="date" header="Дата">
         <template #body="slotProps">
           {{ getDateOnly(slotProps.data.date) }}
         </template>
       </Column>
-      <Column field="caption" header="Комментарий"></Column>
-      <template #expansion="slotProps">
+      <Column v-if="userRole === UserRole.Admin" field="caption" header="Комментарий"></Column>
+      <template v-if="userRole === UserRole.Admin" #expansion="slotProps">
         <div class="p-3">
-          
           <DataTable :value="paymentSharesMap[slotProps.data.id]">
             <Column header="ФИО">
               <template #body="slotProps">
@@ -47,31 +48,11 @@
               </template>
             </Column>
           </DataTable>
-          
         </div>
       </template>
     </DataTable>
-    
-    <DataTable v-if="userRole !== UserRole.Admin" :value="payments" dataKey="id">
-      <Column field="isCompleted" header="Статус">
-        <template #body="slotProps">
-          <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'"
-               :severity="getStatusSeverity(slotProps.data.isCompleted)"/>
-        </template>
-      </Column>
-      <Column field="sharedAmount" header="Ваша сумма"/>
-      <Column field="share" header="Ваша доля"/>
-      <Column field="amount" header="Общаяя сумма"/>
-      <Column field="date" header="Дата">
-        <template #body="slotProps">
-          {{ getDateOnly(slotProps.data.date) }}
-        </template>
-      </Column>
-    </DataTable>
-    
     <Paginator :rows="pageSize" :totalRecords="totalPaymentsCount" :rowsPerPageOptions="[5, 10, 15]"
                @page="pageChange"></Paginator>
-    
   </div>
 
   <Dialog v-if="userRole === UserRole.Admin" v-model:visible="isModalVisible" modal header="Добавление платежа"
