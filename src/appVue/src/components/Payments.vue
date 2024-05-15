@@ -1,24 +1,19 @@
 ﻿<template>
   <div class="w-8">
-    <div :class="{'w-full flex justify-content-end mb-4': userRole !== UserRole.Admin}">
-      <Toolbar class="mb-4" v-if="userRole === UserRole.Admin">
-        <template #start>
-          <Button label="Добавить платеж" icon="pi pi-plus" severity="success" class="mr-2"
-                  @click="isModalVisible = true"/>
-        </template>
-        <template #end>
-          <Dropdown v-model="selectedPaymentType" :options="paymentTypes" optionLabel="name" optionValue="value"
-                    @change="fetchPayments" class="w-full md:w-14rem"/>
-        </template>
-      </Toolbar>
-      <Dropdown v-if="userRole !== UserRole.Admin" v-model="selectedPaymentType" :options="paymentTypes"
-                optionLabel="name" optionValue="value" @change="fetchPayments" class="w-full md:w-14rem"/>
-    </div>
-
+    <Toolbar class="mb-4" :class="{'border-none': userRole !== UserRole.Admin}">
+      <template #start>
+        <Dropdown v-model="selectedPaymentType" :options="paymentTypes" optionLabel="name" optionValue="value"
+                  @change="fetchPayments" class="w-full md:w-14rem"/>
+      </template>
+      <template #end v-if="userRole === UserRole.Admin">
+        <Button label="Добавить платеж" icon="pi pi-plus" severity="success" class="mr-2"
+                @click="isModalVisible = true"/>
+      </template>
+    </Toolbar>
 
     <DataTable v-if="userRole === UserRole.Admin" :value="payments" v-model:expandedRows="expandedRows" dataKey="id"
                @rowExpand="fetchShares">
-      <Column expander />
+      <Column expander/>
       <Column field="isCompleted" header="Статус">
         <template #body="slotProps">
           <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'"
@@ -34,6 +29,7 @@
       <Column field="caption" header="Комментарий"></Column>
       <template #expansion="slotProps">
         <div class="p-3">
+          
           <DataTable :value="paymentSharesMap[slotProps.data.id]">
             <Column header="ФИО">
               <template #body="slotProps">
@@ -51,10 +47,12 @@
               </template>
             </Column>
           </DataTable>
+          
         </div>
       </template>
     </DataTable>
-    <DataTable v-if="userRole !== UserRole.Admin" :value="payments"  dataKey="id">
+    
+    <DataTable v-if="userRole !== UserRole.Admin" :value="payments" dataKey="id">
       <Column field="isCompleted" header="Статус">
         <template #body="slotProps">
           <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'"
@@ -70,8 +68,10 @@
         </template>
       </Column>
     </DataTable>
+    
     <Paginator :rows="pageSize" :totalRecords="totalPaymentsCount" :rowsPerPageOptions="[5, 10, 15]"
                @page="pageChange"></Paginator>
+    
   </div>
 
   <Dialog v-if="userRole === UserRole.Admin" v-model:visible="isModalVisible" modal header="Добавление платежа"
