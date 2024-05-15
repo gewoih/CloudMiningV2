@@ -1,5 +1,7 @@
-﻿import {Payment} from "@/models/Payment.ts";
+﻿import {AdminPayment} from "@/models/AdminPayment.ts";
+import {Payment} from "@/models/Payment.ts";
+
 export interface PaymentList {
-    items: Payment[];
+    items: AdminPayment[] | Payment[] ;
     totalCount: number;
 }

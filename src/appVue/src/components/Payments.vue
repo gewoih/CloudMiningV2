@@ -76,12 +76,15 @@ import {PaymentType} from "@/enums/PaymentType.ts";
 import {Payment} from "@/models/Payment.ts";
 import {CreatePayment} from "@/models/CreatePayment.ts";
 import {PaymentShare} from "@/models/PaymentShare.ts";
+import {UserRole} from "@/enums/UserRole.ts";
+import {AdminPayment} from "@/models/AdminPayment.ts";
+import {Payment} from "@/models/Payment.ts";
 
 const isModalVisible = ref(false);
 const expandedRows = ref({});
 const paymentSharesMap = ref<{ [key: string]: PaymentShare[] }>({});
 const selectedPaymentType = ref(PaymentType.Electricity);
-const payments = ref<Payment[]>();
+const payments = ref<AdminPayment[] | Payment[]>();
 const paymentShares = ref<PaymentShare[]>();
 const totalPaymentsCount = ref(0);
 const pageSize = ref(10);
