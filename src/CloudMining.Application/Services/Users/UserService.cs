@@ -1,5 +1,7 @@
 ﻿using System.Security.Claims;
+using CloudMining.Application.DTO.File;
 using CloudMining.Application.DTO.Users;
+using CloudMining.Application.Services.Files;
 using CloudMining.Application.Services.JWT;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Identity;
@@ -13,16 +15,19 @@ namespace CloudMining.Application.Services.Users
 		private readonly UserManager<User> _userManager;
 		private readonly SignInManager<User> _signInManager;
 		private readonly JwtService _jwtService;
+		private readonly IStorageService _storageService;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 
 		public UserService(UserManager<User> userManager,
 			SignInManager<User> signInManager,
 			JwtService jwtService,
-			IHttpContextAccessor httpContextAccessor)
+			IHttpContextAccessor httpContextAccessor, 
+			IStorageService storageService)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_httpContextAccessor = httpContextAccessor;
+			_storageService = storageService;
 			_jwtService = jwtService;
 		}
 
@@ -85,6 +90,33 @@ namespace CloudMining.Application.Services.Users
 			var user = await _userManager.FindByIdAsync(userId.ToString());
 			var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
 			return result.Succeeded;
+		}
+
+		public async Task<string> ChangeAvatarAsync(FileDto dto)
+		{
+			var currentUserId = GetCurrentUserId();
+			if (currentUserId == null)
+				return string.Empty;
+
+			var currentUser = await _userManager.FindByIdAsync(currentUserId.ToString());
+			if (currentUser is null)
+				return string.Empty;
+			
+			var savedFilePath = await _storageService.SaveFileAsync(dto);
+			currentUser.AvatarPath = savedFilePath;
+
+			var result = await _userManager.UpdateAsync(currentUser);
+			return result.Succeeded ? savedFilePath : string.Empty;
+		}
+
+		public async Task<User?> GetCurrentUserAsync()
+		{
+			var currentUserId = GetCurrentUserId();
+			if (currentUserId == null)
+				return null;
+
+			var currentUser = await _userManager.FindByIdAsync(currentUserId.ToString());
+			return currentUser;
 		}
 
 		public Guid? GetCurrentUserId()

@@ -1,4 +1,6 @@
-﻿using CloudMining.Application.DTO.Users;
+﻿using CloudMining.Application.DTO.File;
+using CloudMining.Application.DTO.Users;
+using CloudMining.Domain.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace CloudMining.Application.Services.Users
@@ -9,6 +11,8 @@ namespace CloudMining.Application.Services.Users
 		Task<string> LoginAsync(LoginDto credentials);
         Task<bool> ChangeEmailAsync(ChangeEmailDto dto);
         Task<bool> ChangePasswordAsync(ChangePasswordDto dto);
+        Task<string> ChangeAvatarAsync(FileDto dto);
+        Task<User?> GetCurrentUserAsync();
         Guid? GetCurrentUserId();
         bool IsCurrentUserAdmin();
 	}
