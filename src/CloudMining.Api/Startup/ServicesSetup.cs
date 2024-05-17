@@ -4,6 +4,7 @@ using CloudMining.Application.DTO.Payments.User;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.Currencies;
 using CloudMining.Application.Services.Deposits;
+using CloudMining.Application.Services.Files;
 using CloudMining.Application.Services.JWT;
 using CloudMining.Application.Services.Payments;
 using CloudMining.Application.Services.Payouts;
@@ -23,6 +24,7 @@ public static class ServicesSetup
         services.AddScoped<IShareService, ShareService>();
         services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
         services.AddScoped<IDepositService, DepositService>();
+        services.AddScoped<IStorageService, LocalStorageService>();
         services.AddScoped<JwtService>();
 
         services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();
