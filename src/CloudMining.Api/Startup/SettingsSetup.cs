@@ -9,7 +9,8 @@ public static class SettingsSetup
         services.Configure<EmcdSettings>(configuration.GetSection(EmcdSettings.SectionName));
         services.Configure<PayoutsLoaderSettings>(configuration.GetSection(PayoutsLoaderSettings.SectionName));
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
-
+        services.Configure<StorageSettings>(configuration.GetSection(StorageSettings.SectionName));
+        
         return services;
     }
 }
