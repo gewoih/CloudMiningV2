@@ -76,6 +76,17 @@ namespace CloudMining.Application.Services.Users
 			return result.Succeeded;
 		}
 
+		public async Task<bool> ChangePasswordAsync(ChangePasswordDto dto)
+		{
+			var userId = GetCurrentUserId();
+			if (userId == null)
+				return false;
+
+			var user = await _userManager.FindByIdAsync(userId.ToString());
+			var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+			return result.Succeeded;
+		}
+
 		public Guid? GetCurrentUserId()
 		{
 			var authHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault();

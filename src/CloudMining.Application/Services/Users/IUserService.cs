@@ -8,6 +8,7 @@ namespace CloudMining.Application.Services.Users
 		Task<IdentityResult> RegisterAsync(RegisterDto dto);
 		Task<string> LoginAsync(LoginDto credentials);
         Task<bool> ChangeEmailAsync(ChangeEmailDto dto);
+        Task<bool> ChangePasswordAsync(ChangePasswordDto dto);
         Guid? GetCurrentUserId();
         bool IsCurrentUserAdmin();
 	}
