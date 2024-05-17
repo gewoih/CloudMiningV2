@@ -15,9 +15,9 @@ namespace CloudMining.Application.Services.Users
 		private readonly JwtService _jwtService;
 		private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public UserService(UserManager<User> userManager, 
-			SignInManager<User> signInManager, 
-			JwtService jwtService, 
+		public UserService(UserManager<User> userManager,
+			SignInManager<User> signInManager,
+			JwtService jwtService,
 			IHttpContextAccessor httpContextAccessor)
 		{
 			_userManager = userManager;
@@ -43,30 +43,57 @@ namespace CloudMining.Application.Services.Users
 
 		public async Task<string> LoginAsync(LoginDto credentials)
 		{
-			var authResult = await _signInManager.PasswordSignInAsync(credentials.Email, credentials.Password, true, false);
+			var authResult =
+				await _signInManager.PasswordSignInAsync(credentials.Email, credentials.Password, true, false);
 			var jwt = string.Empty;
-			
+
 			if (authResult.Succeeded)
 			{
 				var user = await _userManager.FindByEmailAsync(credentials.Email);
-				jwt = await _jwtService.GenerateAsync(user);
+				if (user is not null)
+					jwt = await _jwtService.GenerateAsync(user);
 			}
 
 			return jwt;
 		}
 
-		public Guid? GetCurrentUserId()
-        {
-	        var authHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-	        if (string.IsNullOrEmpty(authHeader))
-		        return null;
-	        
-	        var jwt = authHeader.Split(' ')[1];
-	        var subClaim = _jwtService.GetSubClaim(jwt);
-	        return Guid.Parse(subClaim);
-        }
+		public async Task<bool> ChangeEmailAsync(ChangeEmailDto dto)
+		{
+			var userId = GetCurrentUserId();
+			if (userId == null)
+				return false;
 
-		public IEnumerable<UserRole> GetCurrentUserRoles()
+			var user = await _userManager.FindByIdAsync(userId.ToString());
+			if (user is null)
+				return false;
+
+			var token = await _userManager.GenerateChangeEmailTokenAsync(user, dto.Email);
+			var result = await _userManager.ChangeEmailAsync(user, dto.Email, token);
+
+			user.UserName = user.Email;
+			await _userManager.UpdateAsync(user);
+
+			return result.Succeeded;
+		}
+
+		public Guid? GetCurrentUserId()
+		{
+			var authHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+			if (string.IsNullOrEmpty(authHeader))
+				return null;
+
+			var jwt = authHeader.Split(' ')[1];
+			var subClaim = _jwtService.GetSubClaim(jwt);
+			return Guid.Parse(subClaim);
+		}
+
+		public bool IsCurrentUserAdmin()
+		{
+			var currentUserRoles = GetCurrentUserRoles();
+			return currentUserRoles.Contains(UserRole.Admin);
+		}
+
+		private List<UserRole> GetCurrentUserRoles()
 		{
 			var roleClaims = _httpContextAccessor.HttpContext.User.Claims
 				.Where(c => c.Type == ClaimTypes.Role)
@@ -74,12 +101,6 @@ namespace CloudMining.Application.Services.Users
 				.ToList();
 
 			return roleClaims;
-		}
-
-		public bool IsCurrentUserAdmin()
-		{
-			var currentUserRoles = GetCurrentUserRoles();
-			return currentUserRoles.Contains(UserRole.Admin);
 		}
 	}
 }
