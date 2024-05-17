@@ -1,4 +1,5 @@
-﻿using CloudMining.Application.DTO.Users;
+﻿using CloudMining.Application.DTO.File;
+using CloudMining.Application.DTO.Users;
 using CloudMining.Application.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -56,7 +57,15 @@ namespace CloudMining.Api.Controllers
 			return Ok();
 		}
 
-			return Unauthorized();
+		[Authorize]
+		[HttpPatch("avatar")]
+		public async Task<IActionResult> ChangeAvatar([FromForm] FileDto file)
+		{
+			var newAvatarPath = await _userService.ChangeAvatarAsync(file);
+			if (string.IsNullOrEmpty(newAvatarPath))
+				return Unauthorized();
+				
+			return Ok(newAvatarPath);
 		}
 	}
 }
