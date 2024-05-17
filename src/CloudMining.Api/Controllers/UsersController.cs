@@ -44,5 +44,16 @@ namespace CloudMining.Api.Controllers
 			
 			return BadRequest();
 		}
+
+		[Authorize]
+		[HttpPatch("password")]
+		public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+		{
+			var succeeded = await _userService.ChangePasswordAsync(dto);
+			if (succeeded)
+				return Ok();
+
+			return Unauthorized();
+		}
 	}
 }
