@@ -1,4 +1,4 @@
-﻿using CloudMining.Application.DTO.Payments;
+﻿using CloudMining.Application.DTO.Payments.Admin;
 using CloudMining.Application.DTO.Users;
 using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Identity;
