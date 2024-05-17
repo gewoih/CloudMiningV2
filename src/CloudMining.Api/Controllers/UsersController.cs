@@ -33,5 +33,16 @@ namespace CloudMining.Api.Controllers
 			
 			return Ok(userJwt);
 		}
+
+		[Authorize]
+		[HttpPatch("email")]
+		public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDto dto)
+		{
+			var succeeded = await _userService.ChangeEmailAsync(dto);
+			if (succeeded)
+				return Ok();
+			
+			return BadRequest();
+		}
 	}
 }
