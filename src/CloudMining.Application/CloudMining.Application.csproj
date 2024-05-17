@@ -19,8 +19,4 @@
     <ProjectReference Include="..\CloudMining.Infrastructure\CloudMining.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Users" />
-  </ItemGroup>
-
 </Project>

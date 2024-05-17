@@ -1,4 +1,5 @@
 ﻿using CloudMining.Application.DTO.Payments;
+using CloudMining.Application.DTO.Payments.Admin;
 using CloudMining.Application.DTO.Payments.User;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.Payments;

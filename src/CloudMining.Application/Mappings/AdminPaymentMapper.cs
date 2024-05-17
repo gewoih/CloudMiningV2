@@ -1,4 +1,4 @@
-﻿using CloudMining.Application.DTO.Payments;
+﻿using CloudMining.Application.DTO.Payments.Admin;
 using CloudMining.Domain.Models;
 
 namespace CloudMining.Application.Mappings;

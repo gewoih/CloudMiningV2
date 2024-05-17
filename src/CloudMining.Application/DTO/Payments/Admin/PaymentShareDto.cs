@@ -1,6 +1,6 @@
 ﻿using CloudMining.Application.DTO.Users;
 
-namespace CloudMining.Application.DTO.Payments;
+namespace CloudMining.Application.DTO.Payments.Admin;
 
 public class PaymentShareDto
 {
