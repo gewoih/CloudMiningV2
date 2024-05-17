@@ -19,6 +19,9 @@ public sealed class GlobalExceptionFilter : IExceptionFilter
         if (context.Exception is ArgumentNullException)
             statusCode = HttpStatusCode.BadRequest;
 
+        if (context.Exception is UnauthorizedAccessException)
+            statusCode = HttpStatusCode.Unauthorized;
+        
         var problemDetails = new ProblemDetails
         {
             Status = (int)statusCode,

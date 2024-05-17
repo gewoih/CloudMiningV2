@@ -39,10 +39,10 @@ namespace CloudMining.Api.Controllers
 		public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDto dto)
 		{
 			var succeeded = await _userService.ChangeEmailAsync(dto);
-			if (succeeded)
-				return Ok();
-			
-			return BadRequest();
+			if (!succeeded)
+				return BadRequest();
+				
+			return Ok();
 		}
 
 		[Authorize]
@@ -50,8 +50,11 @@ namespace CloudMining.Api.Controllers
 		public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
 		{
 			var succeeded = await _userService.ChangePasswordAsync(dto);
-			if (succeeded)
-				return Ok();
+			if (!succeeded)
+				return Unauthorized();
+				
+			return Ok();
+		}
 
 			return Unauthorized();
 		}
