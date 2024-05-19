@@ -1,7 +1,7 @@
 using CloudMining.Application.DTO.NotificationSettings;
 using CloudMining.Domain.Models.UserSettings;
 
-namespace CloudMining.Application.Services.Notifications;
+namespace CloudMining.Application.Services.Notifications.Settings;
 
 public interface INotificationSettingsService
 {

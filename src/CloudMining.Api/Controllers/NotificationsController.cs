@@ -1,6 +1,7 @@
 using CloudMining.Application.DTO.NotificationSettings;
 using CloudMining.Application.Mappings;
 using CloudMining.Application.Services.Notifications;
+using CloudMining.Application.Services.Notifications.Settings;
 using CloudMining.Domain.Models.UserSettings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

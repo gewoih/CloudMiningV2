@@ -5,7 +5,7 @@ using CloudMining.Domain.Models.UserSettings;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace CloudMining.Application.Services.Notifications;
+namespace CloudMining.Application.Services.Notifications.Settings;
 
 public sealed class NotificationSettingsService : INotificationSettingsService
 {

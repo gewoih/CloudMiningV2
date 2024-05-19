@@ -8,6 +8,7 @@ using CloudMining.Application.Services.Deposits;
 using CloudMining.Application.Services.Files;
 using CloudMining.Application.Services.JWT;
 using CloudMining.Application.Services.Notifications;
+using CloudMining.Application.Services.Notifications.Settings;
 using CloudMining.Application.Services.Payments;
 using CloudMining.Application.Services.Payouts;
 using CloudMining.Application.Services.Shares;
