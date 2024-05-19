@@ -55,6 +55,7 @@ namespace CloudMining.Application.Services.Payments
 			var usersPaymentShares = 
 				await _shareService.CreatePaymentShares(createPaymentDto.Amount, foundCurrency, createPaymentDto.Date);
 			
+			//TODO: Mapper?
 			var newPayment = new ShareablePayment
 			{
 				Amount = createPaymentDto.Amount,
