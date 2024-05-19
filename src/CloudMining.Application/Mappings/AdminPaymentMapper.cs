@@ -1,5 +1,6 @@
 ﻿using CloudMining.Application.DTO.Payments.Admin;
 using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Payments.Shareable;
 
 namespace CloudMining.Application.Mappings;
 

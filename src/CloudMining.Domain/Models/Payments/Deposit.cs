@@ -1,7 +1,7 @@
-﻿using CloudMining.Domain.Models.Base;
-using CloudMining.Domain.Models.Identity;
+﻿using CloudMining.Domain.Models.Identity;
+using CloudMining.Domain.Models.Shares;
 
-namespace CloudMining.Domain.Models
+namespace CloudMining.Domain.Models.Payments
 {
 	public class Deposit : Payment
 	{

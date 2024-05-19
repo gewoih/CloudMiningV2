@@ -11,6 +11,8 @@ using CloudMining.Application.Services.Payouts;
 using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Payments;
+using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Emcd;
 
 namespace CloudMining.Api.Startup;

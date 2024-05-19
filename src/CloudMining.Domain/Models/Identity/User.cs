@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using CloudMining.Domain.Models.Payments;
+using CloudMining.Domain.Models.Shares;
+using CloudMining.Domain.Models.UserSettings;
+using Microsoft.AspNetCore.Identity;
 
 namespace CloudMining.Domain.Models.Identity
 {
@@ -10,5 +13,6 @@ namespace CloudMining.Domain.Models.Identity
 		public string AvatarPath { get; set; }
 		public List<Deposit> Deposits { get; set; }
 		public List<ShareChange> ShareChanges { get; set; }
+		public NotificationSettings NotificationSettings { get; set; }
 	}
 }

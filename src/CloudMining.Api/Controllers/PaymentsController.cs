@@ -6,6 +6,7 @@ using CloudMining.Application.Services.Payments;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Payments.Shareable;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,6 +1,7 @@
 ﻿using CloudMining.Application.DTO.Payments;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Payments.Shareable;
 
 namespace CloudMining.Application.Services.Payments
 {
