@@ -17,6 +17,7 @@ public sealed class NotificationSettingsMapper : IMapper<NotificationSettings, N
 	{
 		return new NotificationSettingsDto
 		{
+			IsTelegramNotificationsEnabled = model.IsTelegramNotificationsEnabled,
 			NewPayoutNotification = model.NewPayoutNotification,
 			NewPurchaseNotification = model.NewPurchaseNotification,
 			NewElectricityPaymentNotification = model.NewElectricityPaymentNotification,
@@ -32,6 +33,7 @@ public sealed class NotificationSettingsMapper : IMapper<NotificationSettings, N
 		return new NotificationSettings
 		{
 			UserId = currentUserId,
+			IsTelegramNotificationsEnabled = dto.IsTelegramNotificationsEnabled,
 			NewPayoutNotification = dto.NewPayoutNotification,
 			NewPurchaseNotification = dto.NewPurchaseNotification,
 			NewElectricityPaymentNotification = dto.NewElectricityPaymentNotification,

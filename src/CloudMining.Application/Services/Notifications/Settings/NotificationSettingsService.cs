@@ -51,6 +51,7 @@ public sealed class NotificationSettingsService : INotificationSettingsService
 		else
 		{
 			//TODO: Возможно ли сделать через маппер?
+			currentUserSettings.IsTelegramNotificationsEnabled = settingsDto.IsTelegramNotificationsEnabled;
 			currentUserSettings.NewPayoutNotification = settingsDto.NewPayoutNotification;
 			currentUserSettings.NewPurchaseNotification = settingsDto.NewPurchaseNotification;
 			currentUserSettings.NewElectricityPaymentNotification = settingsDto.NewElectricityPaymentNotification;
