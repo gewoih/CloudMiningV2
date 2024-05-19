@@ -6,6 +6,8 @@ using CloudMining.Domain.Models.Payments;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.Shares;
 using CloudMining.Domain.Models.UserSettings;
+using MassTransit;
+using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,19 +22,24 @@ namespace CloudMining.Infrastructure.Database
 		public DbSet<ShareChange> ShareChanges { get; set; }
 		public DbSet<NotificationSettings> NotificationSettings { get; set; }
 		public DbSet<Notification> Notifications { get; set; }
+		public DbSet<OutboxState> OutboxStates { get; set; }
 
 		public CloudMiningContext(DbContextOptions<CloudMiningContext> options) : base(options) { }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
+			base.OnModelCreating(builder);
+			
 			builder.Entity<Currency>().HasData(DatabaseInitializer.GetCurrencies());
 			builder.Entity<Currency>().HasIndex(currency => currency.Code).IsUnique();
 
 			builder.Entity<Notification>()
 				.HasDiscriminator<string>("NotificationType")
 				.HasValue<TelegramNotification>("TelegramNotification");
-			
-			base.OnModelCreating(builder);
+
+			builder.AddInboxStateEntity();
+			builder.AddOutboxMessageEntity();
+			builder.AddOutboxStateEntity();
 		}
 
 		public override int SaveChanges()
