@@ -7,6 +7,7 @@ using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services.Users
 {
@@ -107,6 +108,13 @@ namespace CloudMining.Application.Services.Users
 
 			var result = await _userManager.UpdateAsync(currentUser);
 			return result.Succeeded ? savedFilePath : string.Empty;
+		}
+
+		public async Task<List<User>> GetUsersWithNotificationSettingsAsync()
+		{
+			return await _userManager.Users
+				.Include(user => user.NotificationSettings)
+				.ToListAsync();
 		}
 
 		public async Task<User?> GetCurrentUserAsync()

@@ -12,6 +12,7 @@ namespace CloudMining.Application.Services.Users
         Task<bool> ChangeEmailAsync(ChangeEmailDto dto);
         Task<bool> ChangePasswordAsync(ChangePasswordDto dto);
         Task<string> ChangeAvatarAsync(FileDto dto);
+        Task<List<User>> GetUsersWithNotificationSettingsAsync();
         Task<User?> GetCurrentUserAsync();
         Guid? GetCurrentUserId();
         bool IsCurrentUserAdmin();
