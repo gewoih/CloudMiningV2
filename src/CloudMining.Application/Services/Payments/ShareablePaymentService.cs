@@ -1,11 +1,13 @@
 ﻿using CloudMining.Application.DTO.Payments;
 using CloudMining.Application.Services.Currencies;
+using CloudMining.Application.Services.MassTransit.Events;
 using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services.Payments
@@ -16,16 +18,19 @@ namespace CloudMining.Application.Services.Payments
 		private readonly ICurrencyService _currencyService;
 		private readonly IShareService _shareService;
 		private readonly IUserService _userService;
+		private readonly IPublishEndpoint _publishEndpoint;
 
 		public ShareablePaymentService(CloudMiningContext context, 
 			ICurrencyService currencyService, 
 			IShareService shareService, 
-			IUserService userService)
+			IUserService userService, 
+			IPublishEndpoint publishEndpoint)
 		{
 			_context = context;
 			_currencyService = currencyService;
 			_shareService = shareService;
 			_userService = userService;
+			_publishEndpoint = publishEndpoint;
 		}
 
 		public async Task<int> GetUserPaymentsCount(PaymentType? paymentType = null)
@@ -67,6 +72,8 @@ namespace CloudMining.Application.Services.Payments
 			};
 			
 			await _context.ShareablePayments.AddAsync(newPayment).ConfigureAwait(false);
+			await _publishEndpoint.Publish(new ShareablePaymentCreated { Payment = newPayment });
+
 			await _context.SaveChangesAsync().ConfigureAwait(false);
 
 			return newPayment;
