@@ -22,7 +22,7 @@ namespace CloudMining.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("CloudMining.Domain.Models.Currency", b =>
+            modelBuilder.Entity("CloudMining.Domain.Models.Currencies.Currency", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -59,7 +59,7 @@ namespace CloudMining.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ffd9efc5-9994-4b14-bf0d-4cd6a3ed32ac"),
+                            Id = new Guid("223e1b6b-ad0a-4997-aaf8-090d2ffc175b"),
                             Caption = "Рубль",
                             Code = 1,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -70,7 +70,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("37753397-df75-4267-a560-afe3fe829f45"),
+                            Id = new Guid("1afd3c03-545c-4ca5-b8aa-dd2df1ffeb02"),
                             Caption = "Доллар",
                             Code = 0,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -81,7 +81,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("68f565c1-7055-43b3-9db5-d4b3fbd8b7a3"),
+                            Id = new Guid("00f1366e-0fc7-4772-bb72-d62cbab61965"),
                             Caption = "Bitcoin",
                             Code = 2,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -92,7 +92,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("21a13777-eb6c-4af9-bc9b-b92102e09fad"),
+                            Id = new Guid("227a8250-f370-4706-a197-b8e9960aefa3"),
                             Caption = "Etherium",
                             Code = 3,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -103,7 +103,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("acd3ae06-285b-4445-af4f-7a7c39847c3a"),
+                            Id = new Guid("9b629222-22be-4c47-af33-ef5a251a2ad1"),
                             Caption = "Litecoin",
                             Code = 4,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -114,7 +114,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("9ea238f8-8b5d-4942-8e37-759266f551d4"),
+                            Id = new Guid("1368e50f-521a-4ac3-97f9-9bdd85b5d305"),
                             Caption = "Dogecoin",
                             Code = 5,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -123,48 +123,6 @@ namespace CloudMining.Infrastructure.Migrations
                             Precision = 0,
                             UpdatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
-                });
-
-            modelBuilder.Entity("CloudMining.Domain.Models.Deposit", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Caption")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CurrencyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CurrencyId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Deposits");
                 });
 
             modelBuilder.Entity("CloudMining.Domain.Models.Identity.Role", b =>
@@ -275,7 +233,90 @@ namespace CloudMining.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("CloudMining.Domain.Models.PaymentShare", b =>
+            modelBuilder.Entity("CloudMining.Domain.Models.Notifications.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Caption")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DeletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsSent")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("NotificationType")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
+
+                    b.HasDiscriminator<string>("NotificationType").HasValue("Notification");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.Payments.Deposit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Caption")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CurrencyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DeletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Deposits");
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.Payments.Shareable.PaymentShare", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -323,7 +364,50 @@ namespace CloudMining.Infrastructure.Migrations
                     b.ToTable("PaymentShares");
                 });
 
-            modelBuilder.Entity("CloudMining.Domain.Models.ShareChange", b =>
+            modelBuilder.Entity("CloudMining.Domain.Models.Payments.Shareable.ShareablePayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Caption")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CurrencyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DeletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.ToTable("ShareablePayments");
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.Shares.ShareChange", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -368,14 +452,11 @@ namespace CloudMining.Infrastructure.Migrations
                     b.ToTable("ShareChanges");
                 });
 
-            modelBuilder.Entity("CloudMining.Domain.Models.ShareablePayment", b =>
+            modelBuilder.Entity("CloudMining.Domain.Models.UserSettings.NotificationSettings", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
 
                     b.Property<string>("Caption")
                         .HasColumnType("text");
@@ -383,32 +464,39 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("CurrencyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<DateTime>("DeletedDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
+                    b.Property<bool>("NewElectricityPaymentNotification")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NewPayoutNotification")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NewPurchaseNotification")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("UnpaidElectricityPaymentReminder")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("UnpaidPurchasePaymentReminder")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrencyId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
-                    b.ToTable("ShareablePayments");
+                    b.ToTable("NotificationSettings");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -514,9 +602,23 @@ namespace CloudMining.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CloudMining.Domain.Models.Deposit", b =>
+            modelBuilder.Entity("CloudMining.Domain.Models.Notifications.TelegramNotification", b =>
                 {
-                    b.HasOne("CloudMining.Domain.Models.Currency", "Currency")
+                    b.HasBaseType("CloudMining.Domain.Models.Notifications.Notification");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("TelegramUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasDiscriminator().HasValue("TelegramNotification");
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.Payments.Deposit", b =>
+                {
+                    b.HasOne("CloudMining.Domain.Models.Currencies.Currency", "Currency")
                         .WithMany()
                         .HasForeignKey("CurrencyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -533,9 +635,9 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CloudMining.Domain.Models.PaymentShare", b =>
+            modelBuilder.Entity("CloudMining.Domain.Models.Payments.Shareable.PaymentShare", b =>
                 {
-                    b.HasOne("CloudMining.Domain.Models.ShareablePayment", "ShareablePayment")
+                    b.HasOne("CloudMining.Domain.Models.Payments.Shareable.ShareablePayment", "ShareablePayment")
                         .WithMany("PaymentShares")
                         .HasForeignKey("ShareablePaymentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -552,9 +654,20 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CloudMining.Domain.Models.ShareChange", b =>
+            modelBuilder.Entity("CloudMining.Domain.Models.Payments.Shareable.ShareablePayment", b =>
                 {
-                    b.HasOne("CloudMining.Domain.Models.Deposit", "Deposit")
+                    b.HasOne("CloudMining.Domain.Models.Currencies.Currency", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Currency");
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.Shares.ShareChange", b =>
+                {
+                    b.HasOne("CloudMining.Domain.Models.Payments.Deposit", "Deposit")
                         .WithMany("ShareChanges")
                         .HasForeignKey("DepositId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -571,15 +684,13 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CloudMining.Domain.Models.ShareablePayment", b =>
+            modelBuilder.Entity("CloudMining.Domain.Models.UserSettings.NotificationSettings", b =>
                 {
-                    b.HasOne("CloudMining.Domain.Models.Currency", "Currency")
-                        .WithMany()
-                        .HasForeignKey("CurrencyId")
+                    b.HasOne("CloudMining.Domain.Models.Identity.User", null)
+                        .WithOne("NotificationSettings")
+                        .HasForeignKey("CloudMining.Domain.Models.UserSettings.NotificationSettings", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Currency");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -633,19 +744,22 @@ namespace CloudMining.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CloudMining.Domain.Models.Deposit", b =>
-                {
-                    b.Navigation("ShareChanges");
-                });
-
             modelBuilder.Entity("CloudMining.Domain.Models.Identity.User", b =>
                 {
                     b.Navigation("Deposits");
 
+                    b.Navigation("NotificationSettings")
+                        .IsRequired();
+
                     b.Navigation("ShareChanges");
                 });
 
-            modelBuilder.Entity("CloudMining.Domain.Models.ShareablePayment", b =>
+            modelBuilder.Entity("CloudMining.Domain.Models.Payments.Deposit", b =>
+                {
+                    b.Navigation("ShareChanges");
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.Payments.Shareable.ShareablePayment", b =>
                 {
                     b.Navigation("PaymentShares");
                 });
