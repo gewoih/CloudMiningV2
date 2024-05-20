@@ -69,14 +69,7 @@ namespace CloudMining.Application.Services
 			};
 			
 			await _context.ShareablePayments.AddAsync(newPayment).ConfigureAwait(false);
-			foreach (var paymentShare in usersPaymentShares)
-			{
-				await _publishEndpoint.Publish(new PaymentShareCreated
-				{
-					PaymentType = createPaymentDto.PaymentType,
-					PaymentShare = paymentShare
-				});
-			}
+			await _publishEndpoint.Publish(new PaymentCreated { Payment = newPayment });
 
 			await _context.SaveChangesAsync().ConfigureAwait(false);
 
