@@ -25,7 +25,7 @@ public sealed class TelegramNotificationService : INotificationService
 		foreach (var user in usersWithTelegramNotifications)
 		{
 			var userChatId = user.TelegramChatId;
-			await _telegramBotClient.SendTextMessageAsync(userChatId, "Привет, у тебя новый платеж");
+			await _telegramBotClient.SendTextMessageAsync(userChatId, notification.Content);
 		}
 
 		return notification;

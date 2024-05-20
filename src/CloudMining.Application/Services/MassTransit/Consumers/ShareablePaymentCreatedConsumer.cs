@@ -18,9 +18,15 @@ public sealed class ShareablePaymentCreatedConsumer : IConsumer<ShareablePayment
 	public async Task Consume(ConsumeContext<ShareablePaymentCreated> context)
 	{
 		var message = string.Empty;
-		if (context.Message.Payment.Type == PaymentType.Electricity)
-			message = "У вас новый платеж по электричеству!";
-		
+		var paymentType = context.Message.Payment.Type;
+		message = paymentType switch
+		{
+			PaymentType.Electricity => "У вас новый платеж по электричеству!",
+			PaymentType.Purchase => "У вас новая покупка!",
+			PaymentType.Crypto => "У вас новая выплата!",
+			_ => message
+		};
+
 		var notification = new Notification
 		{
 			Content = message,
