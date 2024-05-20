@@ -33,10 +33,6 @@ namespace CloudMining.Infrastructure.Database
 			builder.Entity<Currency>().HasData(DatabaseInitializer.GetCurrencies());
 			builder.Entity<Currency>().HasIndex(currency => currency.Code).IsUnique();
 
-			builder.Entity<Notification>()
-				.HasDiscriminator<string>("NotificationType")
-				.HasValue<TelegramNotification>("TelegramNotification");
-
 			builder.AddInboxStateEntity();
 			builder.AddOutboxMessageEntity();
 			builder.AddOutboxStateEntity();

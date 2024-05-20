@@ -3,6 +3,7 @@ using System;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CloudMining.Infrastructure.Migrations
 {
     [DbContext(typeof(CloudMiningContext))]
-    partial class CloudMiningContextModelSnapshot : ModelSnapshot
+    [Migration("20240520145331_Notification_Reworked")]
+    partial class Notification_Reworked
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,7 +62,7 @@ namespace CloudMining.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3b0ab7ba-a4aa-4697-9a87-7193f533fed0"),
+                            Id = new Guid("c5c72c5f-c045-4b81-b686-bb4cdd63535e"),
                             Caption = "Рубль",
                             Code = 1,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -70,7 +73,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("7984a97b-3fdc-4e3b-a85b-d05ad078ba08"),
+                            Id = new Guid("a41e45ee-8a76-49bf-bdc7-1c4230dfe23e"),
                             Caption = "Доллар",
                             Code = 0,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -81,7 +84,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("f624be73-447f-47ac-8911-0c72e07933c9"),
+                            Id = new Guid("e4db705f-113e-40b4-8151-7f31397448a5"),
                             Caption = "Bitcoin",
                             Code = 2,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -92,7 +95,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("24f28268-32bd-4ec9-b75d-60bbecaacec3"),
+                            Id = new Guid("dd5b3d08-7180-42de-be00-10b7d4212037"),
                             Caption = "Etherium",
                             Code = 3,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -103,7 +106,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("44de677d-e090-4cd4-ae64-eac0681c0866"),
+                            Id = new Guid("b19b4a83-f8a7-4179-ae3e-78fa0b09f5a5"),
                             Caption = "Litecoin",
                             Code = 4,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -114,7 +117,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("002fd265-9afc-4de6-9e43-e1a58e760ff6"),
+                            Id = new Guid("fe01906f-3126-4c5a-bf51-1259d2f031a5"),
                             Caption = "Dogecoin",
                             Code = 5,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -264,6 +267,11 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Property<int>("Method")
                         .HasColumnType("integer");
 
+                    b.Property<string>("NotificationType")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)");
+
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -277,6 +285,10 @@ namespace CloudMining.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Notifications");
+
+                    b.HasDiscriminator<string>("NotificationType").HasValue("Notification");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("CloudMining.Domain.Models.Payments.Deposit", b =>
@@ -778,6 +790,16 @@ namespace CloudMining.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("CloudMining.Domain.Models.Notifications.TelegramNotification", b =>
+                {
+                    b.HasBaseType("CloudMining.Domain.Models.Notifications.Notification");
+
+                    b.Property<long>("TelegramUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasDiscriminator().HasValue("TelegramNotification");
                 });
 
             modelBuilder.Entity("CloudMining.Domain.Models.Payments.Deposit", b =>
