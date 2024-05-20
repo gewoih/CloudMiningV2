@@ -7,16 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MassTransit.Abstractions" Version="8.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.4" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.1.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
+    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CloudMining.Domain\CloudMining.Domain.csproj" />
     <ProjectReference Include="..\CloudMining.Infrastructure\CloudMining.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Notifications\Settings\" />
   </ItemGroup>
 
 </Project>

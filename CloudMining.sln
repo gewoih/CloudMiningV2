@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudMining.Infrastructure"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudMining.Api", "src\CloudMining.Api\CloudMining.Api.csproj", "{3842C04B-59B0-465F-AC1E-3DD0DE0CDCDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudMining.Interfaces", "CloudMining.Interfaces\CloudMining.Interfaces.csproj", "{48B2F0F3-D593-4191-AA93-C9EAB0F2FBCD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{3842C04B-59B0-465F-AC1E-3DD0DE0CDCDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3842C04B-59B0-465F-AC1E-3DD0DE0CDCDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3842C04B-59B0-465F-AC1E-3DD0DE0CDCDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48B2F0F3-D593-4191-AA93-C9EAB0F2FBCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48B2F0F3-D593-4191-AA93-C9EAB0F2FBCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48B2F0F3-D593-4191-AA93-C9EAB0F2FBCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48B2F0F3-D593-4191-AA93-C9EAB0F2FBCD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

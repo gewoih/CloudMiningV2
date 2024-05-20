@@ -13,7 +13,8 @@ builder.Services
 	.ConfigureDbContext(builder.Configuration)
 	.ConfigureIdentity()
 	.ConfigureAuthentication(builder.Configuration)
-	.RegisterServices();
+	.RegisterServices(builder.Configuration)
+	.ConfigureMassTransit();
 
 var app = builder.Build();
 

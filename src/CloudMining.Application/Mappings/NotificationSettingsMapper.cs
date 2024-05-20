@@ -1,5 +1,5 @@
-using CloudMining.Application.DTO.NotificationSettings;
-using CloudMining.Application.Services.Users;
+using CloudMining.Contracts.DTO.NotificationSettings;
+using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Models.UserSettings;
 
 namespace CloudMining.Application.Mappings;
@@ -17,6 +17,7 @@ public sealed class NotificationSettingsMapper : IMapper<NotificationSettings, N
 	{
 		return new NotificationSettingsDto
 		{
+			IsTelegramNotificationsEnabled = model.IsTelegramNotificationsEnabled,
 			NewPayoutNotification = model.NewPayoutNotification,
 			NewPurchaseNotification = model.NewPurchaseNotification,
 			NewElectricityPaymentNotification = model.NewElectricityPaymentNotification,
@@ -32,6 +33,7 @@ public sealed class NotificationSettingsMapper : IMapper<NotificationSettings, N
 		return new NotificationSettings
 		{
 			UserId = currentUserId,
+			IsTelegramNotificationsEnabled = dto.IsTelegramNotificationsEnabled,
 			NewPayoutNotification = dto.NewPayoutNotification,
 			NewPurchaseNotification = dto.NewPurchaseNotification,
 			NewElectricityPaymentNotification = dto.NewElectricityPaymentNotification,

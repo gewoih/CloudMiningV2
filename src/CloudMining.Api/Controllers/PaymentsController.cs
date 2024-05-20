@@ -1,9 +1,8 @@
-﻿using CloudMining.Application.DTO.Payments;
-using CloudMining.Application.DTO.Payments.Admin;
-using CloudMining.Application.DTO.Payments.User;
-using CloudMining.Application.Mappings;
-using CloudMining.Application.Services.Payments;
-using CloudMining.Application.Services.Users;
+﻿using CloudMining.Application.Mappings;
+using CloudMining.Contracts.DTO.Payments;
+using CloudMining.Contracts.DTO.Payments.Admin;
+using CloudMining.Contracts.DTO.Payments.User;
+using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments.Shareable;
