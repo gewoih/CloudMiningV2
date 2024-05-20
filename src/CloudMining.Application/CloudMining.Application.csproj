@@ -21,8 +21,4 @@
     <ProjectReference Include="..\CloudMining.Infrastructure\CloudMining.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Notifications\Settings\" />
-  </ItemGroup>
-
 </Project>
