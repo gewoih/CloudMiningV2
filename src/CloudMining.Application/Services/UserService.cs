@@ -1,7 +1,11 @@
 ﻿using System.Security.Claims;
+using CloudMining.Application.Mappings;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Identity;
+using CloudMining.Domain.Models.UserSettings;
+using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.DTO.File;
+using CloudMining.Interfaces.DTO.NotificationSettings;
 using CloudMining.Interfaces.DTO.Users;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -16,18 +20,24 @@ namespace CloudMining.Application.Services
 		private readonly SignInManager<User> _signInManager;
 		private readonly JwtService _jwtService;
 		private readonly IStorageService _storageService;
+		private readonly CloudMiningContext _context;
 		private readonly IHttpContextAccessor _httpContextAccessor;
-
+		private readonly IMapper<NotificationSettings, NotificationSettingsDto> _notificationSettingsMapper;
+		
 		public UserService(UserManager<User> userManager,
 			SignInManager<User> signInManager,
 			JwtService jwtService,
 			IHttpContextAccessor httpContextAccessor, 
-			IStorageService storageService)
+			IStorageService storageService,
+			CloudMiningContext context, 
+			IMapper<NotificationSettings, NotificationSettingsDto> notificationSettingsMapper)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_httpContextAccessor = httpContextAccessor;
 			_storageService = storageService;
+			_context = context;
+			_notificationSettingsMapper = notificationSettingsMapper;
 			_jwtService = jwtService;
 		}
 
@@ -129,6 +139,34 @@ namespace CloudMining.Application.Services
 				.ToListAsync();
 		}
 
+		public async Task<bool> ChangeUserSettings(UserSettingsDto settings)
+		{
+			await using var transaction = await _context.Database.BeginTransactionAsync();
+			try
+			{
+				var currentUser = await GetCurrentUserAsync();
+				if (currentUser is null)
+					return false;
+				
+				if (settings.NotificationSettings is not null)
+					await UpdateNotificationSettings(currentUser, settings.NotificationSettings);
+				
+				if (!string.IsNullOrEmpty(settings.TelegramUsername))
+					currentUser.TelegramUsername = settings.TelegramUsername;
+				
+				await _context.SaveChangesAsync();
+
+				await transaction.CommitAsync();
+			}
+			catch
+			{
+				await transaction.RollbackAsync();
+				return false;
+			}
+
+			return true;
+		}
+
 		public async Task<User?> GetCurrentUserAsync()
 		{
 			var currentUserId = GetCurrentUserId();
@@ -156,6 +194,28 @@ namespace CloudMining.Application.Services
 			return currentUserRoles.Contains(UserRole.Admin);
 		}
 
+		private async Task UpdateNotificationSettings(User user, NotificationSettingsDto settings)
+		{
+			var currentUserSettings = await _context.NotificationSettings.FirstOrDefaultAsync(settings => 
+				settings.UserId == user.Id);
+
+			if (currentUserSettings is null)
+			{
+				currentUserSettings = _notificationSettingsMapper.ToDomain(settings);
+				await _context.NotificationSettings.AddAsync(currentUserSettings);
+			}
+			else
+			{
+				//TODO: Возможно ли сделать через маппер?
+				currentUserSettings.IsTelegramNotificationsEnabled = settings.IsTelegramNotificationsEnabled;
+				currentUserSettings.NewPayoutNotification = settings.NewPayoutNotification;
+				currentUserSettings.NewPurchaseNotification = settings.NewPurchaseNotification;
+				currentUserSettings.NewElectricityPaymentNotification = settings.NewElectricityPaymentNotification;
+				currentUserSettings.UnpaidElectricityPaymentReminder = settings.UnpaidElectricityPaymentReminder;
+				currentUserSettings.UnpaidPurchasePaymentReminder = settings.UnpaidPurchasePaymentReminder;
+			}
+		}
+		
 		private List<UserRole> GetCurrentUserRoles()
 		{
 			var roleClaims = _httpContextAccessor.HttpContext.User.Claims
