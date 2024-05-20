@@ -17,7 +17,7 @@ public static class MassTransitSetup
 				configurator.QueryDelay = TimeSpan.FromSeconds(10);
 			});
 			
-			x.AddConsumer<ShareablePaymentCreatedConsumer>();
+			x.AddConsumer<PaymentShareCreatedConsumer>();
 			
 			x.UsingInMemory((context, cfg) =>
 			{

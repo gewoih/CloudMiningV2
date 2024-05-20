@@ -6,19 +6,19 @@ using MassTransit;
 
 namespace CloudMining.Application.Services.MassTransit.Consumers;
 
-public sealed class ShareablePaymentCreatedConsumer : IConsumer<ShareablePaymentCreated>
+public sealed class PaymentShareCreatedConsumer : IConsumer<PaymentShareCreated>
 {
 	private readonly IEnumerable<INotificationService> _notificationServices;
 
-	public ShareablePaymentCreatedConsumer(IEnumerable<INotificationService> notificationServices)
+	public PaymentShareCreatedConsumer(IEnumerable<INotificationService> notificationServices)
 	{
 		_notificationServices = notificationServices;
 	}
 
-	public async Task Consume(ConsumeContext<ShareablePaymentCreated> context)
+	public async Task Consume(ConsumeContext<PaymentShareCreated> context)
 	{
 		var message = string.Empty;
-		var paymentType = context.Message.Payment.Type;
+		var paymentType = context.Message.PaymentType;
 		message = paymentType switch
 		{
 			PaymentType.Electricity => "У вас новый платеж по электричеству!",
