@@ -1,7 +1,7 @@
 using CloudMining.Application.Services.MassTransit.Events;
-using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Notifications;
+using CloudMining.Interfaces.Interfaces;
 using MassTransit;
 
 namespace CloudMining.Application.Services.MassTransit.Consumers;

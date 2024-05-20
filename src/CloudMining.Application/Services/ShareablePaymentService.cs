@@ -1,9 +1,9 @@
 ﻿using CloudMining.Application.Services.MassTransit.Events;
-using CloudMining.Contracts.DTO.Payments;
-using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Interfaces.DTO.Payments;
+using CloudMining.Interfaces.Interfaces;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 

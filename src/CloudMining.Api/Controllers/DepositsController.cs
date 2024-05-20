@@ -1,5 +1,5 @@
-﻿using CloudMining.Contracts.DTO.Payments.Deposits;
-using CloudMining.Contracts.Interfaces;
+﻿using CloudMining.Interfaces.DTO.Payments.Deposits;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

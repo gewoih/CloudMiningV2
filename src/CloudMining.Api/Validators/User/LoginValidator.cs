@@ -1,4 +1,4 @@
-﻿using CloudMining.Contracts.DTO.Users;
+﻿using CloudMining.Interfaces.DTO.Users;
 using FluentValidation;
 
 namespace CloudMining.Api.Validators.User;

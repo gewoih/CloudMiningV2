@@ -1,4 +1,4 @@
-﻿namespace CloudMining.Contracts.DTO.Users;
+﻿namespace CloudMining.Interfaces.DTO.Users;
 
 public class UserDto
 {

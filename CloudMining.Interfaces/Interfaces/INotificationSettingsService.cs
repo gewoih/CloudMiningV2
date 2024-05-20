@@ -1,7 +1,7 @@
-using CloudMining.Contracts.DTO.NotificationSettings;
 using CloudMining.Domain.Models.UserSettings;
+using CloudMining.Interfaces.DTO.NotificationSettings;
 
-namespace CloudMining.Contracts.Interfaces;
+namespace CloudMining.Interfaces.Interfaces;
 
 public interface INotificationSettingsService
 {

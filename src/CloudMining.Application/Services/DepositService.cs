@@ -1,9 +1,9 @@
 ﻿using CloudMining.Application.Mappings;
-using CloudMining.Contracts.DTO.Payments.Deposits;
-using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Interfaces.DTO.Payments.Deposits;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services

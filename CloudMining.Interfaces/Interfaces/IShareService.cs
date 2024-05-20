@@ -1,9 +1,9 @@
-﻿using CloudMining.Contracts.DTO;
-using CloudMining.Domain.Models.Currencies;
+﻿using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.Shares;
+using CloudMining.Interfaces.DTO;
 
-namespace CloudMining.Contracts.Interfaces
+namespace CloudMining.Interfaces.Interfaces
 {
     public interface IShareService
 	{

@@ -1,4 +1,4 @@
-namespace CloudMining.Contracts.DTO.NotificationSettings;
+namespace CloudMining.Interfaces.DTO.NotificationSettings;
 
 public sealed class NotificationSettingsDto
 {

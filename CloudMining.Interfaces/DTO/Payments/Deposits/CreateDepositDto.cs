@@ -1,4 +1,4 @@
-﻿namespace CloudMining.Contracts.DTO.Payments.Deposits
+﻿namespace CloudMining.Interfaces.DTO.Payments.Deposits
 {
 	public sealed class CreateDepositDto
 	{

@@ -1,6 +1,6 @@
-﻿using CloudMining.Contracts.DTO.Payments.Deposits;
-using CloudMining.Domain.Models;
+﻿using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments;
+using CloudMining.Interfaces.DTO.Payments.Deposits;
 
 namespace CloudMining.Application.Mappings;
 

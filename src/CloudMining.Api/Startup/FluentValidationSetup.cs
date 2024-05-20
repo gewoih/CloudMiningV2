@@ -1,9 +1,9 @@
 ﻿using CloudMining.Api.Validators.Deposit;
 using CloudMining.Api.Validators.Payment;
 using CloudMining.Api.Validators.User;
-using CloudMining.Contracts.DTO.Payments;
-using CloudMining.Contracts.DTO.Payments.Deposits;
-using CloudMining.Contracts.DTO.Users;
+using CloudMining.Interfaces.DTO.Payments;
+using CloudMining.Interfaces.DTO.Payments.Deposits;
+using CloudMining.Interfaces.DTO.Users;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 

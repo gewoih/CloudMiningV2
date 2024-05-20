@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace CloudMining.Contracts.DTO.File;
+namespace CloudMining.Interfaces.DTO.File;
 
 public class FileDto
 {

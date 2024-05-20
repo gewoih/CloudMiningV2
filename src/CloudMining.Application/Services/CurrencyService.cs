@@ -1,8 +1,8 @@
-﻿using CloudMining.Contracts.DTO.Currencies;
-using CloudMining.Contracts.Interfaces;
-using CloudMining.Domain.Enums;
+﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Interfaces.DTO.Currencies;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services

@@ -1,4 +1,4 @@
-﻿namespace CloudMining.Contracts.DTO
+﻿namespace CloudMining.Interfaces.DTO
 {
     public sealed class UserCalculatedShare
     {

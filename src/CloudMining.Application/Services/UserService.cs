@@ -1,9 +1,9 @@
 ﻿using System.Security.Claims;
-using CloudMining.Contracts.DTO.File;
-using CloudMining.Contracts.DTO.Users;
-using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Identity;
+using CloudMining.Interfaces.DTO.File;
+using CloudMining.Interfaces.DTO.Users;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

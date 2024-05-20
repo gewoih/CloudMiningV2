@@ -1,6 +1,6 @@
 ﻿using CloudMining.Domain.Enums;
 
-namespace CloudMining.Contracts.DTO.Payments
+namespace CloudMining.Interfaces.DTO.Payments
 {
 	public sealed class CreatePaymentDto
 	{

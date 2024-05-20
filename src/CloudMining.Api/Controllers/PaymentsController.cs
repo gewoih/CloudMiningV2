@@ -1,11 +1,10 @@
 ﻿using CloudMining.Application.Mappings;
-using CloudMining.Contracts.DTO.Payments;
-using CloudMining.Contracts.DTO.Payments.Admin;
-using CloudMining.Contracts.DTO.Payments.User;
-using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Enums;
-using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments.Shareable;
+using CloudMining.Interfaces.DTO.Payments;
+using CloudMining.Interfaces.DTO.Payments.Admin;
+using CloudMining.Interfaces.DTO.Payments.User;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,14 +48,12 @@ namespace CloudMining.Api.Controllers
 			
 			var paymentsPageDto = new PaymentsPageDto
 			{
-				TotalCount = totalPaymentsCount
+				TotalCount = totalPaymentsCount,
+				Items = isCurrentUserAdmin 
+					? paginatedPayments.Select(payment => (PaymentDto)_adminPaymentMapper.ToDto(payment)).ToList() 
+					: paginatedPayments.Select(payment => (PaymentDto)_userPaymentMapper.ToDto(payment)).ToList()
 			};
 
-			if (isCurrentUserAdmin)
-				paymentsPageDto.Items = paginatedPayments.Select(payment => (PaymentDto)_adminPaymentMapper.ToDto(payment)).ToList();
-			else
-				paymentsPageDto.Items = paginatedPayments.Select(payment => (PaymentDto)_userPaymentMapper.ToDto(payment)).ToList();
-			
 			return paymentsPageDto;
 		}
 

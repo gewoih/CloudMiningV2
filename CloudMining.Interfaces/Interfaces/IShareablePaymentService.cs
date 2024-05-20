@@ -1,8 +1,8 @@
-﻿using CloudMining.Contracts.DTO.Payments;
-using CloudMining.Domain.Enums;
+﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments.Shareable;
+using CloudMining.Interfaces.DTO.Payments;
 
-namespace CloudMining.Contracts.Interfaces
+namespace CloudMining.Interfaces.Interfaces
 {
     public interface IShareablePaymentService
     {

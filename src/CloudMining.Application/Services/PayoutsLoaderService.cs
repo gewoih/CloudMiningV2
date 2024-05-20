@@ -1,8 +1,8 @@
-﻿using CloudMining.Contracts.DTO.Payments;
-using CloudMining.Contracts.Interfaces;
-using CloudMining.Domain.Enums;
+﻿using CloudMining.Domain.Enums;
 using CloudMining.Infrastructure.Emcd;
 using CloudMining.Infrastructure.Settings;
+using CloudMining.Interfaces.DTO.Payments;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;

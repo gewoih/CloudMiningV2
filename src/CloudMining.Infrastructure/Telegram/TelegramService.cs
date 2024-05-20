@@ -1,4 +1,4 @@
-using CloudMining.Contracts.Interfaces;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;

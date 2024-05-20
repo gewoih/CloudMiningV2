@@ -1,7 +1,7 @@
-﻿using CloudMining.Contracts.DTO.Payments.Deposits;
-using CloudMining.Domain.Models.Payments;
+﻿using CloudMining.Domain.Models.Payments;
+using CloudMining.Interfaces.DTO.Payments.Deposits;
 
-namespace CloudMining.Contracts.Interfaces
+namespace CloudMining.Interfaces.Interfaces
 {
 	public interface IDepositService
 	{

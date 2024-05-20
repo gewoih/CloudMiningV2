@@ -1,9 +1,9 @@
-﻿using CloudMining.Contracts.DTO;
-using CloudMining.Contracts.Interfaces;
-using CloudMining.Domain.Models.Currencies;
+﻿using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.Shares;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Interfaces.DTO;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services

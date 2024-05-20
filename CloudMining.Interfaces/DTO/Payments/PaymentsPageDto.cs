@@ -1,4 +1,4 @@
-﻿namespace CloudMining.Contracts.DTO.Payments;
+﻿namespace CloudMining.Interfaces.DTO.Payments;
 
 public class PaymentsPageDto
 {

@@ -1,6 +1,6 @@
-using CloudMining.Contracts.DTO.File;
-using CloudMining.Contracts.Interfaces;
 using CloudMining.Infrastructure.Settings;
+using CloudMining.Interfaces.DTO.File;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace CloudMining.Application.Services;

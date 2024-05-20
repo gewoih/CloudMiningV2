@@ -1,4 +1,4 @@
-﻿using CloudMining.Contracts.DTO.Payments;
+﻿using CloudMining.Interfaces.DTO.Payments;
 using FluentValidation;
 
 namespace CloudMining.Api.Validators.Payment;

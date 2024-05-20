@@ -1,5 +1,5 @@
-using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Models.Notifications;
+using CloudMining.Interfaces.Interfaces;
 using Telegram.Bot;
 
 namespace CloudMining.Application.Services;

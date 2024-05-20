@@ -1,6 +1,6 @@
-﻿using CloudMining.Contracts.DTO.File;
-using CloudMining.Contracts.DTO.Users;
-using CloudMining.Contracts.Interfaces;
+﻿using CloudMining.Interfaces.DTO.File;
+using CloudMining.Interfaces.DTO.Users;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

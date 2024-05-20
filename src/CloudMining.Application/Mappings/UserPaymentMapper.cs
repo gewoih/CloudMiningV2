@@ -1,7 +1,7 @@
-﻿using CloudMining.Contracts.DTO.Payments.User;
-using CloudMining.Contracts.Interfaces;
-using CloudMining.Domain.Models;
+﻿using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments.Shareable;
+using CloudMining.Interfaces.DTO.Payments.User;
+using CloudMining.Interfaces.Interfaces;
 
 namespace CloudMining.Application.Mappings;
 

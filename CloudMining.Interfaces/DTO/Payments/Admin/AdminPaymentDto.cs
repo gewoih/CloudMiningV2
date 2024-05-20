@@ -1,4 +1,4 @@
-﻿namespace CloudMining.Contracts.DTO.Payments.Admin;
+﻿namespace CloudMining.Interfaces.DTO.Payments.Admin;
 
 public class AdminPaymentDto : PaymentDto
 {

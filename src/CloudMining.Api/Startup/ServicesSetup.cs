@@ -1,16 +1,16 @@
 ﻿using CloudMining.Application.Mappings;
 using CloudMining.Application.Services;
-using CloudMining.Contracts.DTO.NotificationSettings;
-using CloudMining.Contracts.DTO.Payments.Admin;
-using CloudMining.Contracts.DTO.Payments.Deposits;
-using CloudMining.Contracts.DTO.Payments.User;
-using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.UserSettings;
 using CloudMining.Infrastructure.Emcd;
 using CloudMining.Infrastructure.Telegram;
+using CloudMining.Interfaces.DTO.NotificationSettings;
+using CloudMining.Interfaces.DTO.Payments.Admin;
+using CloudMining.Interfaces.DTO.Payments.Deposits;
+using CloudMining.Interfaces.DTO.Payments.User;
+using CloudMining.Interfaces.Interfaces;
 using Telegram.Bot;
 
 namespace CloudMining.Api.Startup;

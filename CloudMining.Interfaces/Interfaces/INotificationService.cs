@@ -1,6 +1,6 @@
 using CloudMining.Domain.Models.Notifications;
 
-namespace CloudMining.Contracts.Interfaces;
+namespace CloudMining.Interfaces.Interfaces;
 
 public interface INotificationService
 {

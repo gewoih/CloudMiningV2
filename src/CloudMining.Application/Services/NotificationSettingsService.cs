@@ -1,8 +1,8 @@
 using CloudMining.Application.Mappings;
-using CloudMining.Contracts.DTO.NotificationSettings;
-using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Models.UserSettings;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Interfaces.DTO.NotificationSettings;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services;

@@ -1,7 +1,7 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 
-namespace CloudMining.Contracts.Interfaces
+namespace CloudMining.Interfaces.Interfaces
 {
     public interface ICurrencyService
     {

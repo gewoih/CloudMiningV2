@@ -1,6 +1,6 @@
-using CloudMining.Contracts.DTO.File;
+using CloudMining.Interfaces.DTO.File;
 
-namespace CloudMining.Contracts.Interfaces;
+namespace CloudMining.Interfaces.Interfaces;
 
 public interface IStorageService
 {
