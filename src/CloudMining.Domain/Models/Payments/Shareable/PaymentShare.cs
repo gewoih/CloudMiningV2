@@ -1,7 +1,7 @@
 ﻿using CloudMining.Domain.Models.Base;
 using CloudMining.Domain.Models.Identity;
 
-namespace CloudMining.Domain.Models
+namespace CloudMining.Domain.Models.Payments.Shareable
 {
 	public class PaymentShare : Entity
 	{

@@ -1,7 +1,6 @@
 ﻿using CloudMining.Domain.Enums;
-using CloudMining.Domain.Models.Base;
 
-namespace CloudMining.Domain.Models
+namespace CloudMining.Domain.Models.Payments.Shareable
 {
 	public class ShareablePayment : Payment
 	{

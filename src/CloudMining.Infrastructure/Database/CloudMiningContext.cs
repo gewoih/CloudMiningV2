@@ -1,6 +1,11 @@
-﻿using CloudMining.Domain.Models;
-using CloudMining.Domain.Models.Base;
+﻿using CloudMining.Domain.Models.Base;
+using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Identity;
+using CloudMining.Domain.Models.Notifications;
+using CloudMining.Domain.Models.Payments;
+using CloudMining.Domain.Models.Payments.Shareable;
+using CloudMining.Domain.Models.Shares;
+using CloudMining.Domain.Models.UserSettings;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +18,8 @@ namespace CloudMining.Infrastructure.Database
 		public DbSet<PaymentShare> PaymentShares { get; set; }
 		public DbSet<ShareablePayment> ShareablePayments { get; set; }
 		public DbSet<ShareChange> ShareChanges { get; set; }
+		public DbSet<NotificationSettings> NotificationSettings { get; set; }
+		public DbSet<Notification> Notifications { get; set; }
 
 		public CloudMiningContext(DbContextOptions<CloudMiningContext> options) : base(options) { }
 
@@ -21,6 +28,10 @@ namespace CloudMining.Infrastructure.Database
 			builder.Entity<Currency>().HasData(DatabaseInitializer.GetCurrencies());
 			builder.Entity<Currency>().HasIndex(currency => currency.Code).IsUnique();
 
+			builder.Entity<Notification>()
+				.HasDiscriminator<string>("NotificationType")
+				.HasValue<TelegramNotification>("TelegramNotification");
+			
 			base.OnModelCreating(builder);
 		}
 

@@ -1,5 +1,8 @@
 ﻿using CloudMining.Application.Models.Shares;
 using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Currencies;
+using CloudMining.Domain.Models.Payments.Shareable;
+using CloudMining.Domain.Models.Shares;
 using CloudMining.Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;

@@ -1,5 +1,6 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;

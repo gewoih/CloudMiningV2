@@ -1,6 +1,7 @@
 ﻿using CloudMining.Application.DTO.Currencies;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Currencies;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 

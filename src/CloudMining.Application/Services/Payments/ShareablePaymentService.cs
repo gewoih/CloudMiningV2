@@ -4,6 +4,7 @@ using CloudMining.Application.Services.Shares;
 using CloudMining.Application.Services.Users;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 

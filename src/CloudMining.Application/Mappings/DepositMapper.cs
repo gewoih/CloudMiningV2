@@ -1,5 +1,6 @@
 ﻿using CloudMining.Application.DTO.Payments.Deposits;
 using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Payments;
 
 namespace CloudMining.Application.Mappings;
 
