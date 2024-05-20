@@ -11,7 +11,8 @@ public sealed class TelegramNotificationService : INotificationService
 	private readonly IUserService _userService;
 	private readonly CloudMiningContext _context;
 
-	public TelegramNotificationService(IUserService userService, ITelegramBotClient telegramBotClient, CloudMiningContext context)
+	public TelegramNotificationService(IUserService userService, ITelegramBotClient telegramBotClient,
+		CloudMiningContext context)
 	{
 		_userService = userService;
 		_telegramBotClient = telegramBotClient;
@@ -20,23 +21,16 @@ public sealed class TelegramNotificationService : INotificationService
 
 	public async Task<Notification> SendAsync(Notification notification)
 	{
-		var users = await _userService.GetUsersWithNotificationSettingsAsync();
-		var usersWithTelegramNotifications =
-			users.Where(user => user is
-				{ NotificationSettings.IsTelegramNotificationsEnabled: true, TelegramChatId: not null });
+		var user = await _userService.GetAsync(notification.UserId);
+		
+		var userChatId = user.TelegramChatId;
+		await _telegramBotClient.SendTextMessageAsync(userChatId, notification.Message);
 
-		foreach (var user in usersWithTelegramNotifications)
-		{
-			var userChatId = user.TelegramChatId;
-			await _telegramBotClient.SendTextMessageAsync(userChatId, notification.Message);
+		notification.Method = NotificationMethod.Telegram;
+		notification.UserIdentifier = user.TelegramUsername;
 
-			notification.Method = NotificationMethod.Telegram;
-			notification.UserIdentifier = user.TelegramUsername;
-			notification.UserId = user.Id;
-			
-			await _context.Notifications.AddAsync(notification);
-			await _context.SaveChangesAsync();
-		}
+		await _context.Notifications.AddAsync(notification);
+		await _context.SaveChangesAsync();
 
 		return notification;
 	}
