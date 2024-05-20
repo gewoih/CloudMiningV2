@@ -177,6 +177,11 @@ namespace CloudMining.Application.Services
 			return currentUser;
 		}
 
+		public async Task<User?> GetAsync(Guid userId)
+		{
+			return await _context.Users.FindAsync(userId);
+		}
+
 		public Guid? GetCurrentUserId()
 		{
 			var authHeader = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault();

@@ -16,6 +16,7 @@ namespace CloudMining.Interfaces.Interfaces
         Task<List<User>> GetUsersWithNotificationSettingsAsync();
         Task<bool> ChangeUserSettings(UserSettingsDto settings);
         Task<User?> GetCurrentUserAsync();
+        Task<User?> GetAsync(Guid userId);
         Guid? GetCurrentUserId();
         bool IsCurrentUserAdmin();
 	}
