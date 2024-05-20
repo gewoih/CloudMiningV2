@@ -31,13 +31,19 @@ public class TelegramService : BackgroundService
 	{
 		if (update.Type is UpdateType.Message)
 		{
+			var chatId = update.Message.Chat.Id;
+			
 			await using var scope = _serviceProvider.CreateAsyncScope();
 			var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
+			var isUpdated = await userService.ChangeTelegramChatIdAsync(update.Message.Chat.Username, chatId);
+			var message = isUpdated 
+				? "Данные успешно обновлены!" 
+				: "Произошла ошибка. \nПожалуйста, укажите ваш TelegramUsername на сайте CloudMining.";
 			
 			await botClient.SendTextMessageAsync(
-				chatId: update.Message.Chat.Id,
-				text: "Привет!",
+				chatId: chatId,
+				text: message,
 				cancellationToken: cancellationToken);
 		}
 	}
