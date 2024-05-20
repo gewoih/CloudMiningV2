@@ -1,4 +1,4 @@
-﻿using CloudMining.Application.DTO.Payments.Admin;
+﻿using CloudMining.Contracts.DTO.Payments.Admin;
 using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments.Shareable;
 

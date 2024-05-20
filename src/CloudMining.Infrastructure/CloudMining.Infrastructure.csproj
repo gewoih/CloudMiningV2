@@ -20,9 +20,11 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
+    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\CloudMining.Interfaces\CloudMining.Interfaces.csproj" />
     <ProjectReference Include="..\CloudMining.Domain\CloudMining.Domain.csproj" />
   </ItemGroup>
 

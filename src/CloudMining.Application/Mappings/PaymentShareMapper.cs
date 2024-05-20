@@ -1,5 +1,5 @@
-﻿using CloudMining.Application.DTO.Payments.Admin;
-using CloudMining.Application.DTO.Users;
+﻿using CloudMining.Contracts.DTO.Payments.Admin;
+using CloudMining.Contracts.DTO.Users;
 using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments.Shareable;

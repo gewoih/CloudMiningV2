@@ -59,7 +59,7 @@ namespace CloudMining.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("756d6961-277a-4b4c-9a19-bcfa65f5480f"),
+                            Id = new Guid("e9a46756-82a4-414e-b0d3-180a0caf4772"),
                             Caption = "Рубль",
                             Code = 1,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -70,7 +70,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("dbd075b5-6fa4-4432-84ed-3b4d0577b1ea"),
+                            Id = new Guid("417e4b63-4176-40cf-8a5f-ac73934fc6f4"),
                             Caption = "Доллар",
                             Code = 0,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -81,7 +81,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("4ec768f3-b264-4ed8-b1dc-37d558476baa"),
+                            Id = new Guid("cc19d5de-a09a-4858-b7df-1963f4e37ece"),
                             Caption = "Bitcoin",
                             Code = 2,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -92,7 +92,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("4575322e-176e-4054-ab6a-ebb8a7eadc39"),
+                            Id = new Guid("c8e12303-cc8f-4aeb-a04c-734b3b661213"),
                             Caption = "Etherium",
                             Code = 3,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -103,7 +103,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("55f1cac9-20e4-403e-b51b-70b2b4a56f12"),
+                            Id = new Guid("4c96f231-39d4-47ab-a441-dab6b00c8ae0"),
                             Caption = "Litecoin",
                             Code = 4,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -114,7 +114,7 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("a8e5d0f7-9e9e-450b-bcaa-18510aebfe90"),
+                            Id = new Guid("7bcb9a37-cc71-4a01-8548-c5f9aef1cc38"),
                             Caption = "Dogecoin",
                             Code = 5,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -212,6 +212,12 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<long?>("TelegramChatId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TelegramUsername")
                         .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")

@@ -1,5 +1,5 @@
-using CloudMining.Application.DTO.NotificationSettings;
-using CloudMining.Application.Services.Users;
+using CloudMining.Contracts.DTO.NotificationSettings;
+using CloudMining.Contracts.Interfaces;
 using CloudMining.Domain.Models.UserSettings;
 
 namespace CloudMining.Application.Mappings;
