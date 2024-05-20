@@ -29,7 +29,7 @@ public sealed class ShareablePaymentCreatedConsumer : IConsumer<ShareablePayment
 
 		var notification = new Notification
 		{
-			Content = message,
+			Message = message,
 		};
 		
 		foreach (var notificationService in _notificationServices)
