@@ -67,5 +67,13 @@ namespace CloudMining.Api.Controllers
 				
 			return Ok(newAvatarPath);
 		}
+
+		[Authorize]
+		[HttpPatch("settings")]
+		public async Task<IActionResult> ChangeSettings([FromBody] UserSettingsDto settings)
+		{
+			var isSettingsUpdated = await _userService.ChangeUserSettings(settings);
+			return Ok(isSettingsUpdated);
+		}
 	}
 }

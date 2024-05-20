@@ -28,11 +28,4 @@ public class NotificationsController : ControllerBase
 		var notificationSettings = await _notificationSettingsService.GetUserSettingsAsync();
 		return _notificationSettingsMapper.ToDto(notificationSettings);
 	}
-
-	[HttpPatch("settings")]
-	public async Task<bool> UpdateSettings([FromBody] NotificationSettingsDto settings)
-	{
-		var isUpdated = await _notificationSettingsService.UpdateUserSettingsAsync(settings);
-		return isUpdated;
-	}
 }

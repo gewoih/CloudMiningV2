@@ -1,18 +1,10 @@
 using CloudMining.Domain.Models.UserSettings;
 using CloudMining.Interfaces.DTO.NotificationSettings;
-using CloudMining.Interfaces.Interfaces;
 
 namespace CloudMining.Application.Mappings;
 
 public sealed class NotificationSettingsMapper : IMapper<NotificationSettings, NotificationSettingsDto>
 {
-	private readonly IUserService _userService;
-
-	public NotificationSettingsMapper(IUserService userService)
-	{
-		_userService = userService;
-	}
-
 	public NotificationSettingsDto ToDto(NotificationSettings model)
 	{
 		return new NotificationSettingsDto
@@ -28,11 +20,8 @@ public sealed class NotificationSettingsMapper : IMapper<NotificationSettings, N
 
 	public NotificationSettings ToDomain(NotificationSettingsDto dto)
 	{
-		var currentUserId = _userService.GetCurrentUserId() ?? Guid.Empty;
-
 		return new NotificationSettings
 		{
-			UserId = currentUserId,
 			IsTelegramNotificationsEnabled = dto.IsTelegramNotificationsEnabled,
 			NewPayoutNotification = dto.NewPayoutNotification,
 			NewPurchaseNotification = dto.NewPurchaseNotification,
