@@ -13,9 +13,7 @@ namespace CloudMining.Interfaces.Interfaces
         Task<bool> ChangePasswordAsync(ChangePasswordDto dto);
         Task<string> ChangeAvatarAsync(FileDto dto);
         Task<bool> ChangeTelegramChatIdAsync(string telegramUsername, long telegramChatId);
-        Task<List<User>> GetUsersWithNotificationSettingsAsync();
         Task<bool> ChangeUserSettings(UserSettingsDto settings);
-        Task<User?> GetCurrentUserAsync();
         Task<User?> GetAsync(Guid userId);
         Guid? GetCurrentUserId();
         bool IsCurrentUserAdmin();
