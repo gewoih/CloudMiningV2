@@ -1,4 +1,5 @@
-﻿using CloudMining.Domain.Models.Base;
+﻿using CloudMining.Domain.Enums;
+using CloudMining.Domain.Models.Base;
 using CloudMining.Domain.Models.Identity;
 
 namespace CloudMining.Domain.Models.Payments.Shareable
@@ -12,6 +13,6 @@ namespace CloudMining.Domain.Models.Payments.Shareable
 		public DateTime Date { get; set; }
 		public decimal Amount { get; set; }
 		public decimal Share { get; set; }
-		public bool IsCompleted { get; set; }
+		public ShareStatus Status { get; set; }
 	}
 }

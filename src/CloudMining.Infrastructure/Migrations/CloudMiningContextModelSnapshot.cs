@@ -351,9 +351,6 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Property<DateTime>("DeletedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -362,6 +359,9 @@ namespace CloudMining.Infrastructure.Migrations
 
                     b.Property<Guid>("ShareablePaymentId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
