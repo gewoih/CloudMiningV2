@@ -27,7 +27,7 @@ public class UserPaymentMapper : IMapper<ShareablePayment, UserPaymentDto>
             Id = model.Id,
             Amount = model.Amount,
             Date = model.Date,
-            IsCompleted = model.IsCompleted,
+            Status = currentUserPaymentShare?.Status ?? 0,
             Share = userShare,
             SharedAmount = userSharedAmount
         };
