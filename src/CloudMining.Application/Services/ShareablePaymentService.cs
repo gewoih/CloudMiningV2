@@ -112,6 +112,7 @@ namespace CloudMining.Application.Services
 			
 			var paymentsQuery = _context.ShareablePayments
 				.Include(payment => payment.PaymentShares)
+				.Include(payment => payment.Currency)
 				.AsQueryable();
 
 			if (withShares)
