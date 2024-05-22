@@ -9,14 +9,11 @@ namespace CloudMining.Application.Services.MassTransit.Consumers;
 public sealed class PaymentCreatedConsumer : IConsumer<PaymentCreated>
 {
 	private readonly IEnumerable<INotificationService> _notificationServices;
-	private readonly INotificationSettingsService _notificationSettingsService;
-	
+
 	public PaymentCreatedConsumer(
-		IEnumerable<INotificationService> notificationServices, 
-		INotificationSettingsService notificationSettingsService)
+		IEnumerable<INotificationService> notificationServices)
 	{
 		_notificationServices = notificationServices;
-		_notificationSettingsService = notificationSettingsService;
 	}
 
 	public async Task Consume(ConsumeContext<PaymentCreated> context)
