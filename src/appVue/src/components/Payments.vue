@@ -103,7 +103,6 @@ const newPayment = ref<CreatePayment>({
   paymentType: PaymentType.Electricity,
   date: new Date(),
   amount: 0,
-  isCompleted: false
 });
 
 const paymentTypes = ref([
@@ -156,7 +155,6 @@ const createPayment = async () => {
     paymentType: selectedPaymentType.value,
     date: new Date(),
     amount: 0,
-    isCompleted: false
   };
   isModalVisible.value = false;
 };
