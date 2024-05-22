@@ -65,7 +65,8 @@ namespace CloudMining.Application.Services
 				CurrencyId = foundCurrency.Id,
 				Type = createPaymentDto.PaymentType,
 				PaymentShares = usersPaymentShares,
-				Date = createPaymentDto.Date.ToUniversalTime()
+				Date = createPaymentDto.Date.ToUniversalTime(),
+				IsCompleted = false
 			};
 			
 			await _context.ShareablePayments.AddAsync(newPayment).ConfigureAwait(false);
