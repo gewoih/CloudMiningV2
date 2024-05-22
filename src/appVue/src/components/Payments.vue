@@ -28,21 +28,21 @@
       <Column v-if="userRole !== UserRole.Admin" header="Ваша сумма">
         <template v-slot:body="slotProps">
           {{
-            getTruncatedAmount(slotProps.data.sharedAmount,slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
+            getTruncatedAmount(slotProps.data.sharedAmount, slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
           }}
         </template>
       </Column>
       <Column v-if="userRole !== UserRole.Admin" header="Ваша доля">
         <template v-slot:body="slotProps">
           {{
-            getTruncatedAmount(slotProps.data.share,2) + ' ' + "%"
+            getTruncatedAmount(slotProps.data.share, 2) + ' ' + "%"
           }}
         </template>
       </Column>
       <Column header="Общая сумма">
         <template v-slot:body="slotProps">
           {{
-            getTruncatedAmount(slotProps.data.amount,slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
+            getTruncatedAmount(slotProps.data.amount, slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
           }}
         </template>
       </Column>
@@ -51,7 +51,8 @@
           {{ getDateOnly(slotProps.data.date) }}
         </template>
       </Column>
-      <Column v-if="userRole === UserRole.Admin || selectedPaymentType === PaymentType.Purchase" field="caption" header="Комментарий"></Column>
+      <Column v-if="userRole === UserRole.Admin || selectedPaymentType === PaymentType.Purchase" field="caption"
+              header="Комментарий"></Column>
       <template v-if="userRole === UserRole.Admin" v-slot:expansion="slotProps">
         <div class="p-3">
           <DataTable :value="paymentSharesMap[slotProps.data.id]">
@@ -72,7 +73,7 @@
             <Column header="Доля">
               <template v-slot:body="slotProps">
                 {{
-                  getTruncatedAmount(slotProps.data.share,2) + ' ' + "%"
+                  getTruncatedAmount(slotProps.data.share, 2) + ' ' + "%"
                 }}
               </template>
             </Column>
@@ -158,40 +159,66 @@ const getPaymentStatusSeverity = (isCompleted: boolean) => {
   return isCompleted ? 'success' : 'danger';
 };
 
-const getShareStatusSeverity = (product) => {
-  switch (product.status) {
-    case ShareStatus.Created:
-      return 'danger';
+const getShareStatusSeverity = (payment) => {
+  if (selectedPaymentType.value != PaymentType.Crypto) {
+    switch (payment.status) {
+      case ShareStatus.Created:
+        return 'danger';
 
-    case ShareStatus.Pending:
-      return 'warning';
+      case ShareStatus.Pending:
+        return 'warning';
 
-    case ShareStatus.Completed:
-      return 'success';
+      case ShareStatus.Completed:
+        return 'success';
+    }
+  } else {
+    switch (payment.status) {
+      case ShareStatus.Created:
+        return 'warning';
+
+      case ShareStatus.Pending:
+        return 'warning';
+
+      case ShareStatus.Completed:
+        return 'success';
+    }
   }
 };
 const getStatus = (payment) => {
-  if (userRole.value != UserRole.Admin) {
+  if (selectedPaymentType.value != PaymentType.Crypto) {
+    if (userRole.value != UserRole.Admin) {
+      switch (payment.status) {
+        case ShareStatus.Created:
+          return "К оплате";
+
+        case ShareStatus.Pending:
+          return "Ожидание";
+
+        case ShareStatus.Completed:
+          return "Завершен";
+      }
+    } else {
+      switch (payment.status) {
+        case ShareStatus.Created:
+          return "Не оплачен";
+
+        case ShareStatus.Pending:
+          return "Ожидает подтверждения";
+
+        case ShareStatus.Completed:
+          return "Оплачен";
+      }
+    }
+  } else {
     switch (payment.status) {
       case ShareStatus.Created:
-        return "К оплате";
+        return "Ожидание";
 
       case ShareStatus.Pending:
         return "Ожидание";
 
       case ShareStatus.Completed:
         return "Завершен";
-    }
-  } else {
-    switch (payment.status) {
-      case ShareStatus.Created:
-        return "Не оплачен";
-
-      case ShareStatus.Pending:
-        return "Ожидает подтверждения";
-
-      case ShareStatus.Completed:
-        return "Оплачен";
     }
   }
 };
