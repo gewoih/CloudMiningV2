@@ -19,7 +19,7 @@ public static class ServicesSetup
 {
     public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
         services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<IShareService, ShareService>();
         services.AddScoped<IShareablePaymentService, ShareablePaymentService>();

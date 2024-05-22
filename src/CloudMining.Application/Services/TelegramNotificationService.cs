@@ -9,13 +9,13 @@ public sealed class TelegramNotificationService : INotificationService
 {
 	private readonly ITelegramBotClient _telegramBotClient;
 	private readonly CloudMiningContext _context;
-	private readonly IUserService _userService;
+	private readonly IUserManagementService _userManagementService;
 	private readonly INotificationSettingsService _notificationSettingsService;
 
-	public TelegramNotificationService(IUserService userService, ITelegramBotClient telegramBotClient,
+	public TelegramNotificationService(IUserManagementService userManagementService, ITelegramBotClient telegramBotClient,
 		CloudMiningContext context, INotificationSettingsService notificationSettingsService)
 	{
-		_userService = userService;
+		_userManagementService = userManagementService;
 		_telegramBotClient = telegramBotClient;
 		_context = context;
 		_notificationSettingsService = notificationSettingsService;
@@ -23,7 +23,7 @@ public sealed class TelegramNotificationService : INotificationService
 
 	public async Task<Notification?> SendAsync(Notification notification)
 	{
-		var user = await _userService.GetAsync(notification.UserId);
+		var user = await _userManagementService.GetAsync(notification.UserId);
 		var userNotificationSettings = await _notificationSettingsService.GetUserSettingsAsync(user?.Id);
 
 		var userChatId = user?.TelegramChatId;
