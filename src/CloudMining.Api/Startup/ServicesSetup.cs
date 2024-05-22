@@ -22,14 +22,17 @@ public static class ServicesSetup
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         
+        services.AddScoped<JwtService>();
+        
         services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<IShareService, ShareService>();
         services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
         services.AddScoped<IDepositService, DepositService>();
+        
         services.AddScoped<IStorageService, LocalStorageService>();
+        
+        services.AddScoped<INotificationManagementService, NotificationManagementService>();
         services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
-        services.AddScoped<JwtService>();
-
         services.AddScoped<INotificationService, TelegramNotificationService>();
 
         services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();
