@@ -34,9 +34,7 @@
           <DataTable :value="paymentSharesMap[slotProps.data.id]">
             <Column header="ФИО">
               <template #body="slotProps">
-                {{
-                  slotProps.data.user.lastName + ' ' + slotProps.data.user.firstName + ' ' + slotProps.data.user.patronymic
-                }}
+                {{slotProps.data.user.lastName + ' ' + slotProps.data.user.firstName + ' ' + slotProps.data.user.patronymic }}
               </template>
             </Column>
             <Column field="amount" header="Сумма"></Column>
