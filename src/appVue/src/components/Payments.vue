@@ -144,6 +144,7 @@ const newPayment = ref<CreatePayment>({
 
 const paymentTypes = ref([
   {name: 'Электричество', value: 'Electricity'},
+  {name: 'Выплаты', value: 'Crypto'},
   {name: 'Покупки', value: 'Purchase'}
 ]);
 
