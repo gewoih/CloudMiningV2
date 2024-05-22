@@ -1,5 +1,5 @@
 ﻿export enum ShareStatus{
-    Created,
-    Pending,
-    Completed
+    Created = "Created",
+    Pending = "Pending",
+    Completed = "Completed"
 }
