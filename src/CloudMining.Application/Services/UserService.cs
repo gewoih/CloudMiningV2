@@ -132,13 +132,6 @@ namespace CloudMining.Application.Services
 			return result.Succeeded;
 		}
 
-		public async Task<List<User>> GetUsersWithNotificationSettingsAsync()
-		{
-			return await _userManager.Users
-				.Include(user => user.NotificationSettings)
-				.ToListAsync();
-		}
-
 		public async Task<bool> ChangeUserSettings(UserSettingsDto settings)
 		{
 			await using var transaction = await _context.Database.BeginTransactionAsync();
@@ -166,15 +159,10 @@ namespace CloudMining.Application.Services
 
 			return true;
 		}
-
-		public async Task<User?> GetCurrentUserAsync()
+		
+		public async Task<User?> GetAsync(Guid userId)
 		{
-			var currentUserId = GetCurrentUserId();
-			if (currentUserId == null)
-				return null;
-
-			var currentUser = await _userManager.FindByIdAsync(currentUserId.ToString());
-			return currentUser;
+			return await _context.Users.FindAsync(userId);
 		}
 
 		public Guid? GetCurrentUserId()
@@ -188,6 +176,16 @@ namespace CloudMining.Application.Services
 			return Guid.Parse(subClaim);
 		}
 
+		private async Task<User?> GetCurrentUserAsync()
+		{
+			var currentUserId = GetCurrentUserId();
+			if (currentUserId == null)
+				return null;
+
+			var currentUser = await _userManager.FindByIdAsync(currentUserId.ToString());
+			return currentUser;
+		}
+		
 		public bool IsCurrentUserAdmin()
 		{
 			var currentUserRoles = GetCurrentUserRoles();

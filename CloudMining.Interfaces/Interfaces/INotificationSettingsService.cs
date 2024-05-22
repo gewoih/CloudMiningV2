@@ -4,5 +4,5 @@ namespace CloudMining.Interfaces.Interfaces;
 
 public interface INotificationSettingsService
 {
-	Task<NotificationSettings> GetUserSettingsAsync();
+	Task<NotificationSettings> GetUserSettingsAsync(Guid? userId = null);
 }

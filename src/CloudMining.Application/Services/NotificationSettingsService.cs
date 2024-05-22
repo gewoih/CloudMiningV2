@@ -19,9 +19,9 @@ public sealed class NotificationSettingsService : INotificationSettingsService
 		_context = context;
 	}
 
-	public async Task<NotificationSettings> GetUserSettingsAsync()
+	public async Task<NotificationSettings> GetUserSettingsAsync(Guid? userId = null)
 	{
-		var currentUserId = _userService.GetCurrentUserId();
+		var currentUserId = userId ?? _userService.GetCurrentUserId();
 
 		var currentUserSettings = await _context.Users
 			.Where(user => user.Id == currentUserId)

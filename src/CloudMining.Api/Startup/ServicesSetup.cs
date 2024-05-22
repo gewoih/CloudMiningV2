@@ -37,7 +37,7 @@ public static class ServicesSetup
         services.AddSingleton<IMapper<Deposit, CreateDepositDto>, DepositMapper>();
 
         services.AddHttpClient<EmcdApiClient>();
-        //services.AddHostedService<PayoutsLoaderService>();
+        services.AddHostedService<PayoutsLoaderService>();
 
         var telegramBotApiKey = configuration["Telegram:ApiKey"];
         services.AddSingleton<ITelegramBotClient>(sp => new TelegramBotClient(telegramBotApiKey));
