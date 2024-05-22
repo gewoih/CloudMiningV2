@@ -1,6 +1,5 @@
 ﻿using CloudMining.Application.Mappings;
 using CloudMining.Application.Services;
-using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.UserSettings;
@@ -20,6 +19,9 @@ public static class ServicesSetup
     public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IUserManagementService, UserManagementService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        
         services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<IShareService, ShareService>();
         services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
