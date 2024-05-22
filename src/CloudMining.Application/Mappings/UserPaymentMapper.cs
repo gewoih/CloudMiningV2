@@ -26,6 +26,7 @@ public class UserPaymentMapper : IMapper<ShareablePayment, UserPaymentDto>
         return new UserPaymentDto
         {
             Id = model.Id,
+            Caption = model.Caption,
             Date = model.Date,
             Amount = model.Amount,
             Currency = new CurrencyDto()

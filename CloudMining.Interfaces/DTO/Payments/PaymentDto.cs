@@ -10,4 +10,5 @@ public abstract class PaymentDto
     public DateTime Date { get; set; }
     public decimal Amount { get; set; }
     public CurrencyDto Currency { get; set; }
+    public string? Caption { get; set; }
 }
