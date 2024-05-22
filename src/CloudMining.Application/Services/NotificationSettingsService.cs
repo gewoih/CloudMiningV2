@@ -10,29 +10,24 @@ namespace CloudMining.Application.Services;
 public sealed class NotificationSettingsService : INotificationSettingsService
 {
 	private readonly CloudMiningContext _context;
-	private readonly ICurrentUserService _currentUserService;
 	private readonly IMapper<NotificationSettings, NotificationSettingsDto> _notificationSettingsMapper;
 
-	public NotificationSettingsService(ICurrentUserService currentUserService,
-		CloudMiningContext context,
+	public NotificationSettingsService(CloudMiningContext context,
 		IMapper<NotificationSettings, NotificationSettingsDto> notificationSettingsMapper)
 	{
-		_currentUserService = currentUserService;
 		_context = context;
 		_notificationSettingsMapper = notificationSettingsMapper;
 	}
 
-	public async Task<NotificationSettings?> GetUserSettingsAsync(Guid? userId = null)
+	public async Task<NotificationSettings?> GetUserSettingsAsync(Guid userId)
 	{
-		var currentUserId = userId ?? _currentUserService.GetCurrentUserId();
-
 		var userSettings = await _context.NotificationSettings.FirstOrDefaultAsync(settings =>
-			settings.UserId == currentUserId);
+			settings.UserId == userId);
 
 		return userSettings;
 	}
 
-	public async Task<NotificationSettings> UpdateSettingsAsync(Guid userId, NotificationSettingsDto notificationSettingsDto)
+	public async Task<NotificationSettings> UpdateUserSettingsAsync(Guid userId, NotificationSettingsDto notificationSettingsDto)
 	{
 		var userSettings = await GetUserSettingsAsync(userId);
 

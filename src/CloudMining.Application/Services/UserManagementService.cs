@@ -45,7 +45,7 @@ namespace CloudMining.Application.Services
 					return false;
 				
 				if (settings.NotificationSettings is not null)
-					await _notificationSettingsService.UpdateSettingsAsync(userId, settings.NotificationSettings);
+					await _notificationSettingsService.UpdateUserSettingsAsync(userId, settings.NotificationSettings);
 
 				if (!string.IsNullOrEmpty(settings.TelegramUsername))
 					user.TelegramUsername = settings.TelegramUsername;
