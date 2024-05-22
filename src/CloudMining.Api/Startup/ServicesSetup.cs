@@ -1,6 +1,5 @@
 ﻿using CloudMining.Application.Mappings;
 using CloudMining.Application.Services;
-using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.UserSettings;
@@ -19,15 +18,21 @@ public static class ServicesSetup
 {
     public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        
+        services.AddScoped<JwtService>();
+        
         services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<IShareService, ShareService>();
         services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
         services.AddScoped<IDepositService, DepositService>();
+        
         services.AddScoped<IStorageService, LocalStorageService>();
+        
+        services.AddScoped<INotificationManagementService, NotificationManagementService>();
         services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
-        services.AddScoped<JwtService>();
-
         services.AddScoped<INotificationService, TelegramNotificationService>();
 
         services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();

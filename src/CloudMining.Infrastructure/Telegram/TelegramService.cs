@@ -34,7 +34,7 @@ public class TelegramService : BackgroundService
 			var chatId = update.Message.Chat.Id;
 			
 			await using var scope = _serviceProvider.CreateAsyncScope();
-			var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+			var userService = scope.ServiceProvider.GetRequiredService<ICurrentUserService>();
 
 			var isUpdated = await userService.ChangeTelegramChatIdAsync(update.Message.Chat.Username, chatId);
 			var message = isUpdated 

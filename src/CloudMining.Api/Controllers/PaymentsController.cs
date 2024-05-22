@@ -16,20 +16,20 @@ namespace CloudMining.Api.Controllers
 	public class PaymentsController : ControllerBase
 	{
 		private readonly IShareablePaymentService _shareablePaymentService;
-		private readonly IUserService _userService;
+		private readonly ICurrentUserService _currentUserService;
 		private readonly IMapper<ShareablePayment, AdminPaymentDto> _adminPaymentMapper;
 		private readonly IMapper<ShareablePayment, UserPaymentDto> _userPaymentMapper;
 		private readonly IMapper<PaymentShare, PaymentShareDto> _paymentShareMapper;
 
 		public PaymentsController(
 			IShareablePaymentService shareablePaymentService, 
-			IUserService userService,
+			ICurrentUserService currentUserService,
 			IMapper<ShareablePayment, AdminPaymentDto> adminPaymentMapper, 
 			IMapper<PaymentShare, PaymentShareDto> paymentShareMapper, 
 			IMapper<ShareablePayment, UserPaymentDto> userPaymentMapper)
 		{
 			_shareablePaymentService = shareablePaymentService;
-			_userService = userService;
+			_currentUserService = currentUserService;
 			_adminPaymentMapper = adminPaymentMapper;
 			_paymentShareMapper = paymentShareMapper;
 			_userPaymentMapper = userPaymentMapper;
@@ -44,7 +44,7 @@ namespace CloudMining.Api.Controllers
 		{
 			var paginatedPayments = await _shareablePaymentService.GetAsync(skip, take, withShares, paymentType);
 			var totalPaymentsCount = await _shareablePaymentService.GetUserPaymentsCount(paymentType);
-			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
+			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
 			
 			var paymentsPageDto = new PaymentsPageDto
 			{
