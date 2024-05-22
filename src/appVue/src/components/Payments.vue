@@ -14,10 +14,15 @@
     <DataTable :value="payments" v-model:expandedRows="expandedRows" dataKey="id"
                @rowExpand="fetchShares">
       <Column v-if="userRole === UserRole.Admin" expander/>
-      <Column field="isCompleted" header="Статус">
+      <Column v-if="userRole === UserRole.Admin" field="isCompleted" header="Статус">
         <template #body="slotProps">
           <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'"
-               :severity="getStatusSeverity(slotProps.data.isCompleted)"/>
+               :severity="getPaymentStatusSeverity(slotProps.data.isCompleted)"/>
+        </template>
+      </Column>
+      <Column v-if="userRole !== UserRole.Admin" field="status" header="Статус">
+        <template #body="slotProps">
+          <Tag :value="getStatus(slotProps.data)" :severity="getShareStatusSeverity(slotProps.data)"/>
         </template>
       </Column>
       <Column v-if="userRole !== UserRole.Admin" field="sharedAmount" header="Ваша сумма"/>
@@ -34,15 +39,16 @@
           <DataTable :value="paymentSharesMap[slotProps.data.id]">
             <Column header="ФИО">
               <template #body="slotProps">
-                {{slotProps.data.user.lastName + ' ' + slotProps.data.user.firstName + ' ' + slotProps.data.user.patronymic }}
+                {{
+                  slotProps.data.user.lastName + ' ' + slotProps.data.user.firstName + ' ' + slotProps.data.user.patronymic
+                }}
               </template>
             </Column>
             <Column field="amount" header="Сумма"></Column>
             <Column field="share" header="Доля"></Column>
-            <Column field="isCompleted" header="Статус">
+            <Column field="status" header="Статус">
               <template #body="slotProps">
-                <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'"
-                     :severity="getStatusSeverity(slotProps.data.isCompleted)"/>
+                <Tag :value="getStatus(slotProps.data)" :severity="getShareStatusSeverity(slotProps.data)"/>
               </template>
             </Column>
           </DataTable>
@@ -85,6 +91,7 @@ import {PaymentShare} from "@/models/PaymentShare.ts";
 import {UserRole} from "@/enums/UserRole.ts";
 import {AdminPayment} from "@/models/AdminPayment.ts";
 import {Payment} from "@/models/Payment.ts";
+import {ShareStatus} from "@/enums/ShareStatus.ts";
 
 const isModalVisible = ref(false);
 const expandedRows = ref({});
@@ -114,11 +121,49 @@ const pageChange = async (event) => {
   pageNumber.value = event.page + 1;
   pageSize.value = event.rows;
   await fetchPayments();
-}
+};
 
-const getStatusSeverity = (isCompleted: boolean) => {
+const getPaymentStatusSeverity = (isCompleted: boolean) => {
   return isCompleted ? 'success' : 'danger';
-}
+};
+
+const getShareStatusSeverity = (product) => {
+  switch (product.status) {
+    case ShareStatus.Created:
+      return 'danger';
+
+    case ShareStatus.Pending:
+      return 'warning';
+
+    case ShareStatus.Completed:
+      return 'success';
+  }
+};
+const getStatus = (product) => {
+  if (userRole.value != UserRole.Admin) {
+    switch (product.status) {
+      case ShareStatus.Created:
+        return "К оплате";
+
+      case ShareStatus.Pending:
+        return "Ожидание";
+
+      case ShareStatus.Completed:
+        return "Завершен";
+    }
+  } else {
+    switch (product.status) {
+      case ShareStatus.Created:
+        return "Не оплачен";
+
+      case ShareStatus.Pending:
+        return "Ожидает подтверждения";
+
+      case ShareStatus.Completed:
+        return "Оплачен";
+    }
+  }
+};
 
 const getDateOnly = (date) => {
   return format(date, 'dd.MM.yyyy');
@@ -136,7 +181,7 @@ const fetchShares = async (event) => {
     paymentSharesMap.value[paymentId] = await paymentsService.getShares(paymentId);
   }
   paymentShares.value = paymentSharesMap.value[paymentId];
-}
+};
 
 const fetchPayments = async () => {
   const response = await paymentsService.getPayments(pageNumber.value, pageSize.value, selectedPaymentType.value);
