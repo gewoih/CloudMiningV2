@@ -51,7 +51,7 @@
           {{ getDateOnly(slotProps.data.date) }}
         </template>
       </Column>
-      <Column v-if="userRole === UserRole.Admin || selectedPaymentType === PaymentType.Purchase" field="caption"
+      <Column v-if="(userRole === UserRole.Admin && selectedPaymentType !== PaymentType.Crypto) || selectedPaymentType === PaymentType.Purchase" field="caption"
               header="Комментарий"></Column>
       <template v-if="userRole === UserRole.Admin" v-slot:expansion="slotProps">
         <div class="p-3">
@@ -156,7 +156,7 @@ const pageChange = async (event) => {
 };
 
 const getPaymentStatusSeverity = (isCompleted: boolean) => {
-  return isCompleted ? 'success' : 'danger';
+  return isCompleted ? 'success' : 'warning';
 };
 
 const getShareStatusSeverity = (payment) => {
