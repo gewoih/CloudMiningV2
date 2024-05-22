@@ -8,22 +8,31 @@ namespace CloudMining.Application.Services;
 public sealed class TelegramNotificationService : INotificationService
 {
 	private readonly ITelegramBotClient _telegramBotClient;
-	private readonly IUserService _userService;
 	private readonly CloudMiningContext _context;
+	private readonly IUserService _userService;
+	private readonly INotificationSettingsService _notificationSettingsService;
 
 	public TelegramNotificationService(IUserService userService, ITelegramBotClient telegramBotClient,
-		CloudMiningContext context)
+		CloudMiningContext context, INotificationSettingsService notificationSettingsService)
 	{
 		_userService = userService;
 		_telegramBotClient = telegramBotClient;
 		_context = context;
+		_notificationSettingsService = notificationSettingsService;
 	}
 
-	public async Task<Notification> SendAsync(Notification notification)
+	public async Task<Notification?> SendAsync(Notification notification)
 	{
 		var user = await _userService.GetAsync(notification.UserId);
+		var userNotificationSettings = await _notificationSettingsService.GetUserSettingsAsync(user?.Id);
+
+		var userChatId = user?.TelegramChatId;
+		if (!userChatId.HasValue)
+			return null;
+
+		if (!userNotificationSettings.IsTelegramNotificationsEnabled)
+			return null;
 		
-		var userChatId = user.TelegramChatId;
 		await _telegramBotClient.SendTextMessageAsync(userChatId, notification.Message);
 
 		notification.Method = NotificationMethod.Telegram;
