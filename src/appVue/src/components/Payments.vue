@@ -15,39 +15,69 @@
                @rowExpand="fetchShares">
       <Column v-if="userRole === UserRole.Admin" expander/>
       <Column v-if="userRole === UserRole.Admin" field="isCompleted" header="Статус">
-        <template #body="slotProps">
+        <template v-slot:body="slotProps">
           <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'"
                :severity="getPaymentStatusSeverity(slotProps.data.isCompleted)"/>
         </template>
       </Column>
       <Column v-if="userRole !== UserRole.Admin" field="status" header="Статус">
-        <template #body="slotProps">
+        <template v-slot:body="slotProps">
           <Tag :value="getStatus(slotProps.data)" :severity="getShareStatusSeverity(slotProps.data)"/>
         </template>
       </Column>
-      <Column v-if="userRole !== UserRole.Admin" field="sharedAmount" header="Ваша сумма"/>
-      <Column v-if="userRole !== UserRole.Admin" field="share" header="Ваша доля"/>
-      <Column field="amount" header="Общая сумма"/>
+      <Column v-if="userRole !== UserRole.Admin" header="Ваша сумма">
+        <template v-slot:body="slotProps">
+          {{
+            getTruncatedAmount(slotProps.data.sharedAmount,slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
+          }}
+        </template>
+      </Column>
+      <Column v-if="userRole !== UserRole.Admin" header="Ваша доля">
+        <template v-slot:body="slotProps">
+          {{
+            getTruncatedAmount(slotProps.data.share,2) + ' ' + "%"
+          }}
+        </template>
+      </Column>
+      <Column header="Общая сумма">
+        <template v-slot:body="slotProps">
+          {{
+            getTruncatedAmount(slotProps.data.amount,slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
+          }}
+        </template>
+      </Column>
       <Column field="date" header="Дата">
-        <template #body="slotProps">
+        <template v-slot:body="slotProps">
           {{ getDateOnly(slotProps.data.date) }}
         </template>
       </Column>
       <Column v-if="userRole === UserRole.Admin" field="caption" header="Комментарий"></Column>
-      <template v-if="userRole === UserRole.Admin" #expansion="slotProps">
+      <template v-if="userRole === UserRole.Admin" v-slot:expansion="slotProps">
         <div class="p-3">
           <DataTable :value="paymentSharesMap[slotProps.data.id]">
             <Column header="ФИО">
-              <template #body="slotProps">
+              <template v-slot:body="slotProps">
                 {{
                   slotProps.data.user.lastName + ' ' + slotProps.data.user.firstName + ' ' + slotProps.data.user.patronymic
                 }}
               </template>
             </Column>
-            <Column field="amount" header="Сумма"></Column>
-            <Column field="share" header="Доля"></Column>
+            <Column field="amount" header="Сумма">
+              <template v-slot:body="shareSlotProps">
+                {{
+                  getTruncatedAmount(shareSlotProps.data.amount, slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
+                }}
+              </template>
+            </Column>
+            <Column header="Доля">
+              <template v-slot:body="slotProps">
+                {{
+                  getTruncatedAmount(slotProps.data.share,2) + ' ' + "%"
+                }}
+              </template>
+            </Column>
             <Column field="status" header="Статус">
-              <template #body="slotProps">
+              <template v-slot:body="slotProps">
                 <Tag :value="getStatus(slotProps.data)" :severity="getShareStatusSeverity(slotProps.data)"/>
               </template>
             </Column>
@@ -139,9 +169,9 @@ const getShareStatusSeverity = (product) => {
       return 'success';
   }
 };
-const getStatus = (product) => {
+const getStatus = (payment) => {
   if (userRole.value != UserRole.Admin) {
-    switch (product.status) {
+    switch (payment.status) {
       case ShareStatus.Created:
         return "К оплате";
 
@@ -152,7 +182,7 @@ const getStatus = (product) => {
         return "Завершен";
     }
   } else {
-    switch (product.status) {
+    switch (payment.status) {
       case ShareStatus.Created:
         return "Не оплачен";
 
@@ -168,6 +198,10 @@ const getStatus = (product) => {
 const getDateOnly = (date) => {
   return format(date, 'dd.MM.yyyy');
 };
+const getTruncatedAmount = (value, precision) => {
+  const factor = 10 ** precision;
+  return Math.trunc(value * factor) / factor;
+}
 
 const getUserRole = () => {
   const jwt = localStorage.getItem('access_token');
