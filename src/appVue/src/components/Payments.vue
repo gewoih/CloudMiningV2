@@ -5,7 +5,7 @@
         <Dropdown v-model="selectedPaymentType" :options="paymentTypes" optionLabel="name" optionValue="value"
                   @change="fetchPayments" class="w-full md:w-14rem"/>
       </template>
-      <template #end v-if="userRole === UserRole.Admin">
+      <template #end v-if="userRole === UserRole.Admin && selectedPaymentType !== PaymentType.Crypto">
         <Button label="Добавить платеж" icon="pi pi-plus" severity="success" class="mr-2"
                 @click="isModalVisible = true"/>
       </template>
