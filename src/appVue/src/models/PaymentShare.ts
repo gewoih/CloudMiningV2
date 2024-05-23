@@ -7,6 +7,7 @@ export interface PaymentShare{
         lastName: string;
         patronymic: string;
     };
+    id: string;
     amount: number;
     share: number;
     status: ShareStatus;
