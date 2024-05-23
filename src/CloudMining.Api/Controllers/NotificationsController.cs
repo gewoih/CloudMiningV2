@@ -35,4 +35,13 @@ public class NotificationsController : ControllerBase
 		var notificationSettings = await _notificationSettingsService.GetUserSettingsAsync(currentUserId.Value);
 		return Ok(_notificationSettingsMapper.ToDto(notificationSettings));
 	}
+
+	[HttpPatch("settings")]
+	public async Task<IActionResult> UpdateSettings([FromBody] NotificationSettingsDto notificationSettingsDto)
+	{
+		var currentUserId = _currentUserService.GetCurrentUserId();
+		var isUpdated = await _notificationSettingsService.UpdateUserSettingsAsync(currentUserId.Value, notificationSettingsDto);
+
+		return Ok(isUpdated);
+	}
 }
