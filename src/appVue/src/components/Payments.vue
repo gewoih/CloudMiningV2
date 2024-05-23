@@ -16,8 +16,8 @@
       <Column v-if="userRole === UserRole.Admin" expander/>
       <Column v-if="userRole === UserRole.Admin" field="isCompleted" header="Статус">
         <template v-slot:body="slotProps">
-          <Tag :value="slotProps.data.isCompleted ? 'Завершен' : 'Ожидание'"
-               :severity="getPaymentStatusSeverity(slotProps.data.isCompleted)"/>
+          <Tag :value="isCompletedHandle(slotProps.data)"
+               :severity="getPaymentStatusSeverity(slotProps.data)"/>
         </template>
       </Column>
       <Column v-if="userRole !== UserRole.Admin" field="status" header="Статус">
@@ -56,18 +56,19 @@
           field="caption"
           header="Комментарий"></Column>
       <Column v-if="userRole !== UserRole.Admin && selectedPaymentType !== PaymentType.Crypto">
-        <template v-slot:body="slotProps">
-          <div v-if="slotProps.data.status === ShareStatus.Created">
+        <template v-slot:body="sharedSlotProps">
+          <div v-if="sharedSlotProps.data.status === ShareStatus.Created">
             <ConfirmPopup group="templating">
-              <template #message="slotProps">
+              <template #message="sharedSlotProps">
                 <div class="flex align-items-center w-full gap-2 border-bottom-1 surface-border p-3 mb-3 pb-1">
-                  <i :class="slotProps.message.icon" class="text-2xl"></i>
-                  <p>{{ slotProps.message.message }}</p>
+                  <i :class="sharedSlotProps.message.icon" class="text-2xl"></i>
+                  <p>{{ sharedSlotProps.message.message }}</p>
                 </div>
               </template>
             </ConfirmPopup>
             <div class="card flex justify-content-center">
-              <Button @click="showTemplate($event, slotProps.data)" label="Подтвердить оплату"
+              <Button @click="showTemplate($event, sharedSlotProps.data, sharedSlotProps.data)"
+                      label="Подтвердить оплату"
                       severity="success"></Button>
             </div>
           </div>
@@ -103,19 +104,20 @@
               </template>
             </Column>
             <Column>
-              <template v-slot:body="slotProps">
-                <div v-if="slotProps.data.status !== ShareStatus.Completed">
+              <template v-slot:body="sharedSlotProps">
+                <div v-if="sharedSlotProps.data.status !== ShareStatus.Completed">
                   <ConfirmPopup group="templating">
-                    <template #message="slotProps">
+                    <template #message="sharedSlotProps">
                       <div class="flex align-items-center w-full gap-2 border-bottom-1 surface-border p-3 mb-3 pb-1">
-                        <i :class="slotProps.message.icon" class="text-2xl"></i>
-                        <p>{{ slotProps.message.message }}</p>
+                        <i :class="sharedSlotProps.message.icon" class="text-2xl"></i>
+                        <p>{{ sharedSlotProps.message.message }}</p>
                       </div>
                     </template>
                   </ConfirmPopup>
                   <div class="card flex justify-content-center">
-                    <Button @click="showTemplate($event, slotProps.data)" :label="getButtonLabel(slotProps.data)"
-                            :severity="getButtonSeverity(slotProps.data)"></Button>
+                    <Button @click="showTemplate($event, sharedSlotProps.data, slotProps.data)"
+                            :label="getButtonLabel(sharedSlotProps.data)"
+                            :severity="getButtonSeverity(sharedSlotProps.data)"></Button>
                   </div>
                 </div>
               </template>
@@ -150,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
+import {computed, ref} from 'vue';
 import {paymentsService} from "@/services/payments.api.ts";
 import {format} from 'date-fns'
 import {CurrencyCode} from "@/enums/CurrencyCode.ts";
@@ -196,20 +198,20 @@ const pageChange = async (event) => {
   await fetchPayments();
 };
 
-const getPaymentStatusSeverity = (isCompleted: boolean) => {
-  return isCompleted ? 'success' : 'warning';
+const getPaymentStatusSeverity = (data) => {
+  return data.isCompleted ? 'success' : 'warning';
 };
 
 const getButtonLabel = (data) => {
-  if (selectedPaymentType.value != PaymentType.Crypto){
-  switch (data.status) {
-    case ShareStatus.Created:
-      return 'Завершить оплату';
+  if (selectedPaymentType.value != PaymentType.Crypto) {
+    switch (data.status) {
+      case ShareStatus.Created:
+        return 'Завершить оплату';
 
-    case ShareStatus.Pending:
-      return 'Подтвердить оплату';
-  }
-  }else{
+      case ShareStatus.Pending:
+        return 'Подтвердить оплату';
+    }
+  } else {
     switch (data.status) {
       case ShareStatus.Created:
         return 'Подтвердить перевод';
@@ -224,14 +226,14 @@ const getButtonSeverity = (data) => {
         return 'secondary';
 
       case ShareStatus.Pending:
-        return 'primary';
+        return 'success';
     }
-  }else{
+  } else {
     switch (data.status) {
       case ShareStatus.Created:
         return 'success';
+    }
   }
-}
 };
 
 const getShareStatusSeverity = (payment) => {
@@ -298,7 +300,12 @@ const getStatus = (payment) => {
   }
 };
 
-const showTemplate = (event, data) => {
+const isCompletedHandle = (data) => {
+  return data.isCompleted ? "Завершен" : "Ожидание";
+}
+
+
+const showTemplate = (event, data, sharedData) => {
   if (userRole.value == UserRole.Admin) {
     if (data.status == ShareStatus.Created && selectedPaymentType.value != PaymentType.Crypto) {
       confirm.require({
@@ -312,12 +319,14 @@ const showTemplate = (event, data) => {
         rejectLabel: 'Нет',
         rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
         acceptClass: 'p-button-success p-button-sm',
-        accept: () => {
-        },
-        reject: () => {
+        accept: async () => {
+          await paymentsService.switchPaymentStatus(data.id);
+          data.status = ShareStatus.Completed;
+          const payment = payments.value?.find(payment => payment.id === sharedData.id) as AdminPayment;
+          payment.isCompleted = isSharesCompleted(sharedData.id).value;
         }
       });
-    }else if (selectedPaymentType.value == PaymentType.Crypto) {
+    } else if (selectedPaymentType.value == PaymentType.Crypto) {
       confirm.require({
         target: event.currentTarget,
         group: 'templating',
@@ -329,12 +338,14 @@ const showTemplate = (event, data) => {
         rejectLabel: 'Нет',
         rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
         acceptClass: 'p-button-success p-button-sm',
-        accept: () => {
-        },
-        reject: () => {
+        accept: async () => {
+          await paymentsService.switchPaymentStatus(data.id);
+          data.status = ShareStatus.Completed;
+          const payment = payments.value?.find(payment => payment.id === sharedData.id) as AdminPayment;
+          payment.isCompleted = isSharesCompleted(sharedData.id).value;
         }
       });
-    } else{
+    } else {
       confirm.require({
         target: event.currentTarget,
         group: 'templating',
@@ -346,9 +357,11 @@ const showTemplate = (event, data) => {
         rejectLabel: 'Нет',
         rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
         acceptClass: 'p-button-success p-button-sm',
-        accept: () => {
-        },
-        reject: () => {
+        accept: async () => {
+          await paymentsService.switchPaymentStatus(data.id);
+          data.status = ShareStatus.Completed;
+          const payment = payments.value?.find(payment => payment.id === sharedData.id) as AdminPayment;
+          payment.isCompleted = isSharesCompleted(sharedData.id).value;
         }
       });
     }
@@ -364,9 +377,9 @@ const showTemplate = (event, data) => {
       rejectLabel: 'Нет',
       rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
       acceptClass: 'p-button-success p-button-sm',
-      accept: () => {
-      },
-      reject: () => {
+      accept: async () => {
+        await paymentsService.switchPaymentStatus(data.id);
+        data.status = ShareStatus.Pending;
       }
     });
   }
@@ -391,6 +404,7 @@ const fetchShares = async (event) => {
     paymentSharesMap.value[paymentId] = await paymentsService.getShares(paymentId);
   }
   paymentShares.value = paymentSharesMap.value[paymentId];
+
 };
 
 const fetchPayments = async () => {
@@ -412,6 +426,16 @@ const createPayment = async () => {
     amount: 0,
   };
   isModalVisible.value = false;
+};
+
+const isSharesCompleted = (paymentId) => {
+  return computed(() => {
+    const shares = paymentSharesMap.value[paymentId];
+    if (!shares) {
+      return false;
+    }
+    return shares.every(share => share.status === ShareStatus.Completed);
+  });
 };
 
 getUserRole();

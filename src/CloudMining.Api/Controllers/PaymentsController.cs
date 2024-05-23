@@ -78,7 +78,9 @@ namespace CloudMining.Api.Controllers
 		[HttpPatch("status")]
 		public async Task<IActionResult> ChangeStatus([FromBody] ChangeStatusDto dto)
 		{ 
-			await _shareablePaymentService.ChangeStatusAsync(dto);
+			var succeeded = await _shareablePaymentService.ChangeStatusAsync(dto);
+			if (!succeeded)
+				return BadRequest();
 			
 			return Ok();
 		}
