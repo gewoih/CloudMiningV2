@@ -3,6 +3,7 @@ using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.DTO.Payments;
+using CloudMining.Interfaces.DTO.Payments.Status;
 using CloudMining.Interfaces.Interfaces;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -105,6 +106,44 @@ namespace CloudMining.Application.Services
 			return userPaymentShares;
 		}
 
+		public async Task<bool> ChangeStatusAsync(ChangeStatusDto dto)
+		{
+			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
+			var userShare = await _context.PaymentShares
+				.Where(share => share.Id == dto.ShareId)
+				.FirstOrDefaultAsync();
+
+			if (userShare == null)
+				return false;
+
+			if (!isCurrentUserAdmin)
+			{
+				userShare.Status = ShareStatus.Pending;
+			}
+			else
+			{
+				userShare.Status = ShareStatus.Completed;
+        
+				var shares = await GetPaymentShares(userShare.ShareablePaymentId);
+				var allSharesCompleted = shares.All(share => share.Status == ShareStatus.Completed);
+
+				if (allSharesCompleted)
+				{
+					var currentPayment = await _context.ShareablePayments
+						.Where(payment => payment.Id == userShare.ShareablePaymentId)
+						.FirstOrDefaultAsync();
+
+					if (currentPayment != null)
+					{
+						currentPayment.IsCompleted = true;
+					}
+				}
+			}
+
+			await _context.SaveChangesAsync().ConfigureAwait(false);
+			return true;
+		}
+		
 		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, bool withShares = false, PaymentType? paymentType = null)
 		{
 			var currentUserId = _userService.GetCurrentUserId();
@@ -138,5 +177,5 @@ namespace CloudMining.Application.Services
 			
 			return payments;
 		}
-	}
+	}	
 }
