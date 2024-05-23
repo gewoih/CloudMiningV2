@@ -51,8 +51,28 @@
           {{ getDateOnly(slotProps.data.date) }}
         </template>
       </Column>
-      <Column v-if="(userRole === UserRole.Admin && selectedPaymentType !== PaymentType.Crypto) || selectedPaymentType === PaymentType.Purchase" field="caption"
-              header="Комментарий"></Column>
+      <Column
+          v-if="(userRole === UserRole.Admin && selectedPaymentType !== PaymentType.Crypto) || selectedPaymentType === PaymentType.Purchase"
+          field="caption"
+          header="Комментарий"></Column>
+      <Column v-if="userRole !== UserRole.Admin && selectedPaymentType !== PaymentType.Crypto">
+        <template v-slot:body="slotProps">
+          <div v-if="slotProps.data.status === ShareStatus.Created">
+            <ConfirmPopup group="templating">
+              <template #message="slotProps">
+                <div class="flex align-items-center w-full gap-2 border-bottom-1 surface-border p-3 mb-3 pb-1">
+                  <i :class="slotProps.message.icon" class="text-2xl"></i>
+                  <p>{{ slotProps.message.message }}</p>
+                </div>
+              </template>
+            </ConfirmPopup>
+            <div class="card flex justify-content-center">
+              <Button @click="showTemplate($event, slotProps.data)" label="Подтвердить оплату"
+                      severity="success"></Button>
+            </div>
+          </div>
+        </template>
+      </Column>
       <template v-if="userRole === UserRole.Admin" v-slot:expansion="slotProps">
         <div class="p-3">
           <DataTable :value="paymentSharesMap[slotProps.data.id]">
@@ -80,6 +100,24 @@
             <Column field="status" header="Статус">
               <template v-slot:body="slotProps">
                 <Tag :value="getStatus(slotProps.data)" :severity="getShareStatusSeverity(slotProps.data)"/>
+              </template>
+            </Column>
+            <Column>
+              <template v-slot:body="slotProps">
+                <div v-if="slotProps.data.status !== ShareStatus.Completed">
+                  <ConfirmPopup group="templating">
+                    <template #message="slotProps">
+                      <div class="flex align-items-center w-full gap-2 border-bottom-1 surface-border p-3 mb-3 pb-1">
+                        <i :class="slotProps.message.icon" class="text-2xl"></i>
+                        <p>{{ slotProps.message.message }}</p>
+                      </div>
+                    </template>
+                  </ConfirmPopup>
+                  <div class="card flex justify-content-center">
+                    <Button @click="showTemplate($event, slotProps.data)" :label="getButtonLabel(slotProps.data)"
+                            :severity="getButtonSeverity(slotProps.data)"></Button>
+                  </div>
+                </div>
               </template>
             </Column>
           </DataTable>
@@ -123,6 +161,8 @@ import {UserRole} from "@/enums/UserRole.ts";
 import {AdminPayment} from "@/models/AdminPayment.ts";
 import {Payment} from "@/models/Payment.ts";
 import {ShareStatus} from "@/enums/ShareStatus.ts";
+import {useConfirm} from "primevue/useconfirm";
+import ConfirmPopup from 'primevue/confirmpopup';
 
 const isModalVisible = ref(false);
 const expandedRows = ref({});
@@ -134,6 +174,7 @@ const totalPaymentsCount = ref(0);
 const pageSize = ref(10);
 const pageNumber = ref(1);
 const userRole = ref(UserRole.User);
+const confirm = useConfirm();
 
 const newPayment = ref<CreatePayment>({
   caption: null,
@@ -157,6 +198,40 @@ const pageChange = async (event) => {
 
 const getPaymentStatusSeverity = (isCompleted: boolean) => {
   return isCompleted ? 'success' : 'warning';
+};
+
+const getButtonLabel = (data) => {
+  if (selectedPaymentType.value != PaymentType.Crypto){
+  switch (data.status) {
+    case ShareStatus.Created:
+      return 'Завершить оплату';
+
+    case ShareStatus.Pending:
+      return 'Подтвердить оплату';
+  }
+  }else{
+    switch (data.status) {
+      case ShareStatus.Created:
+        return 'Подтвердить перевод';
+    }
+  }
+};
+
+const getButtonSeverity = (data) => {
+  if (selectedPaymentType.value != PaymentType.Crypto) {
+    switch (data.status) {
+      case ShareStatus.Created:
+        return 'secondary';
+
+      case ShareStatus.Pending:
+        return 'primary';
+    }
+  }else{
+    switch (data.status) {
+      case ShareStatus.Created:
+        return 'success';
+  }
+}
 };
 
 const getShareStatusSeverity = (payment) => {
@@ -223,6 +298,79 @@ const getStatus = (payment) => {
   }
 };
 
+const showTemplate = (event, data) => {
+  if (userRole.value == UserRole.Admin) {
+    if (data.status == ShareStatus.Created && selectedPaymentType.value != PaymentType.Crypto) {
+      confirm.require({
+        target: event.currentTarget,
+        group: 'templating',
+        message: 'Вы хотите завершить платеж для этого участника?',
+        icon: 'pi pi-question-circle',
+        acceptIcon: 'pi pi-check',
+        rejectIcon: 'pi pi-times',
+        acceptLabel: 'Да',
+        rejectLabel: 'Нет',
+        rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+        acceptClass: 'p-button-success p-button-sm',
+        accept: () => {
+        },
+        reject: () => {
+        }
+      });
+    }else if (selectedPaymentType.value == PaymentType.Crypto) {
+      confirm.require({
+        target: event.currentTarget,
+        group: 'templating',
+        message: 'Вы хотите подтвердить перевод средств участнику?',
+        icon: 'pi pi-question-circle',
+        acceptIcon: 'pi pi-check',
+        rejectIcon: 'pi pi-times',
+        acceptLabel: 'Да',
+        rejectLabel: 'Нет',
+        rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+        acceptClass: 'p-button-success p-button-sm',
+        accept: () => {
+        },
+        reject: () => {
+        }
+      });
+    } else{
+      confirm.require({
+        target: event.currentTarget,
+        group: 'templating',
+        message: 'Вы подтверждаете перевод средств от участника?',
+        icon: 'pi pi-question-circle',
+        acceptIcon: 'pi pi-check',
+        rejectIcon: 'pi pi-times',
+        acceptLabel: 'Да',
+        rejectLabel: 'Нет',
+        rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+        acceptClass: 'p-button-success p-button-sm',
+        accept: () => {
+        },
+        reject: () => {
+        }
+      });
+    }
+  } else {
+    confirm.require({
+      target: event.currentTarget,
+      group: 'templating',
+      message: 'Вы действительно перевели средства?',
+      icon: 'pi pi-question-circle',
+      acceptIcon: 'pi pi-check',
+      rejectIcon: 'pi pi-times',
+      acceptLabel: 'Да',
+      rejectLabel: 'Нет',
+      rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+      acceptClass: 'p-button-success p-button-sm',
+      accept: () => {
+      },
+      reject: () => {
+      }
+    });
+  }
+}
 const getDateOnly = (date) => {
   return format(date, 'dd.MM.yyyy');
 };
