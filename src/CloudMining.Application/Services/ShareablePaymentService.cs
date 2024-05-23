@@ -125,9 +125,9 @@ namespace CloudMining.Application.Services
 				userShare.Status = ShareStatus.Completed;
         
 				var shares = await GetPaymentShares(userShare.ShareablePaymentId);
-				var allSharesCompleted = shares.All(share => share.Status == ShareStatus.Completed);
+				var isAllSharesCompleted = shares.All(share => share.Status == ShareStatus.Completed);
 
-				if (allSharesCompleted)
+				if (isAllSharesCompleted)
 				{
 					var currentPayment = await _context.ShareablePayments
 						.Where(payment => payment.Id == userShare.ShareablePaymentId)
