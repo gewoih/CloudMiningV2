@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { NotificationSettings } from "@/models/NotificationSettings.ts";
+import {} from "@/services/users.api.ts";
+import {useToast} from "primevue/usetoast";
+import {notificationsService} from "@/services/notifications.api.ts";
+
+const toast = useToast();
 
 const notificationSettings = ref<NotificationSettings>({
   isTelegramNotificationsEnabled: false,
@@ -10,10 +15,26 @@ const notificationSettings = ref<NotificationSettings>({
   unpaidElectricityPaymentReminder: false,
   unpaidPurchasePaymentReminder: false,
 });
+
+async function updateSettings() {
+  const isUpdated = await notificationsService.updateNotificationSettings(notificationSettings.value);
+  if (isUpdated)
+    toast.add({ severity: 'success', summary: 'Успех', detail: 'Настройки успешно сохранены', life: 3000 })
+  else
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Произошла ошибка при сохранении настроек', life: 3000 })
+}
+
+const setNotificationSettings = async () => {
+  notificationSettings.value = await notificationsService.getNotificationSettings();
+};
+
+setNotificationSettings();
+
 </script>
 
 <template>
- 
+ <Toast/>
+  
   <div>
     <h2>Настройки уведомлений</h2>
 
@@ -54,10 +75,12 @@ const notificationSettings = ref<NotificationSettings>({
       </div>
 
       <div class="field-checkbox">
-        <Checkbox :model-value="notificationSettings.unpaidPurchasePaymentReminder" :binary="true" input-id="purchaseReminder"/>
+        <Checkbox v-model="notificationSettings.unpaidPurchasePaymentReminder" :binary="true" input-id="purchaseReminder"/>
         <label for="purchaseReminder">По покупкам</label>
       </div>
     </div>
+    
+    <Button class="mt-5" label="Сохранить настройки" @click="updateSettings"/>
   </div>
 </template>
 
