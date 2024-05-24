@@ -11,5 +11,6 @@ namespace CloudMining.Interfaces.Interfaces
 	    Task<ShareablePayment?> CreateAsync(CreatePaymentDto createPaymentDto);
 	    Task<DateTime> GetLatestPaymentDateAsync(PaymentType paymentType);
         Task<List<PaymentShare>> GetPaymentShares(Guid paymentId);
+        Task<bool> CompletePaymentShareAsync(Guid paymentShareId);
     }
 }

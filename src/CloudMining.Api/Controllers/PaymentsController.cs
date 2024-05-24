@@ -73,5 +73,16 @@ namespace CloudMining.Api.Controllers
 			var paymentDto = _adminPaymentMapper.ToDto(payment);
 			return paymentDto;
 		}
+		
+		[Authorize]
+		[HttpPatch("status")]
+		public async Task<IActionResult> ChangeStatus([FromBody] Guid paymentShareId)
+		{ 
+			var succeeded = await _shareablePaymentService.CompletePaymentShareAsync(paymentShareId);
+			if (!succeeded)
+				return NotFound();
+			
+			return Ok();
+		}
 	}
 }

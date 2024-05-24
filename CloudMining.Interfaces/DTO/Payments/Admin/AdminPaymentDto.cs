@@ -2,5 +2,5 @@
 
 public class AdminPaymentDto : PaymentDto
 {
-    public string? Caption { get; set; }
+    public bool IsCompleted { get; set; }
 }

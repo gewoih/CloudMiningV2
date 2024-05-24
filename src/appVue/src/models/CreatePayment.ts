@@ -7,5 +7,4 @@ export interface CreatePayment{
     paymentType: PaymentType;
     date: Date;
     amount: number;
-    isCompleted: boolean;
 }

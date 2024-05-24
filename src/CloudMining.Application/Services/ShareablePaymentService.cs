@@ -65,7 +65,7 @@ namespace CloudMining.Application.Services
 				CurrencyId = foundCurrency.Id,
 				Type = createPaymentDto.PaymentType,
 				PaymentShares = usersPaymentShares,
-				Date = createPaymentDto.Date.ToUniversalTime()
+				Date = createPaymentDto.Date.ToUniversalTime(),
 			};
 			
 			await _context.ShareablePayments.AddAsync(newPayment).ConfigureAwait(false);
@@ -104,6 +104,19 @@ namespace CloudMining.Application.Services
 			return userPaymentShares;
 		}
 
+		public async Task<bool> CompletePaymentShareAsync(Guid paymentShareId)
+		{
+			var paymentShare = await _context.PaymentShares.FindAsync(paymentShareId);
+			if (paymentShare == null)
+				return false;
+
+			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
+			paymentShare.Status = isCurrentUserAdmin ? ShareStatus.Completed : ShareStatus.Pending;
+			await _context.SaveChangesAsync().ConfigureAwait(false);
+			
+			return true;
+		}
+		
 		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, bool withShares = false, PaymentType? paymentType = null)
 		{
 			var currentUserId = _currentUserService.GetCurrentUserId();
@@ -112,6 +125,7 @@ namespace CloudMining.Application.Services
 			
 			var paymentsQuery = _context.ShareablePayments
 				.Include(payment => payment.PaymentShares)
+				.Include(payment => payment.Currency)
 				.AsQueryable();
 
 			if (withShares)
@@ -136,5 +150,5 @@ namespace CloudMining.Application.Services
 			
 			return payments;
 		}
-	}
+	}	
 }

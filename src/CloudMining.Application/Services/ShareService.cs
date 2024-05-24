@@ -1,4 +1,5 @@
-﻿using CloudMining.Domain.Models.Currencies;
+﻿using CloudMining.Domain.Enums;
+using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.Shares;
 using CloudMining.Infrastructure.Database;
@@ -91,7 +92,8 @@ namespace CloudMining.Application.Services
 					UserId = userShare.UserId,
 					Amount = userShare.Amount,
 					Share = userShare.Share,
-					Date = date.ToUniversalTime()
+					Date = date.ToUniversalTime(),
+					Status = ShareStatus.Created
 				};
 
 				paymentShares.Add(paymentShare);

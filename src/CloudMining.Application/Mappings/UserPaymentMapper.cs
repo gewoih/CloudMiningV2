@@ -1,3 +1,6 @@
+﻿using CloudMining.Domain.Models;
+using CloudMining.Domain.Models.Payments.Shareable;
+using CloudMining.Interfaces.DTO.Currencies;
 ﻿using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.DTO.Payments.User;
 using CloudMining.Interfaces.Interfaces;
@@ -23,12 +26,19 @@ public class UserPaymentMapper : IMapper<ShareablePayment, UserPaymentDto>
 
         return new UserPaymentDto
         {
-            Id = model.Id,
-            Amount = model.Amount,
+            Id = currentUserPaymentShare?.Id ?? Guid.Empty,
+            Caption = model.Caption,
             Date = model.Date,
-            IsCompleted = model.IsCompleted,
+            Amount = model.Amount,
+            Currency = new CurrencyDto()
+            {
+                Code = model.Currency.Code,
+                Precision = model.Currency.Precision,
+                ShortName = model.Currency.ShortName
+            },
             Share = userShare,
-            SharedAmount = userSharedAmount
+            SharedAmount = userSharedAmount,
+            Status = currentUserPaymentShare?.Status ?? 0
         };
     }
 

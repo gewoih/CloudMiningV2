@@ -10,7 +10,7 @@ namespace CloudMining.Domain.Models.Identity
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
 		public string Patronymic { get; set; }
-		public string AvatarPath { get; set; }
+		public string? AvatarPath { get; set; }
 		public string? TelegramUsername { get; set; }
 		public long? TelegramChatId { get; set; }
 		public List<Deposit> Deposits { get; set; }

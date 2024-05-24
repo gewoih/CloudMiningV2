@@ -46,6 +46,10 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Property<int>("Precision")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ShortName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -59,68 +63,74 @@ namespace CloudMining.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3b0ab7ba-a4aa-4697-9a87-7193f533fed0"),
+                            Id = new Guid("e23a58c6-9cef-4c6f-94fc-8577a4b4fb84"),
                             Caption = "Рубль",
                             Code = 1,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             Precision = 2,
+                            ShortName = "₽",
                             UpdatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("7984a97b-3fdc-4e3b-a85b-d05ad078ba08"),
+                            Id = new Guid("f1debadf-a2c3-4908-a11c-8329df252fb8"),
                             Caption = "Доллар",
                             Code = 0,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             Precision = 2,
+                            ShortName = "$",
                             UpdatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("f624be73-447f-47ac-8911-0c72e07933c9"),
+                            Id = new Guid("9a3e4016-240e-44e3-a002-0ee2cff499a3"),
                             Caption = "Bitcoin",
                             Code = 2,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
-                            Precision = 4,
+                            Precision = 5,
+                            ShortName = "BTC",
                             UpdatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("24f28268-32bd-4ec9-b75d-60bbecaacec3"),
+                            Id = new Guid("8927702d-ae2e-4a5a-af19-2e6fa1824648"),
                             Caption = "Etherium",
                             Code = 3,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             Precision = 4,
+                            ShortName = "ETH",
                             UpdatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("44de677d-e090-4cd4-ae64-eac0681c0866"),
+                            Id = new Guid("62c520f6-499a-499e-86c2-b2af9c8eba42"),
                             Caption = "Litecoin",
                             Code = 4,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             Precision = 2,
+                            ShortName = "LTC",
                             UpdatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
-                            Id = new Guid("002fd265-9afc-4de6-9e43-e1a58e760ff6"),
+                            Id = new Guid("a5450179-3bff-4645-9209-04acc6168c5b"),
                             Caption = "Dogecoin",
                             Code = 5,
                             CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DeletedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             Precision = 0,
+                            ShortName = "DOGE",
                             UpdatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
@@ -162,7 +172,6 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("AvatarPath")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -342,9 +351,6 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Property<DateTime>("DeletedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -353,6 +359,9 @@ namespace CloudMining.Infrastructure.Migrations
 
                     b.Property<Guid>("ShareablePaymentId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -392,9 +401,6 @@ namespace CloudMining.Infrastructure.Migrations
 
                     b.Property<DateTime>("DeletedDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");

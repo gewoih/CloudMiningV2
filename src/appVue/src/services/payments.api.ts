@@ -22,6 +22,9 @@ class PaymentsService {
 
         return response.data;
     }
+    async switchPaymentStatus(shareId: string){
+        return apiService.axiosInstance.patch("/payments/status", shareId)
+    }
 }
 
 export const paymentsService = new PaymentsService();

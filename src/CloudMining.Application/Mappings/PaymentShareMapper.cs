@@ -19,10 +19,10 @@ public class PaymentShareMapper : IMapper<PaymentShare, PaymentShareDto>
                 LastName = model.User.LastName,
                 Patronymic = model.User.Patronymic
             },
-            
+            Id = model.Id,
             Amount = model.Amount,
             Share = model.Share,
-            IsCompleted = model.IsCompleted
+            Status = model.Status
         };
     }
 
@@ -40,7 +40,7 @@ public class PaymentShareMapper : IMapper<PaymentShare, PaymentShareDto>
             
             Amount = dto.Amount,
             Share = dto.Share,
-            IsCompleted = dto.IsCompleted
+            Status = dto.Status
         };
     }
 }
