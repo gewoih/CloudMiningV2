@@ -110,7 +110,7 @@ namespace CloudMining.Application.Services
 			if (paymentShare == null)
 				return false;
 
-			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
+			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
 			paymentShare.Status = isCurrentUserAdmin ? ShareStatus.Completed : ShareStatus.Pending;
 			await _context.SaveChangesAsync().ConfigureAwait(false);
 			
