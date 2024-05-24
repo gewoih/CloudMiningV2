@@ -3,7 +3,6 @@ using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.DTO.Payments;
 using CloudMining.Interfaces.DTO.Payments.Admin;
-using CloudMining.Interfaces.DTO.Payments.Status;
 using CloudMining.Interfaces.DTO.Payments.User;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -74,13 +73,14 @@ namespace CloudMining.Api.Controllers
 			var paymentDto = _adminPaymentMapper.ToDto(payment);
 			return paymentDto;
 		}
+		
 		[Authorize]
 		[HttpPatch("status")]
-		public async Task<IActionResult> ChangeStatus([FromBody] ChangeStatusDto dto)
+		public async Task<IActionResult> ChangeStatus([FromBody] Guid paymentShareId)
 		{ 
-			var succeeded = await _shareablePaymentService.ChangeStatusAsync(dto);
+			var succeeded = await _shareablePaymentService.CompletePaymentShareAsync(paymentShareId);
 			if (!succeeded)
-				return BadRequest();
+				return NotFound();
 			
 			return Ok();
 		}

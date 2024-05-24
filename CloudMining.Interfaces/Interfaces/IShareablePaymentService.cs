@@ -1,7 +1,6 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.DTO.Payments;
-using CloudMining.Interfaces.DTO.Payments.Status;
 
 namespace CloudMining.Interfaces.Interfaces
 {
@@ -12,6 +11,6 @@ namespace CloudMining.Interfaces.Interfaces
 	    Task<ShareablePayment?> CreateAsync(CreatePaymentDto createPaymentDto);
 	    Task<DateTime> GetLatestPaymentDateAsync(PaymentType paymentType);
         Task<List<PaymentShare>> GetPaymentShares(Guid paymentId);
-        Task<bool> ChangeStatusAsync(ChangeStatusDto dto);
+        Task<bool> CompletePaymentShareAsync(Guid paymentShareId);
     }
 }

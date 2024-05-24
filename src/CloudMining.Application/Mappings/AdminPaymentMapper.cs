@@ -1,5 +1,4 @@
-﻿using CloudMining.Domain.Models;
-using CloudMining.Domain.Models.Payments.Shareable;
+﻿using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Payments.Admin;
 
@@ -33,7 +32,6 @@ public class AdminPaymentMapper : IMapper<ShareablePayment, AdminPaymentDto>
             Caption = dto.Caption,
             Date = dto.Date,
             Amount = dto.Amount,
-            IsCompleted = dto.IsCompleted
         };
     }
 }
