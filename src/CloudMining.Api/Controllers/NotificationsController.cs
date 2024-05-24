@@ -13,19 +13,35 @@ namespace CloudMining.Api.Controllers;
 public class NotificationsController : ControllerBase
 {
 	private readonly INotificationSettingsService _notificationSettingsService;
+	private readonly ICurrentUserService _currentUserService;
 	private readonly IMapper<NotificationSettings, NotificationSettingsDto> _notificationSettingsMapper;
 
 	public NotificationsController(INotificationSettingsService notificationSettingsService, 
-		IMapper<NotificationSettings, NotificationSettingsDto> notificationSettingsMapper)
+		IMapper<NotificationSettings, NotificationSettingsDto> notificationSettingsMapper, 
+		ICurrentUserService currentUserService)
 	{
 		_notificationSettingsService = notificationSettingsService;
 		_notificationSettingsMapper = notificationSettingsMapper;
+		_currentUserService = currentUserService;
 	}
 
 	[HttpGet("settings")]
-	public async Task<NotificationSettingsDto> GetSettings()
+	public async Task<IActionResult> GetSettings()
 	{
-		var notificationSettings = await _notificationSettingsService.GetUserSettingsAsync();
-		return _notificationSettingsMapper.ToDto(notificationSettings);
+		var currentUserId = _currentUserService.GetCurrentUserId();
+		if (!currentUserId.HasValue)
+			return Forbid();
+		
+		var notificationSettings = await _notificationSettingsService.GetUserSettingsAsync(currentUserId.Value);
+		return Ok(_notificationSettingsMapper.ToDto(notificationSettings));
+	}
+
+	[HttpPatch("settings")]
+	public async Task<IActionResult> UpdateSettings([FromBody] NotificationSettingsDto notificationSettingsDto)
+	{
+		var currentUserId = _currentUserService.GetCurrentUserId();
+		var isUpdated = await _notificationSettingsService.UpdateUserSettingsAsync(currentUserId.Value, notificationSettingsDto);
+
+		return Ok(isUpdated);
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using CloudMining.Domain.Models;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.DTO.Currencies;
+﻿using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.DTO.Payments.User;
 using CloudMining.Interfaces.Interfaces;
 
@@ -8,16 +9,16 @@ namespace CloudMining.Application.Mappings;
 
 public class UserPaymentMapper : IMapper<ShareablePayment, UserPaymentDto>
 {
-    private readonly IUserService _userService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public UserPaymentMapper(IUserService userService)
+    public UserPaymentMapper(ICurrentUserService currentUserService)
     {
-        _userService = userService;
+        _currentUserService = currentUserService;
     }
 
     public UserPaymentDto ToDto(ShareablePayment model)
     {
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _currentUserService.GetCurrentUserId();
         var currentUserPaymentShare = model.PaymentShares.Find(paymentShare => paymentShare.UserId == currentUserId);
 
         var userShare = currentUserPaymentShare?.Share ?? 0;

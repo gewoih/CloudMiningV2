@@ -14,25 +14,25 @@ namespace CloudMining.Application.Services
 		private readonly CloudMiningContext _context;
 		private readonly ICurrencyService _currencyService;
 		private readonly IShareService _shareService;
-		private readonly IUserService _userService;
+		private readonly ICurrentUserService _currentUserService;
 		private readonly IPublishEndpoint _publishEndpoint;
 
 		public ShareablePaymentService(CloudMiningContext context, 
 			ICurrencyService currencyService, 
 			IShareService shareService, 
-			IUserService userService, 
+			ICurrentUserService currentUserService, 
 			IPublishEndpoint publishEndpoint)
 		{
 			_context = context;
 			_currencyService = currencyService;
 			_shareService = shareService;
-			_userService = userService;
+			_currentUserService = currentUserService;
 			_publishEndpoint = publishEndpoint;
 		}
 
 		public async Task<int> GetUserPaymentsCount(PaymentType? paymentType = null)
 		{
-			var currentUserId = _userService.GetCurrentUserId();
+			var currentUserId = _currentUserService.GetCurrentUserId();
 			if (currentUserId == null)
 				return 0;
 
@@ -69,7 +69,7 @@ namespace CloudMining.Application.Services
 			};
 			
 			await _context.ShareablePayments.AddAsync(newPayment).ConfigureAwait(false);
-			await _publishEndpoint.Publish(new ShareablePaymentCreated { Payment = newPayment });
+			await _publishEndpoint.Publish(new PaymentCreated { Payment = newPayment });
 
 			await _context.SaveChangesAsync().ConfigureAwait(false);
 
@@ -89,8 +89,8 @@ namespace CloudMining.Application.Services
 
 		public async Task<List<PaymentShare>> GetPaymentShares(Guid paymentId)
 		{
-			var currentUserId = _userService.GetCurrentUserId();
-			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
+			var currentUserId = _currentUserService.GetCurrentUserId();
+			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
 
 			//TODO: Получать User (ФИО) не из БД, а из UserService
 			var userPaymentSharesQuery = _context.PaymentShares
@@ -119,7 +119,7 @@ namespace CloudMining.Application.Services
 		
 		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, bool withShares = false, PaymentType? paymentType = null)
 		{
-			var currentUserId = _userService.GetCurrentUserId();
+			var currentUserId = _currentUserService.GetCurrentUserId();
 			if (currentUserId == null)
 				return [];
 			
@@ -135,7 +135,7 @@ namespace CloudMining.Application.Services
 				paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
 			
 			//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
-			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
+			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
 			if (!isCurrentUserAdmin)
 			{
 				paymentsQuery = paymentsQuery.Where(payment =>

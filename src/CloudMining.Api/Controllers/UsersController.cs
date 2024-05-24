@@ -11,24 +11,26 @@ namespace CloudMining.Api.Controllers
 	[ApiController]
 	public class UsersController : ControllerBase
 	{
-		private readonly IUserService _userService;
+		private readonly IAuthService _authService;
+		private readonly ICurrentUserService _currentUserService;
 
-		public UsersController(IUserService userService)
+		public UsersController(IAuthService authService, ICurrentUserService currentUserService)
 		{
-			_userService = userService;
+			_authService = authService;
+			_currentUserService = currentUserService;
 		}
 
 		[HttpPost]
 		public async Task<IdentityResult> Register([FromBody] RegisterDto credentials)
 		{
-			var registrationResult = await _userService.RegisterAsync(credentials);
+			var registrationResult = await _authService.RegisterAsync(credentials);
 			return registrationResult;
 		}
 
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] LoginDto credentials)
 		{
-			var userJwt = await _userService.LoginAsync(credentials);
+			var userJwt = await _authService.LoginAsync(credentials);
 			if (string.IsNullOrEmpty(userJwt))
 				return Unauthorized();
 			
@@ -39,7 +41,7 @@ namespace CloudMining.Api.Controllers
 		[HttpPatch("email")]
 		public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDto dto)
 		{
-			var succeeded = await _userService.ChangeEmailAsync(dto);
+			var succeeded = await _authService.ChangeEmailAsync(dto);
 			if (!succeeded)
 				return BadRequest();
 				
@@ -50,7 +52,7 @@ namespace CloudMining.Api.Controllers
 		[HttpPatch("password")]
 		public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
 		{
-			var succeeded = await _userService.ChangePasswordAsync(dto);
+			var succeeded = await _authService.ChangePasswordAsync(dto);
 			if (!succeeded)
 				return Unauthorized();
 				
@@ -61,19 +63,11 @@ namespace CloudMining.Api.Controllers
 		[HttpPatch("avatar")]
 		public async Task<IActionResult> ChangeAvatar([FromForm] FileDto file)
 		{
-			var newAvatarPath = await _userService.ChangeAvatarAsync(file);
+			var newAvatarPath = await _currentUserService.ChangeAvatarAsync(file);
 			if (string.IsNullOrEmpty(newAvatarPath))
 				return Unauthorized();
 				
 			return Ok(newAvatarPath);
-		}
-
-		[Authorize]
-		[HttpPatch("settings")]
-		public async Task<IActionResult> ChangeSettings([FromBody] UserSettingsDto settings)
-		{
-			var isSettingsUpdated = await _userService.ChangeUserSettings(settings);
-			return Ok(isSettingsUpdated);
 		}
 	}
 }
