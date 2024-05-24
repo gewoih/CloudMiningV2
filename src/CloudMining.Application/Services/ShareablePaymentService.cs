@@ -117,7 +117,7 @@ namespace CloudMining.Application.Services
 			return true;
 		}
 		
-		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, bool withShares = false, PaymentType? paymentType = null)
+		public async Task<List<ShareablePayment>> GetAsync(int skip, int take, PaymentType? paymentType = null)
 		{
 			var currentUserId = _currentUserService.GetCurrentUserId();
 			if (currentUserId == null)
@@ -127,9 +127,6 @@ namespace CloudMining.Application.Services
 				.Include(payment => payment.PaymentShares)
 				.Include(payment => payment.Currency)
 				.AsQueryable();
-
-			if (withShares)
-				paymentsQuery = paymentsQuery.Include(payment => payment.PaymentShares);
 			
 			if (paymentType != null)
 				paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);

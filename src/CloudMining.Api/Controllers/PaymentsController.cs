@@ -39,10 +39,9 @@ namespace CloudMining.Api.Controllers
 		public async Task<PaymentsPageDto> Get(
 			[FromQuery] PaymentType paymentType, 
 			[FromQuery] int skip = 0, 
-			[FromQuery] int take = 10,
-			[FromQuery] bool withShares = false)
+			[FromQuery] int take = 10)
 		{
-			var paginatedPayments = await _shareablePaymentService.GetAsync(skip, take, withShares, paymentType);
+			var paginatedPayments = await _shareablePaymentService.GetAsync(skip, take, paymentType);
 			var totalPaymentsCount = await _shareablePaymentService.GetUserPaymentsCount(paymentType);
 			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
 			
