@@ -3,7 +3,6 @@ using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.DTO.Payments;
-using CloudMining.Interfaces.DTO.Payments.Status;
 using CloudMining.Interfaces.Interfaces;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -67,7 +66,6 @@ namespace CloudMining.Application.Services
 				Type = createPaymentDto.PaymentType,
 				PaymentShares = usersPaymentShares,
 				Date = createPaymentDto.Date.ToUniversalTime(),
-				IsCompleted = false
 			};
 			
 			await _context.ShareablePayments.AddAsync(newPayment).ConfigureAwait(false);
@@ -106,41 +104,16 @@ namespace CloudMining.Application.Services
 			return userPaymentShares;
 		}
 
-		public async Task<bool> ChangeStatusAsync(ChangeStatusDto dto)
+		public async Task<bool> CompletePaymentShareAsync(Guid paymentShareId)
 		{
-			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
-			var userShare = await _context.PaymentShares
-				.Where(share => share.Id == dto.ShareId)
-				.FirstOrDefaultAsync();
-
-			if (userShare == null)
+			var paymentShare = await _context.PaymentShares.FindAsync(paymentShareId);
+			if (paymentShare == null)
 				return false;
 
-			if (!isCurrentUserAdmin)
-			{
-				userShare.Status = ShareStatus.Pending;
-			}
-			else
-			{
-				userShare.Status = ShareStatus.Completed;
-        
-				var shares = await GetPaymentShares(userShare.ShareablePaymentId);
-				var isAllSharesCompleted = shares.All(share => share.Status == ShareStatus.Completed);
-
-				if (isAllSharesCompleted)
-				{
-					var currentPayment = await _context.ShareablePayments
-						.Where(payment => payment.Id == userShare.ShareablePaymentId)
-						.FirstOrDefaultAsync();
-
-					if (currentPayment != null)
-					{
-						currentPayment.IsCompleted = true;
-					}
-				}
-			}
-
+			var isCurrentUserAdmin = _userService.IsCurrentUserAdmin();
+			paymentShare.Status = isCurrentUserAdmin ? ShareStatus.Completed : ShareStatus.Pending;
 			await _context.SaveChangesAsync().ConfigureAwait(false);
+			
 			return true;
 		}
 		
