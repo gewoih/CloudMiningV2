@@ -14,12 +14,7 @@ public class AdminPaymentMapper : IMapper<ShareablePayment, AdminPaymentDto>
             Caption = model.Caption,
             Date = model.Date,
             Amount = model.Amount,
-            Currency = new CurrencyDto()
-            {
-                Code = model.Currency.Code,
-                Precision = model.Currency.Precision,
-                ShortName = model.Currency.ShortName
-            },
+            Currency = new CurrencyDto(model.Currency.ShortName, model.Currency.Code, model.Currency.Precision),
             IsCompleted = model.IsCompleted
         };
     }

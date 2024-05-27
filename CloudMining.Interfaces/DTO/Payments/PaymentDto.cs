@@ -1,14 +1,12 @@
-﻿using CloudMining.Domain.Enums;
-using CloudMining.Domain.Models.Currencies;
-using CloudMining.Interfaces.DTO.Currencies;
+﻿using CloudMining.Interfaces.DTO.Currencies;
 
 namespace CloudMining.Interfaces.DTO.Payments;
 
 public abstract class PaymentDto
 {
-    public Guid Id { get; set; }
-    public DateTime Date { get; set; }
-    public decimal Amount { get; set; }
-    public CurrencyDto Currency { get; set; }
-    public string? Caption { get; set; }
+    public Guid Id { get; init; }
+    public DateTime Date { get; init; }
+    public decimal Amount { get; init; }
+    public CurrencyDto Currency { get; init; }
+    public string? Caption { get; init; }
 }

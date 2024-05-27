@@ -42,11 +42,11 @@ namespace CloudMining.Application.Services
             foreach (var payout in latestPayouts.Take(10))
             {
                 var createPaymentDto = new CreatePaymentDto(
-                    caption: null,
-                    currencyCode: Enum.Parse<CurrencyCode>(payout.CoinName),
-                    paymentType: PaymentType.Crypto,
-                    dateTime: payout.GmtTime,
-                    amount: payout.Amount);
+                    Caption: null, 
+                    CurrencyCode: Enum.Parse<CurrencyCode>(payout.CoinName), 
+                    PaymentType: PaymentType.Crypto,
+                    Date: payout.GmtTime,
+                    Amount: payout.Amount);
 
                 _ = await shareablePaymentService.CreateAsync(createPaymentDto);
             }

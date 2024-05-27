@@ -1,11 +1,11 @@
 namespace CloudMining.Interfaces.DTO.NotificationSettings;
 
-public sealed class NotificationSettingsDto
+public record NotificationSettingsDto
 {
-	public bool IsTelegramNotificationsEnabled { get; set; }
-	public bool NewPayoutNotification { get; set; }
-	public bool NewElectricityPaymentNotification { get; set; }
-	public bool NewPurchaseNotification { get; set; }
-	public bool UnpaidElectricityPaymentReminder { get; set; }
-	public bool UnpaidPurchasePaymentReminder { get; set; }
+	public bool IsTelegramNotificationsEnabled { get; init; }
+	public bool NewPayoutNotification { get; init; }
+	public bool NewElectricityPaymentNotification { get; init; }
+	public bool NewPurchaseNotification { get; init; }
+	public bool UnpaidElectricityPaymentReminder { get; init; }
+	public bool UnpaidPurchasePaymentReminder { get; init; }
 }

@@ -1,11 +1,3 @@
-﻿namespace CloudMining.Interfaces.DTO.Users
-{
-	public sealed class RegisterDto
-	{
-		public string FirstName { get; set; }
-		public string LastName { get; set; }
-		public string Patronymic { get; set; }
-		public string Email { get; set; }
-		public string Password { get; set; }
-	}
-}
+﻿namespace CloudMining.Interfaces.DTO.Users;
+
+public record RegisterDto(string FirstName, string LastName, string Patronymic, string Email, string Password);
