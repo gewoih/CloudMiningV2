@@ -23,7 +23,7 @@ public class TelegramService : BackgroundService
 		_botClient.StartReceiving(HandleUpdateAsync, HandlePollingErrorAsync, cancellationToken: stoppingToken);
 		return Task.CompletedTask;
 	}
-	
+
 	private async Task HandleUpdateAsync(
 		ITelegramBotClient botClient,
 		Update update,
@@ -32,23 +32,24 @@ public class TelegramService : BackgroundService
 		if (update.Type is UpdateType.Message)
 		{
 			var chatId = update.Message.Chat.Id;
-			
+
 			await using var scope = _serviceProvider.CreateAsyncScope();
 			var userService = scope.ServiceProvider.GetRequiredService<ICurrentUserService>();
 
 			var isUpdated = await userService.ChangeTelegramChatIdAsync(update.Message.Chat.Username, chatId);
-			var message = isUpdated 
-				? "Данные успешно обновлены!" 
+			var message = isUpdated
+				? "Данные успешно обновлены!"
 				: "Произошла ошибка. \nПожалуйста, укажите ваш TelegramUsername на сайте CloudMining.";
-			
+
 			await botClient.SendTextMessageAsync(
-				chatId: chatId,
-				text: message,
+				chatId,
+				message,
 				cancellationToken: cancellationToken);
 		}
 	}
 
-	private static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+	private static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception,
+		CancellationToken cancellationToken)
 	{
 		return Task.CompletedTask;
 	}

@@ -16,9 +16,9 @@ public static class MassTransitSetup
 				configurator.UseBusOutbox();
 				configurator.QueryDelay = TimeSpan.FromSeconds(10);
 			});
-			
+
 			x.AddConsumer<PaymentCreatedConsumer>();
-			
+
 			x.UsingInMemory((context, cfg) =>
 			{
 				cfg.AutoStart = true;

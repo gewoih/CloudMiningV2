@@ -5,69 +5,68 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CloudMining.Api.Controllers
+namespace CloudMining.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class UsersController : ControllerBase
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	public class UsersController : ControllerBase
+	private readonly IAuthService _authService;
+	private readonly ICurrentUserService _currentUserService;
+
+	public UsersController(IAuthService authService, ICurrentUserService currentUserService)
 	{
-		private readonly IAuthService _authService;
-		private readonly ICurrentUserService _currentUserService;
+		_authService = authService;
+		_currentUserService = currentUserService;
+	}
 
-		public UsersController(IAuthService authService, ICurrentUserService currentUserService)
-		{
-			_authService = authService;
-			_currentUserService = currentUserService;
-		}
+	[HttpPost]
+	public async Task<IdentityResult> Register([FromBody] RegisterDto credentials)
+	{
+		var registrationResult = await _authService.RegisterAsync(credentials);
+		return registrationResult;
+	}
 
-		[HttpPost]
-		public async Task<IdentityResult> Register([FromBody] RegisterDto credentials)
-		{
-			var registrationResult = await _authService.RegisterAsync(credentials);
-			return registrationResult;
-		}
+	[HttpPost("login")]
+	public async Task<IActionResult> Login([FromBody] LoginDto credentials)
+	{
+		var userJwt = await _authService.LoginAsync(credentials);
+		if (string.IsNullOrEmpty(userJwt))
+			return Unauthorized();
 
-		[HttpPost("login")]
-		public async Task<IActionResult> Login([FromBody] LoginDto credentials)
-		{
-			var userJwt = await _authService.LoginAsync(credentials);
-			if (string.IsNullOrEmpty(userJwt))
-				return Unauthorized();
-			
-			return Ok(userJwt);
-		}
+		return Ok(userJwt);
+	}
 
-		[Authorize]
-		[HttpPatch("email")]
-		public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDto dto)
-		{
-			var succeeded = await _authService.ChangeEmailAsync(dto);
-			if (!succeeded)
-				return BadRequest();
-				
-			return Ok();
-		}
+	[Authorize]
+	[HttpPatch("email")]
+	public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDto dto)
+	{
+		var succeeded = await _authService.ChangeEmailAsync(dto);
+		if (!succeeded)
+			return BadRequest();
 
-		[Authorize]
-		[HttpPatch("password")]
-		public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
-		{
-			var succeeded = await _authService.ChangePasswordAsync(dto);
-			if (!succeeded)
-				return Unauthorized();
-				
-			return Ok();
-		}
+		return Ok();
+	}
 
-		[Authorize]
-		[HttpPatch("avatar")]
-		public async Task<IActionResult> ChangeAvatar([FromForm] FileDto file)
-		{
-			var newAvatarPath = await _currentUserService.ChangeAvatarAsync(file);
-			if (string.IsNullOrEmpty(newAvatarPath))
-				return Unauthorized();
-				
-			return Ok(newAvatarPath);
-		}
+	[Authorize]
+	[HttpPatch("password")]
+	public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+	{
+		var succeeded = await _authService.ChangePasswordAsync(dto);
+		if (!succeeded)
+			return Unauthorized();
+
+		return Ok();
+	}
+
+	[Authorize]
+	[HttpPatch("avatar")]
+	public async Task<IActionResult> ChangeAvatar([FromForm] FileDto file)
+	{
+		var newAvatarPath = await _currentUserService.ChangeAvatarAsync(file);
+		if (string.IsNullOrEmpty(newAvatarPath))
+			return Unauthorized();
+
+		return Ok(newAvatarPath);
 	}
 }

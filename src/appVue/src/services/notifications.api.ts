@@ -2,7 +2,7 @@ import {apiService} from "@/services/api.ts";
 import {NotificationSettings} from "@/models/NotificationSettings.ts";
 
 class NotificationsService {
-    async updateNotificationSettings(settings: NotificationSettings){
+    async updateNotificationSettings(settings: NotificationSettings) {
         const response = await apiService.axiosInstance.patch("/notifications/settings", settings);
         return response.status === 200;
     }

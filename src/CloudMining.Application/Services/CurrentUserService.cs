@@ -9,10 +9,10 @@ namespace CloudMining.Application.Services;
 
 public sealed class CurrentUserService : ICurrentUserService
 {
-	private readonly JwtService _jwtService;
 	private readonly IHttpContextAccessor _httpContextAccessor;
-	private readonly IUserManagementService _userManagementService;
+	private readonly JwtService _jwtService;
 	private readonly IStorageService _storageService;
+	private readonly IUserManagementService _userManagementService;
 
 	public CurrentUserService(IUserManagementService userManagementService,
 		IHttpContextAccessor httpContextAccessor,

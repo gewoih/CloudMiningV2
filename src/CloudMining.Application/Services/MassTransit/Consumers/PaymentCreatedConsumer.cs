@@ -20,7 +20,7 @@ public sealed class PaymentCreatedConsumer : IConsumer<PaymentCreated>
 	{
 		var message = string.Empty;
 		var paymentType = context.Message.Payment.Type;
-		
+
 		foreach (var paymentShare in context.Message.Payment.PaymentShares)
 		{
 			message = paymentType switch
@@ -38,17 +38,15 @@ public sealed class PaymentCreatedConsumer : IConsumer<PaymentCreated>
 			shareInfo += $"{Environment.NewLine}";
 			shareInfo += $"Ваша доля: {paymentShare.Amount}";
 			message += shareInfo;
-			
+
 			var notification = new Notification
 			{
 				UserId = paymentShare.UserId,
-				Message = message,
+				Message = message
 			};
-			
+
 			foreach (var notificationService in _notificationServices)
-			{
 				await notificationService.SendAsync(notification);
-			}
 		}
 	}
 }

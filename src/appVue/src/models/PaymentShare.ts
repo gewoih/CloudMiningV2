@@ -1,6 +1,6 @@
 ﻿import {ShareStatus} from "@/enums/ShareStatus.ts";
 
-export interface PaymentShare{
+export interface PaymentShare {
     user: {
         id: string;
         firstName: string;

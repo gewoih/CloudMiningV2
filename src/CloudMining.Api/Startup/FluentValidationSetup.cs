@@ -11,14 +11,14 @@ namespace CloudMining.Api.Startup;
 
 public static class FluentValidationSetup
 {
-    public static IServiceCollection ConfigureFluentValidation(this IServiceCollection services)
-    {
-        services.AddFluentValidationAutoValidation();
-        services.AddScoped<IValidator<LoginDto>, LoginValidator>();
-        services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
-        services.AddScoped<IValidator<CreatePaymentDto>, PaymentValidator>();
-        services.AddScoped<IValidator<CreateDepositDto>, DepositValidator>();
+	public static IServiceCollection ConfigureFluentValidation(this IServiceCollection services)
+	{
+		services.AddFluentValidationAutoValidation();
+		services.AddScoped<IValidator<LoginDto>, LoginValidator>();
+		services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
+		services.AddScoped<IValidator<CreatePaymentDto>, PaymentValidator>();
+		services.AddScoped<IValidator<CreateDepositDto>, DepositValidator>();
 
-        return services;
-    }
+		return services;
+	}
 }

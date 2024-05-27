@@ -13,7 +13,7 @@ class UsersService {
         const token = response.data;
 
         localStorage.setItem('access_token', token);
-        await router.push({ name: 'payments' });
+        await router.push({name: 'payments'});
     }
 }
 

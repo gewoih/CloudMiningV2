@@ -17,21 +17,21 @@
 
         <template #end>
           <div class="flex justify-content-center mr-2">
-            <Button type="button" icon="pi pi-user" @click="toggleMenu" aria-haspopup="true" aria-controls="menu"
-                    rounded outlined/>
-            <Menu ref="menu" id="menu" :model="settingsMenuItems" :popup="true"></Menu>
+            <Button aria-controls="menu" aria-haspopup="true" icon="pi pi-user" outlined rounded
+                    type="button" @click="toggleMenu"/>
+            <Menu id="menu" ref="menu" :model="settingsMenuItems" :popup="true"></Menu>
           </div>
         </template>
       </Menubar>
     </div>
-    
+
     <div class="flex flex-1 align-items-center justify-content-center">
       <router-view></router-view>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {ref} from "vue";
 import router from "@/router.ts";
 import Menu from "primevue/menu";

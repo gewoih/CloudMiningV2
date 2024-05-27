@@ -11,50 +11,47 @@ namespace CloudMining.Application.Services;
 
 public class JwtService
 {
-    private readonly string _signingKey;
-    private readonly int _jwtLifetimeInDays;
-    private readonly UserManager<User> _userManager;
+	private readonly int _jwtLifetimeInDays;
+	private readonly string _signingKey;
+	private readonly UserManager<User> _userManager;
 
-    public JwtService(IOptions<JwtSettings> settings, UserManager<User> userManager)
-    {
-        _userManager = userManager;
-        _signingKey = settings.Value.SigningKey;
-        _jwtLifetimeInDays = settings.Value.LifetimeInDays;
-    }
+	public JwtService(IOptions<JwtSettings> settings, UserManager<User> userManager)
+	{
+		_userManager = userManager;
+		_signingKey = settings.Value.SigningKey;
+		_jwtLifetimeInDays = settings.Value.LifetimeInDays;
+	}
 
-    public string GetSubClaim(string token)
-    {
-        if (new JwtSecurityTokenHandler().ReadToken(token) is not JwtSecurityToken jwt) 
-            return null;
-	        
-        var sub = jwt.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
-        return sub;
-    }
-    
-    public async Task<string> GenerateAsync(User user)
-    {
-        var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-        };
+	public string GetSubClaim(string token)
+	{
+		if (new JwtSecurityTokenHandler().ReadToken(token) is not JwtSecurityToken jwt)
+			return null;
 
-        var roles = await _userManager.GetRolesAsync(user);
-        foreach (var role in roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
-        
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_signingKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expires = DateTime.Now.AddDays(_jwtLifetimeInDays);
+		var sub = jwt.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
+		return sub;
+	}
 
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: expires,
-            signingCredentials: credentials
-        );
+	public async Task<string> GenerateAsync(User user)
+	{
+		var claims = new List<Claim>
+		{
+			new(JwtRegisteredClaimNames.Email, user.Email),
+			new(JwtRegisteredClaimNames.Sub, user.Id.ToString())
+		};
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
+		var roles = await _userManager.GetRolesAsync(user);
+		foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));
+
+		var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_signingKey));
+		var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+		var expires = DateTime.Now.AddDays(_jwtLifetimeInDays);
+
+		var token = new JwtSecurityToken(
+			claims: claims,
+			expires: expires,
+			signingCredentials: credentials
+		);
+
+		return new JwtSecurityTokenHandler().WriteToken(token);
+	}
 }

@@ -2,7 +2,7 @@
 
 public enum ShareStatus
 {
-    Created,
-    Pending,
-    Completed
+	Created,
+	Pending,
+	Completed
 }

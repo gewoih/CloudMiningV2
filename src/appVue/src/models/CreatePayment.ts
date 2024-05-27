@@ -1,7 +1,7 @@
 ﻿import {CurrencyCode} from "@/enums/CurrencyCode.ts";
 import {PaymentType} from "@/enums/PaymentType.ts";
 
-export interface CreatePayment{
+export interface CreatePayment {
     caption: string | null;
     currencyCode: CurrencyCode;
     paymentType: PaymentType;

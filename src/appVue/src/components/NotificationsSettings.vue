@@ -1,7 +1,6 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, ref} from "vue";
-import { NotificationSettings } from "@/models/NotificationSettings.ts";
-import {} from "@/services/users.api.ts";
+import {NotificationSettings} from "@/models/NotificationSettings.ts";
 import {useToast} from "primevue/usetoast";
 import {notificationsService} from "@/services/notifications.api.ts";
 
@@ -23,9 +22,8 @@ async function updateSettings() {
   if (isUpdated) {
     initialSettings.value = JSON.parse(JSON.stringify(notificationSettings.value));
     toast.add({severity: 'success', summary: 'Успех', detail: 'Настройки успешно сохранены', life: 3000});
-  }
-  else
-    toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Произошла ошибка при сохранении настроек', life: 3000 });
+  } else
+    toast.add({severity: 'error', summary: 'Ошибка', detail: 'Произошла ошибка при сохранении настроек', life: 3000});
 }
 
 const setNotificationSettings = async () => {
@@ -42,8 +40,8 @@ const hasChanges = computed(() => {
 </script>
 
 <template>
- <Toast/>
-  
+  <Toast/>
+
   <div>
     <h2>Настройки уведомлений</h2>
 
@@ -51,7 +49,8 @@ const hasChanges = computed(() => {
       <h4>Источники уведомлений</h4>
 
       <div class="field-checkbox">
-        <Checkbox v-model="notificationSettings.isTelegramNotificationsEnabled" :binary="true" input-id="isTelegramEnabled"/>
+        <Checkbox v-model="notificationSettings.isTelegramNotificationsEnabled" :binary="true"
+                  input-id="isTelegramEnabled"/>
         <label for="isTelegramEnabled">Telegram</label>
       </div>
     </div>
@@ -60,23 +59,23 @@ const hasChanges = computed(() => {
       <p class="font-bold">Уведомления по новым платежам</p>
 
       <div class="field-checkbox">
-        <Checkbox v-model="notificationSettings.newPayoutNotification" 
-                  :binary="true" 
-                  :disabled="!notificationSettings.isTelegramNotificationsEnabled" 
+        <Checkbox v-model="notificationSettings.newPayoutNotification"
+                  :binary="true"
+                  :disabled="!notificationSettings.isTelegramNotificationsEnabled"
                   input-id="newPayout"/>
         <label for="newPayout">Выплаты в криптовалюте</label>
       </div>
 
       <div class="field-checkbox">
         <Checkbox v-model="notificationSettings.newElectricityPaymentNotification"
-                  :binary="true" 
+                  :binary="true"
                   :disabled="!notificationSettings.isTelegramNotificationsEnabled"
                   input-id="newElectricity"/>
         <label for="newElectricity">Платежи по электричеству</label>
       </div>
 
       <div class="field-checkbox">
-        <Checkbox v-model="notificationSettings.newPurchaseNotification" 
+        <Checkbox v-model="notificationSettings.newPurchaseNotification"
                   :binary="true"
                   :disabled="!notificationSettings.isTelegramNotificationsEnabled"
                   input-id="newPurchase"/>
@@ -88,7 +87,7 @@ const hasChanges = computed(() => {
       <p class="font-bold">Напоминания о просроченных платежах</p>
 
       <div class="field-checkbox">
-        <Checkbox v-model="notificationSettings.unpaidElectricityPaymentReminder" 
+        <Checkbox v-model="notificationSettings.unpaidElectricityPaymentReminder"
                   :binary="true"
                   :disabled="!notificationSettings.isTelegramNotificationsEnabled"
                   input-id="electricityReminder"/>
@@ -96,15 +95,15 @@ const hasChanges = computed(() => {
       </div>
 
       <div class="field-checkbox">
-        <Checkbox v-model="notificationSettings.unpaidPurchasePaymentReminder" 
+        <Checkbox v-model="notificationSettings.unpaidPurchasePaymentReminder"
                   :binary="true"
                   :disabled="!notificationSettings.isTelegramNotificationsEnabled"
                   input-id="purchaseReminder"/>
         <label for="purchaseReminder">По покупкам</label>
       </div>
     </div>
-    
-    <Button class="mt-5" label="Сохранить настройки" @click="updateSettings" :disabled="!hasChanges"/>
+
+    <Button :disabled="!hasChanges" class="mt-5" label="Сохранить настройки" @click="updateSettings"/>
   </div>
 </template>
 

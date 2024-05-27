@@ -1,4 +1,4 @@
-export enum CurrencyCode{
+export enum CurrencyCode {
     USD = "USD",
     RUB = "RUB",
     BTC = "BTC",

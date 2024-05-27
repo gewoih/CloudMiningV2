@@ -7,10 +7,10 @@ namespace CloudMining.Application.Services;
 
 public sealed class AuthService : IAuthService
 {
-	private readonly UserManager<User> _userManager;
-	private readonly SignInManager<User> _signInManager;
-	private readonly JwtService _jwtService;
 	private readonly ICurrentUserService _currentUserService;
+	private readonly JwtService _jwtService;
+	private readonly SignInManager<User> _signInManager;
+	private readonly UserManager<User> _userManager;
 
 	public AuthService(UserManager<User> userManager,
 		SignInManager<User> signInManager,

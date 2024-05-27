@@ -2,6 +2,6 @@
 
 public interface IMapper<TDomain, TDto>
 {
-    TDto ToDto(TDomain model);
-    TDomain ToDomain(TDto dto);
+	TDto ToDto(TDomain model);
+	TDomain ToDomain(TDto dto);
 }

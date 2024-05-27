@@ -2,27 +2,27 @@
   <div class="w-8">
     <Toolbar class="mb-4 border-none">
       <template #start>
-        <Dropdown v-model="selectedPaymentType" :options="paymentTypes" optionLabel="name" optionValue="value"
-                  @change="fetchPayments" class="w-full md:w-14rem"/>
+        <Dropdown v-model="selectedPaymentType" :options="paymentTypes" class="w-full md:w-14rem" optionLabel="name"
+                  optionValue="value" @change="fetchPayments"/>
       </template>
-      <template #end v-if="userRole === UserRole.Admin && selectedPaymentType !== PaymentType.Crypto">
-        <Button label="Добавить платеж" icon="pi pi-plus" severity="success" class="mr-2"
+      <template v-if="userRole === UserRole.Admin && selectedPaymentType !== PaymentType.Crypto" #end>
+        <Button class="mr-2" icon="pi pi-plus" label="Добавить платеж" severity="success"
                 @click="isModalVisible = true"/>
       </template>
     </Toolbar>
 
-    <DataTable :value="payments" v-model:expandedRows="expandedRows" dataKey="id"
+    <DataTable v-model:expandedRows="expandedRows" :value="payments" dataKey="id"
                @rowExpand="fetchShares">
       <Column v-if="userRole === UserRole.Admin" expander/>
       <Column v-if="userRole === UserRole.Admin" field="isCompleted" header="Статус">
         <template v-slot:body="slotProps">
-          <Tag :value="isCompletedHandle(slotProps.data)"
-               :severity="getPaymentStatusSeverity(slotProps.data)"/>
+          <Tag :severity="getPaymentStatusSeverity(slotProps.data)"
+               :value="isCompletedHandle(slotProps.data)"/>
         </template>
       </Column>
       <Column v-if="userRole !== UserRole.Admin" field="status" header="Статус">
         <template v-slot:body="slotProps">
-          <Tag :value="getStatus(slotProps.data)" :severity="getShareStatusSeverity(slotProps.data)"/>
+          <Tag :severity="getShareStatusSeverity(slotProps.data)" :value="getStatus(slotProps.data)"/>
         </template>
       </Column>
       <Column v-if="userRole !== UserRole.Admin" header="Ваша сумма">
@@ -67,9 +67,9 @@
               </template>
             </ConfirmPopup>
             <div class="card flex justify-content-center">
-              <Button @click="showTemplate($event, sharedSlotProps.data, sharedSlotProps.data)"
-                      label="Подтвердить оплату"
-                      severity="success"></Button>
+              <Button label="Подтвердить оплату"
+                      severity="success"
+                      @click="showTemplate($event, sharedSlotProps.data, sharedSlotProps.data)"></Button>
             </div>
           </div>
         </template>
@@ -100,7 +100,7 @@
             </Column>
             <Column field="status" header="Статус">
               <template v-slot:body="slotProps">
-                <Tag :value="getStatus(slotProps.data)" :severity="getShareStatusSeverity(slotProps.data)"/>
+                <Tag :severity="getShareStatusSeverity(slotProps.data)" :value="getStatus(slotProps.data)"/>
               </template>
             </Column>
             <Column>
@@ -115,9 +115,9 @@
                     </template>
                   </ConfirmPopup>
                   <div class="card flex justify-content-center">
-                    <Button @click="showTemplate($event, sharedSlotProps.data, slotProps.data)"
-                            :label="getButtonLabel(sharedSlotProps.data)"
-                            :severity="getButtonSeverity(sharedSlotProps.data)"></Button>
+                    <Button :label="getButtonLabel(sharedSlotProps.data)"
+                            :severity="getButtonSeverity(sharedSlotProps.data)"
+                            @click="showTemplate($event, sharedSlotProps.data, slotProps.data)"></Button>
                   </div>
                 </div>
               </template>
@@ -126,32 +126,32 @@
         </div>
       </template>
     </DataTable>
-    <Paginator :rows="pageSize" :totalRecords="totalPaymentsCount" :rowsPerPageOptions="[5, 10, 15]"
+    <Paginator :rows="pageSize" :rowsPerPageOptions="[5, 10, 15]" :totalRecords="totalPaymentsCount"
                @page="pageChange"></Paginator>
   </div>
 
-  <Dialog v-if="userRole === UserRole.Admin" v-model:visible="isModalVisible" modal header="Добавление платежа"
-          :draggable="false" :dismissableMask="true">
+  <Dialog v-if="userRole === UserRole.Admin" v-model:visible="isModalVisible" :dismissableMask="true" :draggable="false"
+          header="Добавление платежа" modal>
     <div class="flex align-items-center gap-3 mb-3">
-      <label for="amount" class="font-semibold w-6rem">Сумма</label>
-      <InputNumber v-model="newPayment.amount" id="amount" class="flex-auto" autocomplete="off"/>
+      <label class="font-semibold w-6rem" for="amount">Сумма</label>
+      <InputNumber id="amount" v-model="newPayment.amount" autocomplete="off" class="flex-auto"/>
     </div>
     <div class="flex align-items-center gap-3 mb-3">
-      <label for="date" class="font-semibold w-6rem">Дата</label>
-      <Calendar id="date" v-model="newPayment.date" date-format="dd.mm.yy" show-icon class="flex-auto"
-                autocomplete="off"/>
+      <label class="font-semibold w-6rem" for="date">Дата</label>
+      <Calendar id="date" v-model="newPayment.date" autocomplete="off" class="flex-auto" date-format="dd.mm.yy"
+                show-icon/>
     </div>
     <div class="flex align-items-center gap-3 mb-5">
-      <label for="caption" class="font-semibold w-6rem">Комментарий</label>
-      <InputText id="caption" v-model="newPayment.caption" class="flex-auto" autocomplete="off"/>
+      <label class="font-semibold w-6rem" for="caption">Комментарий</label>
+      <InputText id="caption" v-model="newPayment.caption" autocomplete="off" class="flex-auto"/>
     </div>
     <div class="flex justify-content-end gap-2">
-      <Button type="submit" label="Сохранить" @click="createPayment"></Button>
+      <Button label="Сохранить" type="submit" @click="createPayment"></Button>
     </div>
   </Dialog>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, ref} from 'vue';
 import {paymentsService} from "@/services/payments.api.ts";
 import {format} from 'date-fns'

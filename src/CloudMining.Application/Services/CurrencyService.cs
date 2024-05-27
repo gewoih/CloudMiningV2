@@ -1,39 +1,37 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Infrastructure.Database;
-using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace CloudMining.Application.Services
+namespace CloudMining.Application.Services;
+
+public sealed class CurrencyService : ICurrencyService
 {
-    public sealed class CurrencyService : ICurrencyService
-    {
-        private readonly CloudMiningContext _context;
+	private readonly CloudMiningContext _context;
 
-        public CurrencyService(CloudMiningContext context)
-        {
-            _context = context;
-        }
-        
-        public async Task<Currency?> GetAsync(CurrencyCode code)
-        {
-            var foundCurrency = await _context.Currencies
-                .FirstOrDefaultAsync(currency => currency.Code == code)
-                .ConfigureAwait(false);
+	public CurrencyService(CloudMiningContext context)
+	{
+		_context = context;
+	}
 
-            return foundCurrency;
-        }
+	public async Task<Currency?> GetAsync(CurrencyCode code)
+	{
+		var foundCurrency = await _context.Currencies
+			.FirstOrDefaultAsync(currency => currency.Code == code)
+			.ConfigureAwait(false);
 
-        public async Task<Guid> GetIdAsync(CurrencyCode code)
-        {
-	        var currencyId = await _context.Currencies
-		        .Where(currency => currency.Code == code)
-		        .Select(currency => currency.Id)
-		        .FirstOrDefaultAsync()
-		        .ConfigureAwait(false);
+		return foundCurrency;
+	}
 
-	        return currencyId;
-        }
-    }
+	public async Task<Guid> GetIdAsync(CurrencyCode code)
+	{
+		var currencyId = await _context.Currencies
+			.Where(currency => currency.Code == code)
+			.Select(currency => currency.Id)
+			.FirstOrDefaultAsync()
+			.ConfigureAwait(false);
+
+		return currencyId;
+	}
 }
