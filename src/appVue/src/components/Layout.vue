@@ -45,7 +45,7 @@ const items = ref([
   {
     label: 'Участники',
     icon: 'pi pi-users',
-    route: 'payments',
+    route: 'members',
   },
   {
     label: 'Платежи',
