@@ -1,9 +1,3 @@
-﻿namespace CloudMining.Interfaces.DTO.Payments.Deposits
-{
-	public sealed class CreateDepositDto
-	{
-		public Guid UserId { get; set; }
-		public decimal Amount { get; set; }
-		public DateTime Date { get; set; }
-	}
-}
+﻿namespace CloudMining.Interfaces.DTO.Payments.Deposits;
+
+public record CreateDepositDto(Guid UserId, decimal Amount, DateTime Date);

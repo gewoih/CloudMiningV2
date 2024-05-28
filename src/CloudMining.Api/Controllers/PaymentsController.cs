@@ -44,14 +44,12 @@ namespace CloudMining.Api.Controllers
 			var paginatedPayments = await _shareablePaymentService.GetAsync(skip, take, paymentType);
 			var totalPaymentsCount = await _shareablePaymentService.GetUserPaymentsCount(paymentType);
 			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
-			
-			var paymentsPageDto = new PaymentsPageDto
-			{
-				TotalCount = totalPaymentsCount,
-				Items = isCurrentUserAdmin 
-					? paginatedPayments.Select(payment => (PaymentDto)_adminPaymentMapper.ToDto(payment)).ToList() 
-					: paginatedPayments.Select(payment => (PaymentDto)_userPaymentMapper.ToDto(payment)).ToList()
-			};
+
+			var payments = isCurrentUserAdmin
+				? paginatedPayments.Select(payment => (PaymentDto)_adminPaymentMapper.ToDto(payment)).ToList()
+				: paginatedPayments.Select(payment => (PaymentDto)_userPaymentMapper.ToDto(payment)).ToList();
+
+			var paymentsPageDto = new PaymentsPageDto(payments, totalPaymentsCount);
 
 			return paymentsPageDto;
 		}

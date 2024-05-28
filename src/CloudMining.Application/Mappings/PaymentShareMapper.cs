@@ -1,5 +1,4 @@
-﻿using CloudMining.Domain.Models;
-using CloudMining.Domain.Models.Identity;
+﻿using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.DTO.Payments.Admin;
 using CloudMining.Interfaces.DTO.Users;
@@ -10,20 +9,8 @@ public class PaymentShareMapper : IMapper<PaymentShare, PaymentShareDto>
 {
     public PaymentShareDto ToDto(PaymentShare model)
     {
-        return new PaymentShareDto
-        {
-            User = new UserDto
-            {
-                Id = model.User.Id,
-                FirstName = model.User.FirstName,
-                LastName = model.User.LastName,
-                Patronymic = model.User.Patronymic
-            },
-            Id = model.Id,
-            Amount = model.Amount,
-            Share = model.Share,
-            Status = model.Status
-        };
+        var user = new UserDto(model.User.Id, model.User.FirstName, model.User.LastName, model.User.Patronymic);
+        return new PaymentShareDto(model.Id, user, model.Amount, model.Share, model.Status);
     }
 
     public PaymentShare ToDomain(PaymentShareDto dto)

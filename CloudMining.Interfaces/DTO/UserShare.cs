@@ -1,14 +1,3 @@
-﻿namespace CloudMining.Interfaces.DTO
-{
-    public sealed class UserShare
-    {
-        public Guid UserId { get; set; }
-        public decimal Share { get; set; }
+﻿namespace CloudMining.Interfaces.DTO;
 
-        public UserShare(Guid userId, decimal share)
-        {
-            UserId = userId;
-            Share = share;
-        }
-	}
-}
+public record UserShare(Guid UserId, decimal Share);

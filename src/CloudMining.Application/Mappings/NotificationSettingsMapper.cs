@@ -7,15 +7,14 @@ public sealed class NotificationSettingsMapper : IMapper<NotificationSettings, N
 {
 	public NotificationSettingsDto ToDto(NotificationSettings model)
 	{
-		return new NotificationSettingsDto
-		{
-			IsTelegramNotificationsEnabled = model.IsTelegramNotificationsEnabled,
-			NewPayoutNotification = model.NewPayoutNotification,
-			NewPurchaseNotification = model.NewPurchaseNotification,
-			NewElectricityPaymentNotification = model.NewElectricityPaymentNotification,
-			UnpaidElectricityPaymentReminder = model.UnpaidElectricityPaymentReminder,
-			UnpaidPurchasePaymentReminder = model.UnpaidPurchasePaymentReminder
-		};
+		return new NotificationSettingsDto(
+			IsTelegramNotificationsEnabled: model.IsTelegramNotificationsEnabled,
+			NewPayoutNotification: model.NewPayoutNotification,
+			NewPurchaseNotification: model.NewPurchaseNotification,
+			NewElectricityPaymentNotification: model.NewElectricityPaymentNotification,
+			UnpaidElectricityPaymentReminder: model.UnpaidElectricityPaymentReminder,
+			UnpaidPurchasePaymentReminder: model.UnpaidPurchasePaymentReminder
+		);
 	}
 
 	public NotificationSettings ToDomain(NotificationSettingsDto dto)

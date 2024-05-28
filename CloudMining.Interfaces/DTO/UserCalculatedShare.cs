@@ -1,16 +1,3 @@
-﻿namespace CloudMining.Interfaces.DTO
-{
-    public sealed class UserCalculatedShare
-    {
-        public Guid UserId { get; set; }
-        public decimal Amount { get; set; }
-        public decimal Share { get; set; }
+﻿namespace CloudMining.Interfaces.DTO;
 
-        public UserCalculatedShare(Guid userId, decimal amount, decimal share)
-        {
-            UserId = userId;
-            Amount = amount;
-            Share = share;
-        }
-    }
-}
+public record UserCalculatedShare(Guid UserId, decimal Amount, decimal Share);
