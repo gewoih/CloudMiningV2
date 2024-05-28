@@ -55,9 +55,9 @@
 <script setup lang="ts">
 import {ref} from "vue";
 import {format} from "date-fns";
-import {paymentsService} from "@/services/payments.api.ts";
 import {Member} from "@/models/Member.ts";
 import {MemberDeposit} from "@/models/MemberDeposit.ts";
+import {membersService} from "@/services/members.api.ts";
 
 const expandedRows = ref({});
 const depositsMap = ref<{ [key: string]: MemberDeposit[] }>({});
@@ -76,15 +76,14 @@ const getTruncatedAmount = (value: number, precision: number) => {
 const fetchDeposits = async (event) => {
   const memberId = event.data.id;
   if (!depositsMap.value[memberId]) {
-    depositsMap.value[memberId] = await paymentsService.getDeposits(memberId);
+    depositsMap.value[memberId] = await membersService.getDeposits(memberId);
   }
   deposits.value = depositsMap.value[memberId];
 
 };
 
 const fetchMembers = async () => {
-  const response = await paymentsService.getMembers();
-  members.value = response.items;
+  members.value = await membersService.getMembers();
 };
 
 fetchMembers();
