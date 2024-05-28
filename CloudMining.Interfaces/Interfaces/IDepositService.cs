@@ -1,10 +1,9 @@
 ﻿using CloudMining.Domain.Models.Payments;
 using CloudMining.Interfaces.DTO.Payments.Deposits;
 
-namespace CloudMining.Interfaces.Interfaces
+namespace CloudMining.Interfaces.Interfaces;
+
+public interface IDepositService
 {
-	public interface IDepositService
-	{
-		Task<Deposit> AddDepositAndRecalculateShares(CreateDepositDto depositDto);
-	}
+	Task<Deposit> AddDepositAndRecalculateShares(CreateDepositDto depositDto);
 }

@@ -10,19 +10,21 @@ class PaymentsService {
     }
 
     async getPayments(skip: number, take: number, paymentType: PaymentType): Promise<PaymentList> {
-        skip = (skip-1)*take;
+        skip = (skip - 1) * take;
         const response = await apiService.axiosInstance
             .get("/payments", {params: {paymentType, skip, take}});
-        
+
         return response.data;
     }
+
     async getShares(paymentId: string): Promise<PaymentShare[]> {
         const response = await apiService.axiosInstance
             .get("/payments/shares", {params: {paymentId}});
 
         return response.data;
     }
-    async switchPaymentStatus(shareId: string){
+
+    async switchPaymentStatus(shareId: string) {
         return apiService.axiosInstance.patch("/payments/status", shareId)
     }
 }

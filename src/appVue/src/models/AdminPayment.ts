@@ -1,6 +1,6 @@
 import {CurrencyCode} from "@/enums/CurrencyCode.ts";
 
-export interface AdminPayment{
+export interface AdminPayment {
     id: string | null;
     caption: string | null;
     date: Date;

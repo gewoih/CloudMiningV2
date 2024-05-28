@@ -8,17 +8,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Reference Include="Microsoft.Extensions.Identity.Core">
-        <HintPath>..\..\..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.4\Microsoft.Extensions.Identity.Core.dll</HintPath>
-      </Reference>
+        <Reference Include="Microsoft.Extensions.Identity.Core">
+            <HintPath>..\..\..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.4\Microsoft.Extensions.Identity.Core.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\CloudMining.Domain\CloudMining.Domain.csproj" />
+        <ProjectReference Include="..\src\CloudMining.Domain\CloudMining.Domain.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2.0"/>
     </ItemGroup>
 
 </Project>

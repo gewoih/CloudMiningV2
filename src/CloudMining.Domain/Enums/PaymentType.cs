@@ -1,9 +1,8 @@
-﻿namespace CloudMining.Domain.Enums
+﻿namespace CloudMining.Domain.Enums;
+
+public enum PaymentType
 {
-    public enum PaymentType
-    {
-        Electricity,
-        Crypto,
-        Purchase
-    }
+	Electricity,
+	Crypto,
+	Purchase
 }

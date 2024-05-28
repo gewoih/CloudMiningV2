@@ -6,35 +6,35 @@ namespace CloudMining.Api.Filters;
 
 public sealed class GlobalExceptionFilter : IExceptionFilter
 {
-    private readonly IWebHostEnvironment _env;
+	private readonly IWebHostEnvironment _env;
 
-    public GlobalExceptionFilter(IWebHostEnvironment env)
-    {
-        _env = env;
-    }
+	public GlobalExceptionFilter(IWebHostEnvironment env)
+	{
+		_env = env;
+	}
 
-    public void OnException(ExceptionContext context)
-    {
-        var statusCode = HttpStatusCode.InternalServerError;
-        if (context.Exception is ArgumentNullException)
-            statusCode = HttpStatusCode.BadRequest;
+	public void OnException(ExceptionContext context)
+	{
+		var statusCode = HttpStatusCode.InternalServerError;
+		if (context.Exception is ArgumentNullException)
+			statusCode = HttpStatusCode.BadRequest;
 
-        if (context.Exception is UnauthorizedAccessException)
-            statusCode = HttpStatusCode.Unauthorized;
-        
-        var problemDetails = new ProblemDetails
-        {
-            Status = (int)statusCode,
-            Title = "An error occurred while processing your request.",
-            Detail = _env.IsDevelopment() ? context.Exception.StackTrace : "A server error occurred.",
-            Instance = context.HttpContext.Request.Path
-        };
+		if (context.Exception is UnauthorizedAccessException)
+			statusCode = HttpStatusCode.Unauthorized;
 
-        context.Result = new ObjectResult(problemDetails)
-        {
-            StatusCode = (int)statusCode
-        };
+		var problemDetails = new ProblemDetails
+		{
+			Status = (int)statusCode,
+			Title = "An error occurred while processing your request.",
+			Detail = _env.IsDevelopment() ? context.Exception.StackTrace : "A server error occurred.",
+			Instance = context.HttpContext.Request.Path
+		};
 
-        context.ExceptionHandled = true;
-    }
+		context.Result = new ObjectResult(problemDetails)
+		{
+			StatusCode = (int)statusCode
+		};
+
+		context.ExceptionHandled = true;
+	}
 }

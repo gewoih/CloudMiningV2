@@ -27,7 +27,8 @@ public sealed class NotificationSettingsService : INotificationSettingsService
 		return userSettings;
 	}
 
-	public async Task<NotificationSettings> UpdateUserSettingsAsync(Guid userId, NotificationSettingsDto notificationSettingsDto)
+	public async Task<NotificationSettings> UpdateUserSettingsAsync(Guid userId,
+		NotificationSettingsDto notificationSettingsDto)
 	{
 		var userSettings = await GetUserSettingsAsync(userId);
 

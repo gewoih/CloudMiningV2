@@ -27,15 +27,15 @@
       <Password id="confirmPassword" v-model="user.confirmPassword" toggleMask/>
     </div>
     <div class="field">
-      <Button class="align-items-center justify-content-center" :disabled="!isValid" type="submit" @click="register">
+      <Button :disabled="!isValid" class="align-items-center justify-content-center" type="submit" @click="register">
         Создать аккаунт
       </Button>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import {ref, computed} from 'vue';
+<script lang="ts" setup>
+import {computed, ref} from 'vue';
 import {RegisterUser} from '@/models/RegisterUser.ts';
 import {usersService} from '@/services/users.api';
 

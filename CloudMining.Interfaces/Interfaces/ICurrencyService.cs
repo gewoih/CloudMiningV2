@@ -1,11 +1,10 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 
-namespace CloudMining.Interfaces.Interfaces
+namespace CloudMining.Interfaces.Interfaces;
+
+public interface ICurrencyService
 {
-    public interface ICurrencyService
-    {
-        Task<Currency?> GetAsync(CurrencyCode code);
-        Task<Guid> GetIdAsync(CurrencyCode code);
-    }
+	Task<Currency?> GetAsync(CurrencyCode code);
+	Task<Guid> GetIdAsync(CurrencyCode code);
 }

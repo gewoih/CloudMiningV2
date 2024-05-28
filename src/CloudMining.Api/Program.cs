@@ -1,6 +1,6 @@
-﻿using CloudMining.Infrastructure.Database;
+﻿using CloudMining.Api.Startup;
+using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using CloudMining.Api.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +26,7 @@ if (app.Environment.IsDevelopment())
 {
 	await DatabaseInitializer.CreateRolesAsync(scope.ServiceProvider);
 	await DatabaseInitializer.CreateUsersAsync(scope.ServiceProvider);
-	
+
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }

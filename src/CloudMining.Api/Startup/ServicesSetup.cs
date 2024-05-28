@@ -16,38 +16,38 @@ namespace CloudMining.Api.Startup;
 
 public static class ServicesSetup
 {
-    public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddScoped<IUserManagementService, UserManagementService>();
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<ICurrentUserService, CurrentUserService>();
-        
-        services.AddScoped<JwtService>();
-        
-        services.AddScoped<ICurrencyService, CurrencyService>();
-        services.AddScoped<IShareService, ShareService>();
-        services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
-        services.AddScoped<IDepositService, DepositService>();
-        
-        services.AddScoped<IStorageService, LocalStorageService>();
-        
-        services.AddScoped<INotificationManagementService, NotificationManagementService>();
-        services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
-        services.AddScoped<INotificationService, TelegramNotificationService>();
+	public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddScoped<IUserManagementService, UserManagementService>();
+		services.AddScoped<IAuthService, AuthService>();
+		services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();
-        services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
-        services.AddScoped<IMapper<NotificationSettings, NotificationSettingsDto>, NotificationSettingsMapper>();
-        services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
-        services.AddSingleton<IMapper<Deposit, CreateDepositDto>, DepositMapper>();
+		services.AddScoped<JwtService>();
 
-        services.AddHttpClient<EmcdApiClient>();
-        services.AddHostedService<PayoutsLoaderService>();
+		services.AddScoped<ICurrencyService, CurrencyService>();
+		services.AddScoped<IShareService, ShareService>();
+		services.AddScoped<IShareablePaymentService, ShareablePaymentService>();
+		services.AddScoped<IDepositService, DepositService>();
 
-        var telegramBotApiKey = configuration["Telegram:ApiKey"];
-        services.AddSingleton<ITelegramBotClient>(sp => new TelegramBotClient(telegramBotApiKey));
-        services.AddHostedService<TelegramService>();
-        
-        return services;
-    }
+		services.AddScoped<IStorageService, LocalStorageService>();
+
+		services.AddScoped<INotificationManagementService, NotificationManagementService>();
+		services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
+		services.AddScoped<INotificationService, TelegramNotificationService>();
+
+		services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();
+		services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
+		services.AddScoped<IMapper<NotificationSettings, NotificationSettingsDto>, NotificationSettingsMapper>();
+		services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
+		services.AddSingleton<IMapper<Deposit, CreateDepositDto>, DepositMapper>();
+
+		services.AddHttpClient<EmcdApiClient>();
+		services.AddHostedService<PayoutsLoaderService>();
+
+		var telegramBotApiKey = configuration["Telegram:ApiKey"];
+		services.AddSingleton<ITelegramBotClient>(sp => new TelegramBotClient(telegramBotApiKey));
+		services.AddHostedService<TelegramService>();
+
+		return services;
+	}
 }

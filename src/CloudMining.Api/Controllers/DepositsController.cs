@@ -3,25 +3,24 @@ using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CloudMining.Api.Controllers
+namespace CloudMining.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Authorize]
+public class DepositsController : ControllerBase
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	[Authorize]
-	public class DepositsController : ControllerBase
+	private readonly IDepositService _depositService;
+
+	public DepositsController(IDepositService depositService)
 	{
-		private readonly IDepositService _depositService;
+		_depositService = depositService;
+	}
 
-		public DepositsController(IDepositService depositService)
-		{
-			_depositService = depositService;
-		}
-
-		[HttpPost]
-		public async Task<IActionResult> Create([FromBody] CreateDepositDto depositDto)
-		{
-			_ = await _depositService.AddDepositAndRecalculateShares(depositDto);
-			return Ok();
-		}
+	[HttpPost]
+	public async Task<IActionResult> Create([FromBody] CreateDepositDto depositDto)
+	{
+		_ = await _depositService.AddDepositAndRecalculateShares(depositDto);
+		return Ok();
 	}
 }
