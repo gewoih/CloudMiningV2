@@ -220,6 +220,9 @@ namespace CloudMining.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime?>("RegistrationDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -807,7 +810,7 @@ namespace CloudMining.Infrastructure.Migrations
 
             modelBuilder.Entity("CloudMining.Domain.Models.Payments.Shareable.PaymentShare", b =>
                 {
-                    b.HasOne("CloudMining.Domain.Models.Payments.Shareable.ShareablePayment", "ShareablePayment")
+                    b.HasOne("CloudMining.Domain.Models.Payments.Shareable.ShareablePayment", null)
                         .WithMany("PaymentShares")
                         .HasForeignKey("ShareablePaymentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -818,8 +821,6 @@ namespace CloudMining.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ShareablePayment");
 
                     b.Navigation("User");
                 });
@@ -837,21 +838,17 @@ namespace CloudMining.Infrastructure.Migrations
 
             modelBuilder.Entity("CloudMining.Domain.Models.Shares.ShareChange", b =>
                 {
-                    b.HasOne("CloudMining.Domain.Models.Payments.Deposit", "Deposit")
+                    b.HasOne("CloudMining.Domain.Models.Payments.Deposit", null)
                         .WithMany("ShareChanges")
                         .HasForeignKey("DepositId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CloudMining.Domain.Models.Identity.User", "User")
+                    b.HasOne("CloudMining.Domain.Models.Identity.User", null)
                         .WithMany("ShareChanges")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Deposit");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CloudMining.Domain.Models.UserSettings.NotificationSettings", b =>
