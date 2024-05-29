@@ -17,6 +17,11 @@ public sealed class UserManagementService : IUserManagementService
 		_notificationSettingsService = notificationSettingsService;
 	}
 
+	public async Task<List<User>> GetAllUsersAsync()
+	{
+		return await _context.Users.ToListAsync();
+	}
+
 	public async Task<User?> GetAsync(Guid userId)
 	{
 		return await _context.Users.FindAsync(userId);
