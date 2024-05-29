@@ -24,6 +24,11 @@ public sealed class DepositService : IDepositService
 		_depositMapper = depositMapper;
 	}
 
+	public async Task<List<Deposit>> GetUserDeposits(Guid userId)
+	{
+		return await _context.Deposits.Where(deposit => deposit.UserId == userId).ToListAsync();
+	}
+
 	public async Task<Deposit> AddDepositAndRecalculateShares(CreateDepositDto depositDto)
 	{
 		var currencyId = await _currencyService.GetIdAsync(CurrencyCode.RUB);
