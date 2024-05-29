@@ -19,7 +19,9 @@ public sealed class UserManagementService : IUserManagementService
 
 	public async Task<List<User>> GetAllUsersAsync()
 	{
-		return await _context.Users.ToListAsync();
+		return await _context.Users
+			.ToListAsync()
+			.ConfigureAwait(false);
 	}
 
 	public async Task<User?> GetAsync(Guid userId)
