@@ -7,7 +7,6 @@ export interface Member{
         lastName: string;
         patronymic: string;
     };
-    id: string;
     share: number;
     amount: number;
     currency: {
