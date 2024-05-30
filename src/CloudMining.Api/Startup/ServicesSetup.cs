@@ -43,6 +43,7 @@ public static class ServicesSetup
 		services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
 		services.AddSingleton<IMapper<Deposit, CreateDepositDto>, DepositMapper>();
 		services.AddSingleton<IMapper<User, MemberDto>, MemberMapper>();
+		services.AddSingleton<IMapper<Deposit, MemberDepositDto>, MemberDepositMapper>();
 
 		services.AddHttpClient<EmcdApiClient>();
 		services.AddHostedService<PayoutsLoaderService>();
