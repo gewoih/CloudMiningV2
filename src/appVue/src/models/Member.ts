@@ -1,6 +1,4 @@
-﻿import {CurrencyCode} from "@/enums/CurrencyCode.ts";
-
-export interface Member{
+﻿export interface Member{
     user: {
         id: string;
         firstName: string;
@@ -9,10 +7,5 @@ export interface Member{
     };
     share: number;
     amount: number;
-    currency: {
-        shortName: string;
-        code: CurrencyCode;
-        precision: number;
-    };
     date: Date;
 }

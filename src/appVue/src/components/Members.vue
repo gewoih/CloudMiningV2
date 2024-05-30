@@ -20,7 +20,7 @@
       <Column header="Сумма инвестиций">
         <template v-slot:body="slotProps">
           {{
-            getTruncatedAmount(slotProps.data.sharedAmount, slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
+            getTruncatedAmount(slotProps.data.sharedAmount, 2) + ' ' + "₽"
           }}
         </template>
       </Column>
@@ -40,7 +40,7 @@
             <Column field="amount" header="Сумма">
               <template v-slot:body="shareSlotProps">
                 {{
-                  getTruncatedAmount(shareSlotProps.data.amount, slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
+                  getTruncatedAmount(shareSlotProps.data.amount, 2) + ' ' + "₽"
                 }}
               </template>
             </Column>
