@@ -10,9 +10,9 @@ class MembersService {
         return response.data;
     }
 
-    async getDeposits(memberId: string): Promise<MemberDeposit[]> {
+    async getDeposits(userId: string): Promise<MemberDeposit[]> {
         const response = await apiService.axiosInstance
-            .get("/members/deposits", {params: {memberId}});
+            .get("/members/deposits", {params: {userId}});
 
         return response.data;
     }
