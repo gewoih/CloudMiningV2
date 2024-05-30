@@ -5,14 +5,14 @@ import {MemberDeposit} from "@/models/MemberDeposit.ts";
 class MembersService {
     async getMembers(): Promise<Member[]> {
         const response = await apiService.axiosInstance
-            .get("");
+            .get("/members");
 
         return response.data;
     }
 
     async getDeposits(memberId: string): Promise<MemberDeposit[]> {
         const response = await apiService.axiosInstance
-            .get("", {params: {memberId}});
+            .get("/members/deposits", {params: {memberId}});
 
         return response.data;
     }
