@@ -1,6 +1,6 @@
 ﻿<template>
   <div class="w-8">
-    <DataTable v-model:expandedRows="expandedRows" :value="members" dataKey="id"
+    <DataTable v-model:expandedRows="expandedRows" :value="members" dataKey="user.id"
                @rowExpand="fetchDeposits">
       <Column expander/>
       <Column header="ФИО">
@@ -20,27 +20,27 @@
       <Column header="Сумма инвестиций">
         <template v-slot:body="slotProps">
           {{
-            getTruncatedAmount(slotProps.data.sharedAmount, 2) + ' ' + "₽"
+            getTruncatedAmount(slotProps.data.amount, 2) + ' ' + "₽"
           }}
         </template>
       </Column>
-      <Column field="date" header="Дата регистрации">
+      <Column field="registrationDate" header="Дата регистрации">
         <template v-slot:body="slotProps">
-          {{ getDateOnly(slotProps.data.date) }}
+<!--          {{ getDateOnly(slotProps.data.registrationDate) }}-->
         </template>
       </Column>
       <template v-slot:expansion="slotProps">
         <div class="p-3">
-          <DataTable :value="depositsMap[slotProps.data.id]">
+          <DataTable :value="depositsMap[slotProps.data.user.id]">
             <Column field="date" header="Дата">
-              <template v-slot:body="shareSlotProps">
-                {{ getDateOnly(shareSlotProps.data.date) }}
+              <template v-slot:body="slotProps">
+                {{ getDateOnly(slotProps.data.date) }}
               </template>
             </Column>
             <Column field="amount" header="Сумма">
-              <template v-slot:body="shareSlotProps">
+              <template v-slot:body="slotProps">
                 {{
-                  getTruncatedAmount(shareSlotProps.data.amount, 2) + ' ' + "₽"
+                  getTruncatedAmount(slotProps.data.amount, 2) + ' ' + "₽"
                 }}
               </template>
             </Column>
@@ -74,12 +74,11 @@ const getTruncatedAmount = (value: number, precision: number) => {
 }
 
 const fetchDeposits = async (event) => {
-  const memberId = event.data.id;
+  const memberId = event.data.user.id;
   if (!depositsMap.value[memberId]) {
     depositsMap.value[memberId] = await membersService.getDeposits(memberId);
   }
   deposits.value = depositsMap.value[memberId];
-
 };
 
 const fetchMembers = async () => {
