@@ -7,5 +7,5 @@
     };
     share: number;
     amount: number;
-    date: Date;
+    registrationDate: Date;
 }
