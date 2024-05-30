@@ -17,7 +17,7 @@ public sealed class UserManagementService : IUserManagementService
 		_notificationSettingsService = notificationSettingsService;
 	}
 
-	public async Task<List<User>> GetAllUsersWithDepositsAndShareChangesAsync()
+	public async Task<List<User>> GetMembersAsync()
 	{
 		return await _context.Users
 			.Include(user => user.Deposits)
