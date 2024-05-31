@@ -26,7 +26,7 @@
       </Column>
       <Column field="registrationDate" header="Дата регистрации">
         <template v-slot:body="slotProps">
-<!--          {{ getDateOnly(slotProps.data.registrationDate) }}-->
+          {{ getDateOnly(slotProps.data.registrationDate) }}
         </template>
       </Column>
       <template v-slot:expansion="slotProps">
