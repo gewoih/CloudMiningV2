@@ -17,13 +17,17 @@ public sealed class UserManagementService : IUserManagementService
 		_notificationSettingsService = notificationSettingsService;
 	}
 
-	public async Task<List<User>> GetMembersAsync()
+	public async Task<List<User>> GetUsersAsync(bool withDeposits = false, bool withShareChanges = false)
 	{
-		return await _context.Users
-			.Include(user => user.Deposits)
-			.Include(user => user.ShareChanges)
-			.ToListAsync()
-			.ConfigureAwait(false);
+		var usersQuery = _context.Users.AsQueryable();
+
+		if (withDeposits)
+			usersQuery = usersQuery.Include(user => user.Deposits);
+
+		if (withShareChanges)
+			usersQuery = usersQuery.Include(user => user.ShareChanges);
+
+		return await usersQuery.ToListAsync().ConfigureAwait(false);
 	}
 
 	public async Task<User?> GetAsync(Guid userId)
