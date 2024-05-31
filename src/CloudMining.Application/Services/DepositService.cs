@@ -1,6 +1,5 @@
 ﻿using CloudMining.Application.Mappings;
 using CloudMining.Domain.Enums;
-using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.DTO.Payments.Deposits;
@@ -33,31 +32,19 @@ public sealed class DepositService : IDepositService
     public async Task<Deposit> AddDepositAndRecalculateShares(DepositDto depositDto)
     {
         var currencyId = await _currencyService.GetIdAsync(CurrencyCode.RUB);
-        var deposit = _depositMapper.ToDomain(depositDto);
-        deposit.CurrencyId = currencyId;
-
-        var firstDeposit = await _context.Deposits
-            .Where(firstDeposit => firstDeposit.UserId == deposit.UserId)
-            .OrderBy(firstDeposit => firstDeposit.Date)
-            .FirstOrDefaultAsync()
-            .ConfigureAwait(false);
-        var firstDepositDate = firstDeposit?.Date;
-        var user = await _context.Users.FindAsync(deposit.UserId);
-        if (user != null && (firstDepositDate == null || deposit.Date < firstDepositDate))
-        {
-            user.RegistrationDate = deposit.Date;
-        }
-
+        var newDeposit = _depositMapper.ToDomain(depositDto);
+        newDeposit.CurrencyId = currencyId;
+        
         var usersDeposits = await GetUsersDeposits();
         usersDeposits[depositDto.UserId] += depositDto.Amount;
 
         var newShareChanges = await _shareService.GetUpdatedUsersSharesAsync(usersDeposits, depositDto.Date);
-        deposit.ShareChanges = newShareChanges;
+        newDeposit.ShareChanges = newShareChanges;
 
-        await _context.Deposits.AddAsync(deposit);
+        await _context.Deposits.AddAsync(newDeposit);
         await _context.SaveChangesAsync();
 
-        return deposit;
+        return newDeposit;
     }
 
     private async Task<Dictionary<Guid, decimal>> GetUsersDeposits()

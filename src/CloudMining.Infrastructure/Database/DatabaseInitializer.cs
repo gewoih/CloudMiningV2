@@ -63,13 +63,25 @@ public static class DatabaseInitializer
 	{
 		_userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
-		await RegisterUserIfNotExists("Admin", "nranenko@bk.ru", "Никита", "Раненко", "Максимович", "24042001Nr.");
-		await RegisterUserIfNotExists("User", "grigmaks2014@yandex.ru", "Максим", "Григорьев", "Владимирович",
-			"24042001Nr.");
+		await RegisterUserIfNotExists("Admin", 
+			"nranenko@bk.ru", 
+			"Никита", 
+			"Раненко", 
+			"Максимович", 
+			"24042001Nr.", 
+			new(2020, 1, 1));
+		
+		await RegisterUserIfNotExists("User", 
+			"grigmaks2014@yandex.ru", 
+			"Максим", 
+			"Григорьев", 
+			"Владимирович",
+			"24042001Nr.", 
+			new(2020, 1, 1));
 	}
 
 	private static async Task RegisterUserIfNotExists(string role, string email, string firstName,
-		string lastName, string patronymic, string password)
+		string lastName, string patronymic, string password, DateTime registrationDate)
 	{
 		var user = new User
 		{
@@ -77,7 +89,8 @@ public static class DatabaseInitializer
 			Email = email,
 			FirstName = firstName,
 			LastName = lastName,
-			Patronymic = patronymic
+			Patronymic = patronymic,
+			RegistrationDate = registrationDate
 		};
 
 		var userExist = await _userManager.FindByEmailAsync(email);
