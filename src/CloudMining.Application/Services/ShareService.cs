@@ -49,6 +49,19 @@ public sealed class ShareService : IShareService
 		return usersShares;
 	}
 
+	public decimal CalculateUserShare(List<ShareChange> shareChanges)
+	{
+		if (shareChanges.Count == 0)
+			return 0;
+		
+		var userShare = shareChanges
+			.OrderByDescending(shareChange => shareChange.Date)
+			.First()
+			.After;
+
+		return userShare;
+	}
+
 	public async Task<List<ShareChange>> GetUpdatedUsersSharesAsync(Dictionary<Guid, decimal> usersDeposits,
 		DateTime newDepositDate)
 	{
