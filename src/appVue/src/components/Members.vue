@@ -1,5 +1,11 @@
 ﻿<template>
   <div class="w-8">
+  <Toolbar class="mb-4 border-none">
+    <template #end>
+      <Button class="mr-2" icon="pi pi-plus" label="Добавить депозит" severity="success"
+              @click="isModalVisible = true"/>
+    </template>
+  </Toolbar>
     <DataTable v-model:expandedRows="expandedRows" :value="members" dataKey="user.id"
                @rowExpand="fetchDeposits">
       <Column expander/>
@@ -49,19 +55,47 @@
       </template>
     </DataTable>
   </div>
+
+  <Dialog v-model:visible="isModalVisible" :dismissableMask="true" :draggable="false"
+          header="Добавление депозита участнику" modal>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label class="font-semibold w-6rem" for="amount">Сумма</label>
+      <InputNumber id="amount" v-model="" autocomplete="off" class="flex-auto"/>
+    </div>
+    <div class="flex align-items-center gap-3 mb-3">
+      <label class="font-semibold w-6rem" for="date">Дата</label>
+      <Calendar id="date" v-model="" autocomplete="off" class="flex-auto" date-format="dd.mm.yy"
+                show-icon/>
+    </div>
+    <div class="flex align-items-center gap-3 mb-5">
+      <label class="font-semibold w-6rem" for="caption">Комментарий</label>
+      <InputText id="caption" v-model="" autocomplete="off" class="flex-auto"/>
+    </div>
+    <div class="flex justify-content-end gap-2">
+      <Button label="Сохранить" type="submit" @click="createDeposit"></Button>
+    </div>
+  </Dialog>
+  
 </template>
 
 <script setup lang="ts">
 import {ref} from "vue";
 import {format} from "date-fns";
 import {Member} from "@/models/Member.ts";
-import {Deposit} from "@/models/MemberDeposit.ts";
+import {Deposit} from "@/models/Deposit.ts";
 import {membersService} from "@/services/members.api.ts";
+import {CreateDeposit} from "@/models/CreateDeposit.ts";
 
+const isModalVisible = ref(false);
 const expandedRows = ref({});
 const depositsMap = ref<{ [key: string]: Deposit[] }>({});
 const members = ref<Member[]>();
 const deposits = ref<Deposit[]>();
+const newDeposit = ref<CreateDeposit>({
+  userId: "",
+  date: new Date(),
+  amount: 0
+});
 
 const getDateOnly = (date: Date) => {
   return format(date, 'dd.MM.yyyy');
@@ -82,6 +116,12 @@ const fetchDeposits = async (event) => {
 
 const fetchMembers = async () => {
   members.value = await membersService.getMembers();
+};
+
+const createDeposit = async () => {
+  
+
+  isModalVisible.value = false;
 };
 
 fetchMembers();
