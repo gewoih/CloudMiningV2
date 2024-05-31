@@ -5,5 +5,6 @@ namespace CloudMining.Interfaces.Interfaces;
 
 public interface IDepositService
 {
-	Task<Deposit> AddDepositAndRecalculateShares(CreateDepositDto depositDto);
+	Task<List<Deposit>> GetUserDeposits(Guid userId);
+	Task<Deposit> AddDepositAndRecalculateShares(DepositDto depositDto);
 }

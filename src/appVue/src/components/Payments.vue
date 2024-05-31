@@ -384,10 +384,10 @@ const showTemplate = (event, data, sharedData) => {
     });
   }
 }
-const getDateOnly = (date) => {
+const getDateOnly = (date: Date) => {
   return format(date, 'dd.MM.yyyy');
 };
-const getTruncatedAmount = (value, precision) => {
+const getTruncatedAmount = (value: number, precision: number) => {
   const factor = 10 ** precision;
   return Math.trunc(value * factor) / factor;
 }
@@ -428,7 +428,7 @@ const createPayment = async () => {
   isModalVisible.value = false;
 };
 
-const isSharesCompleted = (paymentId) => {
+const isSharesCompleted = (paymentId: string) => {
   return computed(() => {
     const shares = paymentSharesMap.value[paymentId];
     if (!shares) {

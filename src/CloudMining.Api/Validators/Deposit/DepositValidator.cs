@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace CloudMining.Api.Validators.Deposit;
 
-public class DepositValidator : AbstractValidator<CreateDepositDto>
+public class DepositValidator : AbstractValidator<DepositDto>
 {
 	public DepositValidator()
 	{

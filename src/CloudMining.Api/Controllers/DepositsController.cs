@@ -18,7 +18,7 @@ public class DepositsController : ControllerBase
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> Create([FromBody] CreateDepositDto depositDto)
+	public async Task<IActionResult> Create([FromBody] DepositDto depositDto)
 	{
 		_ = await _depositService.AddDepositAndRecalculateShares(depositDto);
 		return Ok();
