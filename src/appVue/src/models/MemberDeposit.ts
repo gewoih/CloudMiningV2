@@ -1,6 +1,5 @@
-﻿export interface MemberDeposit{
+﻿export interface Deposit{
     id: string;
     date: Date;
     amount: number;
-    caption: string | null;
 }

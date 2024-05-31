@@ -44,7 +44,6 @@
                 }}
               </template>
             </Column>
-            <Column field="caption" header="Комментарий"></Column>
           </DataTable>
         </div>
       </template>
@@ -56,13 +55,13 @@
 import {ref} from "vue";
 import {format} from "date-fns";
 import {Member} from "@/models/Member.ts";
-import {MemberDeposit} from "@/models/MemberDeposit.ts";
+import {Deposit} from "@/models/MemberDeposit.ts";
 import {membersService} from "@/services/members.api.ts";
 
 const expandedRows = ref({});
-const depositsMap = ref<{ [key: string]: MemberDeposit[] }>({});
+const depositsMap = ref<{ [key: string]: Deposit[] }>({});
 const members = ref<Member[]>();
-const deposits = ref<MemberDeposit[]>();
+const deposits = ref<Deposit[]>();
 
 const getDateOnly = (date: Date) => {
   return format(date, 'dd.MM.yyyy');

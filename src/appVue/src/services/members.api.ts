@@ -1,6 +1,6 @@
 import {apiService} from "@/services/api.ts";
 import {Member} from "@/models/Member.ts";
-import {MemberDeposit} from "@/models/MemberDeposit.ts";
+import {Deposit} from "@/models/MemberDeposit.ts";
 
 class MembersService {
     async getMembers(): Promise<Member[]> {
@@ -10,7 +10,7 @@ class MembersService {
         return response.data;
     }
 
-    async getDeposits(userId: string): Promise<MemberDeposit[]> {
+    async getDeposits(userId: string): Promise<Deposit[]> {
         const response = await apiService.axiosInstance
             .get("/members/deposits", {params: {userId}});
 
