@@ -2,6 +2,7 @@
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Interfaces.DTO.Members;
+using CloudMining.Interfaces.DTO.Payments.Deposits;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +17,12 @@ public class MembersController : ControllerBase
     private readonly IUserManagementService _userManagementService;
     private readonly IDepositService _depositService;
     private readonly IMapper<User, MemberDto> _memberMapper;
-    private readonly IMapper<Deposit, MemberDepositDto> _memberDepositMapper;
+    private readonly IMapper<Deposit, DepositDto> _memberDepositMapper;
 
     public MembersController(IUserManagementService userManagementService,
         IDepositService depositService,
         IMapper<User, MemberDto> memberMapper,
-        IMapper<Deposit, MemberDepositDto> memberDepositMapper)
+        IMapper<Deposit, DepositDto> memberDepositMapper)
     {
         _userManagementService = userManagementService;
         _depositService = depositService;
@@ -32,13 +33,13 @@ public class MembersController : ControllerBase
     [HttpGet]
     public async Task<IEnumerable<MemberDto>> Get()
     {
-        var members = await _userManagementService.GetMembersAsync();
+        var members = await _userManagementService.GetUsersAsync(withDeposits: true, withShareChanges: true);
         var membersDto = members.Select(member => _memberMapper.ToDto(member));
         return membersDto;
     }
     
     [HttpGet("deposits")]
-    public async Task<IEnumerable<MemberDepositDto>> GetMemberDeposits([FromQuery] Guid userId)
+    public async Task<IEnumerable<DepositDto>> GetMemberDeposits([FromQuery] Guid userId)
     {
         var memberDeposits = await _depositService.GetUserDeposits(userId);
         var memberDepositsDto = memberDeposits.Select(deposit => _memberDepositMapper.ToDto(deposit));
