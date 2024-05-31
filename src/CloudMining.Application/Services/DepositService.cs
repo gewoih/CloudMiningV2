@@ -13,11 +13,11 @@ public sealed class DepositService : IDepositService
 {
     private readonly CloudMiningContext _context;
     private readonly ICurrencyService _currencyService;
-    private readonly IMapper<Deposit, CreateDepositDto> _depositMapper;
+    private readonly IMapper<Deposit, DepositDto> _depositMapper;
     private readonly IShareService _shareService;
 
     public DepositService(CloudMiningContext context, IShareService shareService, ICurrencyService currencyService,
-        IMapper<Deposit, CreateDepositDto> depositMapper)
+        IMapper<Deposit, DepositDto> depositMapper)
     {
         _context = context;
         _shareService = shareService;
@@ -30,7 +30,7 @@ public sealed class DepositService : IDepositService
         return await _context.Deposits.Where(deposit => deposit.UserId == userId).ToListAsync();
     }
 
-    public async Task<Deposit> AddDepositAndRecalculateShares(CreateDepositDto depositDto)
+    public async Task<Deposit> AddDepositAndRecalculateShares(DepositDto depositDto)
     {
         var currencyId = await _currencyService.GetIdAsync(CurrencyCode.RUB);
         var deposit = _depositMapper.ToDomain(depositDto);

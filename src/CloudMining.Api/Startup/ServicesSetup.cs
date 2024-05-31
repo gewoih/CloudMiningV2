@@ -13,6 +13,7 @@ using CloudMining.Interfaces.DTO.Payments.Deposits;
 using CloudMining.Interfaces.DTO.Payments.User;
 using CloudMining.Interfaces.Interfaces;
 using Telegram.Bot;
+using DepositDto = CloudMining.Interfaces.DTO.Payments.Deposits.DepositDto;
 
 namespace CloudMining.Api.Startup;
 
@@ -37,13 +38,12 @@ public static class ServicesSetup
 		services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
 		services.AddScoped<INotificationService, TelegramNotificationService>();
 
-		services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();
 		services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
 		services.AddScoped<IMapper<NotificationSettings, NotificationSettingsDto>, NotificationSettingsMapper>();
+		services.AddScoped<IMapper<User, MemberDto>, MemberMapper>();
+		services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();
 		services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
-		services.AddSingleton<IMapper<Deposit, CreateDepositDto>, DepositMapper>();
-		services.AddSingleton<IMapper<User, MemberDto>, MemberMapper>();
-		services.AddSingleton<IMapper<Deposit, MemberDepositDto>, MemberDepositMapper>();
+		services.AddSingleton<IMapper<Deposit, DepositDto>, DepositMapper>();
 
 		services.AddHttpClient<EmcdApiClient>();
 		services.AddHostedService<PayoutsLoaderService>();

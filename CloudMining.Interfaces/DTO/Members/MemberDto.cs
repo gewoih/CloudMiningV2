@@ -1,5 +1,4 @@
-﻿using CloudMining.Interfaces.DTO.Currencies;
-using CloudMining.Interfaces.DTO.Users;
+﻿using CloudMining.Interfaces.DTO.Users;
 
 namespace CloudMining.Interfaces.DTO.Members;
 

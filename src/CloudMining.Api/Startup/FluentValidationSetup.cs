@@ -17,7 +17,7 @@ public static class FluentValidationSetup
 		services.AddScoped<IValidator<LoginDto>, LoginValidator>();
 		services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
 		services.AddScoped<IValidator<CreatePaymentDto>, PaymentValidator>();
-		services.AddScoped<IValidator<CreateDepositDto>, DepositValidator>();
+		services.AddScoped<IValidator<DepositDto>, DepositValidator>();
 
 		return services;
 	}
