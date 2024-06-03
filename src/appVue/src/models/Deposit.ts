@@ -1,5 +1,5 @@
 ﻿export interface Deposit{
-    id: string;
+    userId: string;
     date: Date;
     amount: number;
 }
