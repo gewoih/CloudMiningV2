@@ -5,8 +5,10 @@ import Payments from './components/Payments.vue';
 import NotFound from "@/components/NotFound.vue";
 import NotificationsSettings from "@/components/NotificationsSettings.vue";
 import Members from "@/components/Members.vue";
+import Home from "@/components/Home.vue";
 
 const routes = [
+    { path: '/', name: 'home', component: Home },
     {path: '/user/register', name: 'register', component: Registration},
     {path: '/user/login', name: 'login', component: Authentication},
     {path: '/payments', name: 'payments', component: Payments},
