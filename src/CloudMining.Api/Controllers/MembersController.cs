@@ -17,17 +17,17 @@ public class MembersController : ControllerBase
     private readonly IUserManagementService _userManagementService;
     private readonly IDepositService _depositService;
     private readonly IMapper<User, MemberDto> _memberMapper;
-    private readonly IMapper<Deposit, DepositDto> _memberDepositMapper;
+    private readonly IMapper<Deposit, DepositDto> _depositMapper;
 
     public MembersController(IUserManagementService userManagementService,
         IDepositService depositService,
         IMapper<User, MemberDto> memberMapper,
-        IMapper<Deposit, DepositDto> memberDepositMapper)
+        IMapper<Deposit, DepositDto> depositMapper)
     {
         _userManagementService = userManagementService;
         _depositService = depositService;
         _memberMapper = memberMapper;
-        _memberDepositMapper = memberDepositMapper;
+        _depositMapper = depositMapper;
     }
     
     [HttpGet]
@@ -42,7 +42,7 @@ public class MembersController : ControllerBase
     public async Task<IEnumerable<DepositDto>> GetMemberDeposits([FromQuery] Guid userId)
     {
         var memberDeposits = await _depositService.GetUserDeposits(userId);
-        var memberDepositsDto = memberDeposits.Select(deposit => _memberDepositMapper.ToDto(deposit));
+        var memberDepositsDto = memberDeposits.Select(deposit => _depositMapper.ToDto(deposit));
         return memberDepositsDto;
     }
 }
