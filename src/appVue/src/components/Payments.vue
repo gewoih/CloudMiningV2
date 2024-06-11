@@ -193,9 +193,12 @@ const paymentTypes = ref([
 ]);
 
 const pageChange = async (event) => {
-  pageNumber.value = event.page + 1;
-  pageSize.value = event.rows;
-  await fetchPayments();
+  const newPageNumber = event.page + 1;
+  if (newPageNumber !== pageNumber.value) {
+    pageNumber.value = newPageNumber;
+    pageSize.value = event.rows;
+    await fetchPayments();
+  }
 };
 
 const getPaymentStatusSeverity = (data) => {
