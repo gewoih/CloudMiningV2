@@ -37,7 +37,9 @@
       </Column>
       <template v-slot:expansion="slotProps">
         <div class="p-3">
-          <DataTable :value="depositsMap[slotProps.data.user.id]">
+          <DataTable :value="depositsMap[slotProps.data.user.id]"
+                     :sortField="'date'"
+                     :sortOrder="-1">
             <Column field="date" header="Дата">
               <template v-slot:body="slotProps">
                 {{ getDateOnly(slotProps.data.date) }}
@@ -143,7 +145,8 @@ const createDeposit = async () => {
   if (!depositsMap.value[memberId]) {
     depositsMap.value[memberId] = [];
   }
-  depositsMap.value[memberId].push({ ...newDeposit.value });
+  const newDepositData = { ...newDeposit.value };
+  depositsMap.value[memberId].unshift(newDepositData);
 
   deposits.value = depositsMap.value[memberId];
   isModalVisible.value = false;
