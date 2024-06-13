@@ -36,8 +36,8 @@
         </template>
       </Column>
       <template v-slot:expansion="slotProps">
-        <div class="p-3">
-          <DataTable :value="depositsMap[slotProps.data.user.id]">
+        <div class="flex justify-content-center p-3">
+          <DataTable class="w-7" :value="depositsMap[slotProps.data.user.id]">
             <Column field="date" header="Дата">
               <template v-slot:body="slotProps">
                 {{ getDateOnly(slotProps.data.date) }}
