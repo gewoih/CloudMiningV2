@@ -4,66 +4,67 @@
       <template #start>
         <h1>Моя статистика</h1>
       </template>
+      <template #end>
+        <i class="pi pi-question-circle mr-3 text-2xl"
+           v-tooltip.bottom="{
+            value: 'Селектор переключения стратегии расчета дохода. ' +
+             '<br/><b>Доход (Hold)</b> - доход при учёте хранения полного объема полученных средств с начала участия в проекте. ' +
+              '<br/><b>Доход (Receive&Sell)</b> - доход при учёте продажи полного объема полученных средств в день получения.',
+            showDelay: 300,
+            hideDelay: 300,
+            pt: {
+              text:'bg-white text-color font-medium shadow-5 w-19rem'
+            },
+            escape: false
+          }"></i>
+        <Dropdown v-model="selectedIncomeType" :options="incomeTypes" class="w-15rem" optionLabel="name"
+                  optionValue="value"/>
+      </template>
     </Toolbar>
     <div class="flex align-items-center justify-content-between mb-8">
-      <Card class="shadow-3 w-19rem">
+      <Card class="shadow-3 w-2">
         <template #title>
           <i class="pi pi-wallet mr-1"></i>
-          Доход (Hold)
-          <i class="pi pi-question-circle"
-             v-tooltip.bottom="{
-            value: 'Доход при учёте хранения полного объема полученных средств с начала участия в проекте',
-            showDelay: 300,
-            hideDelay: 300
-          }"></i>
+          Доходы
         </template>
         <template #content>Card content</template>
-        <template #footer>Card footer</template>
+        <template #footer>
+          <div class="mb-4">Card footer</div>
+        </template>
       </Card>
-      <Card class="shadow-3 w-19rem">
+      <Card class="shadow-3 w-2">
         <template #title>
-          <i class="pi pi-wallet mr-1"></i>
-          Доход (Receive&Sell)
-          <i class="pi pi-question-circle"
-             v-tooltip.bottom="{
-            value: 'Доход при учёте продажи полного объема полученных средств в день получения',
-            showDelay: 300,
-            hideDelay: 300
-          }"></i>
+          <i class="pi pi-calendar-clock mr-1"></i>
+          Расходы
         </template>
-        <template #content>Card content</template>
-        <template #footer>Card footer</template>
+        <template #content>
+          <div class="mb-1">Card content</div>
+        </template>
+        <template #footer>
+          <div class="mb-1">Card footer</div>
+          <div>Card footer</div>
+        </template>
       </Card>
-      <Card class="shadow-3 w-19rem">
+      <Card class="shadow-3 w-2">
         <template #title>
           <i class="pi pi-chart-line mr-1"></i>
           Прибыль
-          <i class="pi pi-question-circle"
-             v-tooltip.bottom="{
-            value: 'Доход (Receive&Sell) минус расходы',
-            showDelay: 300,
-            hideDelay: 300
-          }"></i>
         </template>
-        <template #content>Card content</template>
-        <template #footer>Card footer</template>
-      </Card>
-      <Card class="shadow-3 w-19rem">
-        <template #title>
-          <i class="pi pi-percentage mr-1"></i>
-          Процент окупаемости
+        <template #content>
+          <div class="mb-1">Card content</div>
         </template>
-        <template #content>Card content</template>
-        <template #footer>Card footer</template>
+        <template #footer>
+          <div class="mb-1">Card footer</div>
+          <div>Card footer</div>
+        </template>
       </Card>
     </div>
-    <div class="flex align-items-center justify-content-between mt-7 mb-7 mr-2 ml-2">
+    <div class="flex align-items-center justify-content-between mt-7 mb-7">
       <Card class="shadow-3 w-5 pt-1 pb-1">
         <template #title>
           <Toolbar class="border-none pt-0 pb-0">
-            <template #end>
-              <Dropdown v-model="selectedIncomeType" :options="incomeTypes" class="w-full" optionLabel="name"
-                        optionValue="value"/>
+            <template #start>
+              Доходы
             </template>
           </Toolbar>
         </template>
@@ -75,14 +76,7 @@
         <template #title>
           <Toolbar class="border-none pt-0 pb-0">
             <template #start>
-              <div>
-                <div class="mb-1">
-                  В среднем
-                </div>
-                <div>
-                  <h3 class="m-0">6500 ₽</h3>
-                </div>
-              </div>
+              Расходы
             </template>
             <template #end>
               <Dropdown v-model="selectedExpenseType" :options="expenseTypes" class="w-full" optionLabel="name"
@@ -112,7 +106,7 @@ const incomeTypes = ref([
   {name: 'Доход (Receive&Sell)', value: 2},
 ]);
 const expenseTypes = ref([
-  {name: 'Расходы', value: 1},
+  {name: 'Общие', value: 1},
   {name: 'Электричество', value: 2},
   {name: 'Покупки', value: 3},
 ]);
