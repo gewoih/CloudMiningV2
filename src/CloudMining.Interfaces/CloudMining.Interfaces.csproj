@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\src\CloudMining.Domain\CloudMining.Domain.csproj"/>
+        <ProjectReference Include="..\CloudMining.Domain\CloudMining.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
