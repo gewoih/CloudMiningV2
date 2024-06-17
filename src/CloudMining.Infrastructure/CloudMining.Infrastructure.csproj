@@ -24,8 +24,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\CloudMining.Interfaces\CloudMining.Interfaces.csproj"/>
         <ProjectReference Include="..\CloudMining.Domain\CloudMining.Domain.csproj"/>
+        <ProjectReference Include="..\CloudMining.Interfaces\CloudMining.Interfaces.csproj" />
     </ItemGroup>
 
     <ItemGroup>
