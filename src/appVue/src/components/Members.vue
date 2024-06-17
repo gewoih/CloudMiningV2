@@ -37,7 +37,7 @@
       </Column>
       <template v-slot:expansion="slotProps">
         <div class="flex justify-content-center p-3">
-          <DataTable :value="depositsMap[slotProps.data.user.id]"
+          <DataTable class="w-6" :value="depositsMap[slotProps.data.user.id]"
                      :sortField="'date'"
                      :sortOrder="-1">
             <Column field="date" header="Дата">
