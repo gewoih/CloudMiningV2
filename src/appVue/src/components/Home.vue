@@ -8,8 +8,8 @@
         <i class="pi pi-question-circle mr-3 text-2xl"
            v-tooltip.bottom="{
             value: 'Селектор переключения стратегии расчета дохода. ' +
-             '<br/><b>Доход (Hold)</b> - доход при учёте хранения полного объема полученных средств с начала участия в проекте. ' +
-              '<br/><b>Доход (Receive&Sell)</b> - доход при учёте продажи полного объема полученных средств в день получения.',
+             '<br/><br/><b>Доход (Hold)</b> - доход при учёте хранения полного объема полученных средств с начала участия в проекте. ' +
+              '<br/><br/><b>Доход (Receive&Sell)</b> - доход при учёте продажи полного объема полученных средств в день получения.',
             showDelay: 300,
             hideDelay: 300,
             pt: {
@@ -22,49 +22,55 @@
       </template>
     </Toolbar>
     <div class="flex align-items-center justify-content-between mb-8">
-      <Card class="shadow-3 w-2">
+      <Card class="my-box">
         <template #title>
           <i class="pi pi-wallet mr-1"></i>
           Доходы
         </template>
-        <template #content>Card content</template>
+        <template #content>
+          <h2 class="m-0">500 000,88 ₽</h2> 
+        </template>
         <template #footer>
-          <div class="mb-4">Card footer</div>
+          <div class="mb-1"><b>4200,99 ₽</b> в месяц</div>
         </template>
       </Card>
-      <Card class="shadow-3 w-2">
+      <Card class="my-box">
         <template #title>
           <i class="pi pi-calendar-clock mr-1"></i>
           Расходы
         </template>
         <template #content>
-          <div class="mb-1">Card content</div>
+          <h2 class="m-0">340 000,88 ₽</h2>
         </template>
         <template #footer>
-          <div class="mb-1">Card footer</div>
-          <div>Card footer</div>
+          <div class="mb-2"><b>150 000,44 ₽</b> электричество</div>
+          <div><b>150 000,44 ₽</b> покупки</div>
         </template>
       </Card>
-      <Card class="shadow-3 w-2">
+      <Card class="my-box">
         <template #title>
           <i class="pi pi-chart-line mr-1"></i>
           Прибыль
         </template>
         <template #content>
-          <div class="mb-1">Card content</div>
+          <h2 class="m-0">220 000,66 ₽</h2>
         </template>
         <template #footer>
-          <div class="mb-1">Card footer</div>
-          <div>Card footer</div>
+          <div class="mb-2"><b>6213,44 ₽</b> в месяц</div>
+          <div><b>94.45%</b> окупилось</div>
         </template>
       </Card>
     </div>
     <div class="flex align-items-center justify-content-between mt-7 mb-7">
-      <Card class="shadow-3 w-5 pt-1 pb-1">
+      <Card class="my-chart">
         <template #title>
           <Toolbar class="border-none pt-0 pb-0">
             <template #start>
-              Доходы
+             <div class="font-medium">Доходы</div> 
+            </template>
+            <template #end>
+              <Dropdown v-model="selectedIncomeTimeline" :options="incomeTimelines" class="custom-dropdown" optionLabel="name"
+                        optionValue="value" />
             </template>
           </Toolbar>
         </template>
@@ -72,15 +78,17 @@
           <Chart type="line" :data="incomeChartData" :options="incomeChartOptions" class="h-19rem mb-1"/>
         </template>
       </Card>
-      <Card class="shadow-3 w-5">
+      <Card class="my-chart">
         <template #title>
           <Toolbar class="border-none pt-0 pb-0">
             <template #start>
-              Расходы
+              <div class="font-medium">Расходы</div>
             </template>
             <template #end>
-              <Dropdown v-model="selectedExpenseType" :options="expenseTypes" class="w-full" optionLabel="name"
-                        optionValue="value"/>
+              <Dropdown v-model="selectedExpenseType" :options="expenseTypes" class="custom-dropdown mr-2" optionLabel="name"
+                        optionValue="value" />
+              <Dropdown v-model="selectedExpenseTimeline" :options="expenseTimelines" class="custom-dropdown" optionLabel="name"
+                        optionValue="value" />
             </template>
           </Toolbar>
         </template>
@@ -96,7 +104,9 @@
 import {onMounted, ref} from "vue";
 
 const selectedIncomeType = ref(1)
+const selectedIncomeTimeline = ref(1)
 const selectedExpenseType = ref(1)
+const selectedExpenseTimeline = ref(1)
 const incomeChartData = ref();
 const incomeChartOptions = ref();
 const expenseChartData = ref();
@@ -105,10 +115,23 @@ const incomeTypes = ref([
   {name: 'Доход (Hold)', value: 1},
   {name: 'Доход (Receive&Sell)', value: 2},
 ]);
+
+const incomeTimelines = ref([
+  {name: 'За всё время', value: 1},
+  {name: 'С начала года', value: 2},
+  {name: '12 месяцев', value: 3},
+]);
+
 const expenseTypes = ref([
   {name: 'Общие', value: 1},
   {name: 'Электричество', value: 2},
   {name: 'Покупки', value: 3},
+]);
+
+const expenseTimelines = ref([
+  {name: 'За всё время', value: 1},
+  {name: 'С начала года', value: 2},
+  {name: '12 месяцев', value: 3},
 ]);
 
 const setIncomeChartData = () => {
