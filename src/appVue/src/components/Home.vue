@@ -66,16 +66,16 @@
         <template #title>
           <Toolbar class="border-none pt-0 pb-0">
             <template #start>
-             <div class="font-medium">Доходы</div> 
+             <div class="font-medium">Доходы/Прибыль</div> 
             </template>
             <template #end>
-              <Dropdown v-model="selectedIncomeTimeline" :options="incomeTimelines" class="custom-dropdown" optionLabel="name"
+              <Dropdown v-model="selectedIncomeAndProfitTimeline" :options="incomeAndProfitTimelines" class="custom-dropdown" optionLabel="name"
                         optionValue="value" />
             </template>
           </Toolbar>
         </template>
         <template #content>
-          <Chart type="line" :data="incomeChartData" :options="incomeChartOptions" class="h-19rem mb-1"/>
+          <Chart type="bar" :data="incomeAndProfitChartData" :options="incomeAndProfitChartOptions" class="h-19rem mb-1"/>
         </template>
       </Card>
       <Card class="my-chart">
@@ -104,11 +104,11 @@
 import {onMounted, ref} from "vue";
 
 const selectedIncomeType = ref(1)
-const selectedIncomeTimeline = ref(1)
+const selectedIncomeAndProfitTimeline = ref(1)
 const selectedExpenseType = ref(1)
 const selectedExpenseTimeline = ref(1)
-const incomeChartData = ref();
-const incomeChartOptions = ref();
+const incomeAndProfitChartData = ref();
+const incomeAndProfitChartOptions = ref();
 const expenseChartData = ref();
 const expenseChartOptions = ref();
 const incomeTypes = ref([
@@ -116,7 +116,7 @@ const incomeTypes = ref([
   {name: 'Доход (Receive&Sell)', value: 2},
 ]);
 
-const incomeTimelines = ref([
+const incomeAndProfitTimelines = ref([
   {name: 'За всё время', value: 1},
   {name: 'С начала года', value: 2},
   {name: '12 месяцев', value: 3},
@@ -134,23 +134,41 @@ const expenseTimelines = ref([
   {name: '12 месяцев', value: 3},
 ]);
 
-const setIncomeChartData = () => {
+const setIncomeAndProfitChartData = () => {
 
   return {
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
       {
-        label: 'First Dataset',
+        label: 'Доходы',
         data: [28, 48, 40, 19, 86, 27, 90],
-        fill: false,
         borderColor: ['rgb(139, 92, 246)'],
         backgroundColor: ['rgb(139, 92, 246)'],
-        tension: 0.4
+        order: 2,
+        borderRadius: {
+          topLeft: 8,
+          topRight: 8,
+          bottomLeft: 0,
+          bottomRight: 0
+        }
+      },
+      {
+        label: 'Прибыль',
+        data: [18, 28, 30, 9, 46, 17, 50],
+        borderColor: 'rgb(0, 255, 195)',
+        backgroundColor: ['rgba(255,255,255,0)'],
+        borderWidth: {
+          top: 2,
+          bottom: 0,
+          left: 0,
+          right: 0 
+        },
+        order: 1
       }
     ]
   };
 };
-const setIncomeChartOptions = () => {
+const setIncomeAndProfitChartOptions = () => {
   const documentStyle = getComputedStyle(document.documentElement);
   const textColor = documentStyle.getPropertyValue('--text-color');
   const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
@@ -168,11 +186,15 @@ const setIncomeChartOptions = () => {
       },
       tooltip: {
         mode: 'index',
-        intersect: false
+        intersect: false,
+        itemSort: (a: any, b: any) => {
+          return b.dataset.order - a.dataset.order;
+        }
       }
     },
     scales: {
       x: {
+        stacked: true,
         ticks: {
           color: textColorSecondary
         },
@@ -181,6 +203,7 @@ const setIncomeChartOptions = () => {
         }
       },
       y: {
+        stacked: false,
         ticks: {
           color: textColorSecondary
         },
@@ -204,10 +227,16 @@ const setExpenseChartData = () => {
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
       {
-        label: 'Sales',
+        label: 'Расходы',
         data: [540, 325, 702, 620, 325, 702, 620],
-        backgroundColor: ['rgb(139, 92, 246)', 'rgb(139, 92, 246)', 'rgb(139, 92, 246)', 'rgb(139, 92, 246)', 'rgb(139, 92, 246)', 'rgb(139, 92, 246)', 'rgb(139, 92, 246)'],
-        borderColor: ['rgb(139, 92, 246)', 'rgb(139, 92, 246)', 'rgb(139, 92, 246)', 'rgb(139, 92, 246)'],
+        backgroundColor: ['rgb(139, 92, 246)'],
+        borderColor: ['rgb(139, 92, 246)'],
+        borderRadius: {
+          topLeft: 8,
+          topRight: 8,
+          bottomLeft: 0,
+          bottomRight: 0
+        },
         borderWidth: 1
       }
     ]
@@ -262,8 +291,8 @@ const setExpenseChartOptions = () => {
   };
 }
 onMounted(() => {
-  incomeChartData.value = setIncomeChartData();
-  incomeChartOptions.value = setIncomeChartOptions();
+  incomeAndProfitChartData.value = setIncomeAndProfitChartData();
+  incomeAndProfitChartOptions.value = setIncomeAndProfitChartOptions();
   expenseChartData.value = setExpenseChartData();
   expenseChartOptions.value = setExpenseChartOptions();
 });
