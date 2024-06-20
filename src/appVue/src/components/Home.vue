@@ -21,6 +21,7 @@
                   optionValue="value"/>
       </template>
     </Toolbar>
+    <!-- TODO: Сделать карточки через grid -->
     <div class="flex align-items-center justify-content-between mb-8">
       <Card class="my-box">
         <template #title>
