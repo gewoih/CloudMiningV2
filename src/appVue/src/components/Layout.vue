@@ -38,9 +38,9 @@ import Menu from "primevue/menu";
 
 const items = ref([
   {
-    label: 'Статистика',
+    label: 'Главная',
     icon: 'pi pi-chart-line',
-    route: 'payments',
+    route: 'home',
   },
   {
     label: 'Участники',
