@@ -50,6 +50,8 @@ public static class ServicesSetup
 		services.AddHostedService<PayoutsLoaderService>();
 		
 		services.AddHttpClient<BinanceApiClient>();
+		services.AddHostedService<MarketDataLoaderService>();
+		
 
 		var telegramBotApiKey = configuration["Telegram:ApiKey"];
 		services.AddSingleton<ITelegramBotClient>(sp => new TelegramBotClient(telegramBotApiKey));
