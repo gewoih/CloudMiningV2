@@ -27,6 +27,7 @@ public class CloudMiningContext : IdentityDbContext<User, Role, Guid>
 	public DbSet<NotificationSettings> NotificationSettings { get; set; }
 	public DbSet<Notification> Notifications { get; set; }
 	public DbSet<OutboxState> OutboxStates { get; set; }
+	public DbSet<MarketData> MarketData { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder builder)
 	{
