@@ -1,7 +1,9 @@
 ﻿using System.Text;
+using CloudMining.Application.Utils;
 using CloudMining.Domain.Enums;
 using CloudMining.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace CloudMining.Infrastructure.Binance;
 
@@ -13,45 +15,48 @@ public sealed class BinanceApiClient
     public BinanceApiClient(HttpClient httpClient, IOptions<BinanceSettings> settings)
     {
         _httpClient = httpClient;
-        
+
         var baseUrl = settings.Value.BaseUrl;
         _getPriceDataUrl = baseUrl + settings.Value.Endpoints.GetPriceDataUrl;
     }
 
     public async Task<List<PriceData>> GetPriceData(
-        int limit = default,
-        long startTime = default,
-        long endTime = default, 
-        CurrencyCode from = CurrencyCode.BTC, 
-        CurrencyCode to = CurrencyCode.RUB,
-        CandlestickIntervals candlesInterval = CandlestickIntervals._1h)
+        CurrencyCode fromCurrency,
+        CurrencyCode toCurrency,
+        CandlestickTimeFrame timeFrame = CandlestickTimeFrame.Hour,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        int limit = 500)
     {
-        var parameters = new Dictionary<string, string>();
+        var symbol = $"{fromCurrency}{toCurrency}";
+        var requestUrl = string.Format(_getPriceDataUrl, symbol, timeFrame.GetDescription(), limit);
 
-        if (limit != default)
-            parameters.Add("limit", limit.ToString());
+        if (fromDate.HasValue)
+            requestUrl += $"&startTime={fromDate.Value.Ticks}";
 
-        if (startTime != default)
-            parameters.Add("startTime", startTime.ToString());
+        if (toDate.HasValue)
+            requestUrl += $"&endTime={toDate.Value.Ticks}";
 
-        if (endTime != default)
-            parameters.Add("endTime", endTime.ToString());
-        
-        var symbol = $"{from}{to}";
-        var interval = candlesInterval.ToString().Substring(1);
+        var response = await _httpClient.GetAsync(requestUrl);
+        response.EnsureSuccessStatusCode();
 
-        parameters.Add("symbol", symbol);
-        parameters.Add("interval", interval);
-        
-        var queryBuilder = new StringBuilder(_getPriceDataUrl);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var data = JsonConvert.DeserializeObject<List<List<object>>>(responseContent);
 
-        if (parameters.Any())
+        var priceDataList = new List<PriceData>();
+        foreach (var entry in data)
         {
-            queryBuilder.Append("?");
-            queryBuilder.Append(string.Join("&", parameters.Select(p => $"{p.Key}={p.Value}")));
+            var unixTime = Convert.ToInt64(entry[0]);
+            var date = DateTimeOffset.FromUnixTimeMilliseconds(unixTime).DateTime;
+            var price = Convert.ToDecimal(entry[4]);
+            var priceData = new PriceData
+            {
+                Price = price,
+                Date = date
+            };
+            priceDataList.Add(priceData);
         }
 
-        var priceData = await _httpClient.GetAsync(queryBuilder.ToString());
+        return priceDataList;
     }
-    
 }
