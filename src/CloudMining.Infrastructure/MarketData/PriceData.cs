@@ -1,4 +1,6 @@
-﻿namespace CloudMining.Infrastructure.Binance;
+﻿using CloudMining.Domain.Enums;
+
+namespace CloudMining.Infrastructure.Binance;
 
 public sealed class PriceData
 {
