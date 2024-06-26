@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using CloudMining.Application.Utils;
 using CloudMining.Domain.Enums;
 using CloudMining.Infrastructure.Settings;
@@ -47,8 +48,9 @@ public sealed class BinanceApiClient
         foreach (var entry in data)
         {
             var unixTime = Convert.ToInt64(entry[0]);
-            var date = DateTimeOffset.FromUnixTimeMilliseconds(unixTime).DateTime;
-            var price = Convert.ToDecimal(entry[4]);
+            var date = DateTimeOffset.FromUnixTimeMilliseconds(unixTime).UtcDateTime;
+            var priceString = entry[4].ToString();
+            var price = decimal.Parse(priceString!, CultureInfo.InvariantCulture);
             var priceData = new PriceData
             {
                 Price = price,
