@@ -35,6 +35,9 @@ public class CloudMiningContext : IdentityDbContext<User, Role, Guid>
 
 		builder.Entity<Currency>().HasData(DatabaseInitializer.GetCurrencies());
 		builder.Entity<Currency>().HasIndex(currency => currency.Code).IsUnique();
+		builder.Entity<MarketData>()
+			.HasIndex(data => new { data.From, data.To, data.Date })
+			.IsUnique();
 
 		builder.AddInboxStateEntity();
 		builder.AddOutboxMessageEntity();
