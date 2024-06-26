@@ -123,6 +123,18 @@ namespace CloudMining.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("c24b466a-97c2-4d64-bbe7-c583b76a2c3c"),
+                            Caption = "Tether",
+                            Code = 6,
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DeletedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            Precision = 2,
+                            ShortName = "USDT",
+                            UpdatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
                             Id = new Guid("a5450179-3bff-4645-9209-04acc6168c5b"),
                             Caption = "Dogecoin",
                             Code = 5,
