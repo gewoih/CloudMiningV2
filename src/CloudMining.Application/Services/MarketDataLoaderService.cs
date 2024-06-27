@@ -53,8 +53,7 @@ public sealed class MarketDataLoaderService : BackgroundService
                                 .Where(marketData =>
                                     marketData.From == currencyPair.From && marketData.To == currencyPair.To)
                                 .MaxAsync(marketData => (DateTime?)marketData.Date) ??
-                            new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                                .AddSeconds(1);
+                            new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             if ((endDate - startDate).TotalHours < 1)
             {
