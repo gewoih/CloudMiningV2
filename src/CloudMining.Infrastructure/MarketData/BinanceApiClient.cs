@@ -33,10 +33,20 @@ public sealed class BinanceApiClient
         var requestUrl = string.Format(_getPriceDataUrl, symbol, timeFrame.GetDescription(), limit);
 
         if (fromDate.HasValue)
-            requestUrl += $"&startTime={fromDate.Value.Ticks}";
+        {
+            var unixEpoch = DateTime.UnixEpoch;
+            var startTime = fromDate.Value.ToUniversalTime();
+            var startTimeMilliseconds = (long)(startTime - unixEpoch).TotalMilliseconds;
+            requestUrl += $"&startTime={startTimeMilliseconds}";
+        }
 
         if (toDate.HasValue)
-            requestUrl += $"&endTime={toDate.Value.Ticks}";
+        {
+            var unixEpoch = DateTime.UnixEpoch;
+            var endTime = toDate.Value.ToUniversalTime();
+            var endTimeMilliseconds = (long)(endTime - unixEpoch).TotalMilliseconds;
+            requestUrl += $"&endTime={endTimeMilliseconds}";
+        }
 
         var response = await _httpClient.GetAsync(requestUrl);
         response.EnsureSuccessStatusCode();
