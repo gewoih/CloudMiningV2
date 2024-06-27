@@ -5,7 +5,7 @@ namespace CloudMining.Infrastructure.Settings;
 public class MarketDataLoaderSettings
 {
     public static readonly string SectionName = "MarketDataLoader";
-    public int DelayInMinutes { get; set; }
+    public TimeSpan Delay { get; set; }
     public List<CurrencyPairs> CurrencyPairs { get; set; }
 }
 

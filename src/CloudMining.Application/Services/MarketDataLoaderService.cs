@@ -12,7 +12,7 @@ namespace CloudMining.Application.Services;
 
 public sealed class MarketDataLoaderService : BackgroundService
 {
-    private readonly int _delayInMinutes;
+    private readonly TimeSpan _delay;
     private readonly BinanceApiClient _binanceApiClient;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly List<CurrencyPairs> _сurrencyPairs;
@@ -23,7 +23,7 @@ public sealed class MarketDataLoaderService : BackgroundService
         IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
-        _delayInMinutes = settings.Value.DelayInMinutes;
+        _delay = settings.Value.Delay;
         _binanceApiClient = binanceApiClient;
         _сurrencyPairs = settings.Value.CurrencyPairs;
     }
@@ -36,7 +36,7 @@ public sealed class MarketDataLoaderService : BackgroundService
             var context = scope.ServiceProvider.GetRequiredService<CloudMiningContext>();
             await LoadRealTimeMarketData(context);
 
-            await Task.Delay(TimeSpan.FromMinutes(_delayInMinutes), stoppingToken);
+            await Task.Delay(_delay, stoppingToken);
         }
     }
 
@@ -79,7 +79,6 @@ public sealed class MarketDataLoaderService : BackgroundService
             if (!existingCombinationsHashSet.Contains(combo))
             {
                 context.MarketData.Add(data);
-                existingCombinationsHashSet.Add(combo);
             }
         }
 
