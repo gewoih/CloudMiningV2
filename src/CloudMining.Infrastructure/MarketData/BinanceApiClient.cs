@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Text;
 using CloudMining.Application.Utils;
 using CloudMining.Domain.Enums;
 using CloudMining.Infrastructure.Settings;
@@ -21,7 +20,7 @@ public sealed class BinanceApiClient
         _getPriceDataUrl = baseUrl + settings.Value.Endpoints.GetPriceDataUrl;
     }
 
-    public async Task<List<PriceData>> GetPriceData(
+    public async Task<List<PriceData>> GetMarketDataAsync(
         CurrencyCode fromCurrency,
         CurrencyCode toCurrency,
         CandlestickTimeFrame timeFrame = CandlestickTimeFrame.Hour,

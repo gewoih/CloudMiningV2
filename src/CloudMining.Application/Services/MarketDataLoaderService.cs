@@ -58,21 +58,25 @@ public sealed class MarketDataLoaderService : BackgroundService
             
             for (; lastMarketDataDate < _loadHistoricalDataTo; lastMarketDataDate += _loadingDelay)
             {
-                var priceData = await _binanceApiClient.GetPriceData(currencyPair.From, currencyPair.To,
-                    fromDate: lastMarketDataDate, limit: 1000);
+                var binanceMarketData = await _binanceApiClient.GetMarketDataAsync(
+                    fromCurrency: currencyPair.From,
+                    toCurrency: currencyPair.To,
+                    fromDate: lastMarketDataDate, 
+                    limit: 1000);
                 
-                if (priceData.Count == 0)
+                if (binanceMarketData.Count == 0)
                     break;
 
-				loadedMarketData = priceData.Select(data => new MarketData
+                var newMarketData = binanceMarketData.Select(data => new MarketData
                 {
                     From = currencyPair.From,
                     To = currencyPair.To,
                     Price = data.Price,
                     Date = data.Date
-                }).ToList();
+                });
 
-                lastMarketDataDate = priceData.Max(data => data.Date);
+				loadedMarketData.AddRange(newMarketData);
+                lastMarketDataDate = binanceMarketData.Max(data => data.Date);
             }
 
             await context.MarketData.AddRangeAsync(loadedMarketData);
@@ -85,7 +89,7 @@ public sealed class MarketDataLoaderService : BackgroundService
         var marketDataList = new List<MarketData>();
         foreach (var currencyPair in _currencyPairs)
         {
-            var priceData = await _binanceApiClient.GetPriceData(currencyPair.From, currencyPair.To, limit: 1);
+            var priceData = await _binanceApiClient.GetMarketDataAsync(currencyPair.From, currencyPair.To, limit: 1);
             foreach (var data in priceData)
             {
                 var marketData = new MarketData()
