@@ -1,5 +1,4 @@
-﻿using CloudMining.Domain.Enums;
-using CloudMining.Domain.Models.Currencies;
+﻿using CloudMining.Domain.Models.Currencies;
 using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Settings;
@@ -12,26 +11,23 @@ namespace CloudMining.Application.Services;
 
 public sealed class MarketDataLoaderService : BackgroundService
 {
-    private readonly TimeSpan _delay;
-    private readonly DateTime _fromDate;
-    private readonly DateTime _toDate;
+    private readonly TimeSpan _loadingDelay;
+    private readonly DateTime _loadHistoricalDataFrom;
+    private readonly DateTime _loadHistoricalDataTo;
     private readonly BinanceApiClient _binanceApiClient;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly List<CurrencyPairs> _сurrencyPairs;
-
+    private readonly List<CurrencyPair> _currencyPairs;
 
     public MarketDataLoaderService(BinanceApiClient binanceApiClient,
         IOptions<MarketDataLoaderSettings> settings,
-        IServiceScopeFactory scopeFactory,
-        DateTime fromDate,
-        DateTime toDate)
+        IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
-        _delay = settings.Value.Delay;
-        _fromDate = fromDate != default ? fromDate : new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        _toDate = toDate != default ? toDate : DateTime.UtcNow;
+        _loadingDelay = settings.Value.Delay;
+        _loadHistoricalDataFrom = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        _loadHistoricalDataTo = DateTime.UtcNow;
         _binanceApiClient = binanceApiClient;
-        _сurrencyPairs = settings.Value.CurrencyPairs;
+        _currencyPairs = settings.Value.CurrencyPairs;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -44,30 +40,31 @@ public sealed class MarketDataLoaderService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             await LoadRealTimeMarketData(context);
-            await Task.Delay(_delay, stoppingToken);
+            await Task.Delay(_loadingDelay, stoppingToken);
         }
     }
 
     private async Task LoadHistoricalMarketData(CloudMiningContext context)
     {
-
-        foreach (var currencyPair in _сurrencyPairs)
+        foreach (var currencyPair in _currencyPairs)
         {
-            var startDate = await GetStartDateForCurrencyPair(context, currencyPair);
+            var loadedMarketData = new List<MarketData>();
 
-            if (IsDataLoaded(startDate))
-                break;
+            var lastMarketDataDate = await GetLastMarketDataDate(context, currencyPair);
+            if (lastMarketDataDate is null)
+                lastMarketDataDate = _loadHistoricalDataFrom;
+            else
+                lastMarketDataDate += _loadingDelay;
             
-            for (; startDate < _toDate; startDate += _delay)
+            for (; lastMarketDataDate < _loadHistoricalDataTo; lastMarketDataDate += _loadingDelay)
             {
                 var priceData = await _binanceApiClient.GetPriceData(currencyPair.From, currencyPair.To,
-                    fromDate: startDate, limit: 1000);
+                    fromDate: lastMarketDataDate, limit: 1000);
                 
                 if (priceData.Count == 0)
                     break;
-                
-                //mapper
-                var marketDataList = priceData.Select(data => new MarketData
+
+				loadedMarketData = priceData.Select(data => new MarketData
                 {
                     From = currencyPair.From,
                     To = currencyPair.To,
@@ -75,18 +72,18 @@ public sealed class MarketDataLoaderService : BackgroundService
                     Date = data.Date
                 }).ToList();
 
-                context.MarketData.AddRange(marketDataList);
-                await context.SaveChangesAsync();
-
-                startDate = priceData.Max(data => data.Date);
+                lastMarketDataDate = priceData.Max(data => data.Date);
             }
+
+            await context.MarketData.AddRangeAsync(loadedMarketData);
+            await context.SaveChangesAsync();
         }
     }
 
     private async Task LoadRealTimeMarketData(CloudMiningContext context)
     {
         var marketDataList = new List<MarketData>();
-        foreach (var currencyPair in _сurrencyPairs)
+        foreach (var currencyPair in _currencyPairs)
         {
             var priceData = await _binanceApiClient.GetPriceData(currencyPair.From, currencyPair.To, limit: 1);
             foreach (var data in priceData)
@@ -105,7 +102,7 @@ public sealed class MarketDataLoaderService : BackgroundService
         await SaveRealTimeMarketData(marketDataList, context);
     }
 
-    private async Task SaveRealTimeMarketData(IEnumerable<MarketData> marketData, CloudMiningContext context)
+    private static async Task SaveRealTimeMarketData(IEnumerable<MarketData> marketData, CloudMiningContext context)
     {
         var existingCombinations = await context.MarketData
             .Where(data => data.Date == context.MarketData.Max(x => x.Date))
@@ -120,26 +117,19 @@ public sealed class MarketDataLoaderService : BackgroundService
         {
             var combo = (data.From, data.To, data.Date);
             if (!existingCombinationsHashSet.Contains(combo))
-            {
-                context.MarketData.Add(data);
-            }
+                await context.MarketData.AddAsync(data);
         }
 
         await context.SaveChangesAsync()
             .ConfigureAwait(false);
     }
 
-    private async Task<DateTime> GetStartDateForCurrencyPair(CloudMiningContext context, CurrencyPairs currencyPair)
+    private static async Task<DateTime?> GetLastMarketDataDate(CloudMiningContext context, CurrencyPair currencyPair)
     {
-        var lastDate = await context.MarketData
-            .Where(m => m.From == currencyPair.From && m.To == currencyPair.To)
-            .MaxAsync(m => (DateTime?)m.Date);
+        var lastMarketDataDate = await context.MarketData
+            .Where(marketData => marketData.From == currencyPair.From && marketData.To == currencyPair.To)
+            .MaxAsync(marketData => (DateTime?)marketData.Date);
 
-        return lastDate.HasValue ? lastDate.Value + _delay : _fromDate;
-    }
-
-    private bool IsDataLoaded(DateTime startDate)
-    {
-        return _toDate - startDate < _delay;
+        return lastMarketDataDate;
     }
 }
