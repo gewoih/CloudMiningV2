@@ -13,6 +13,8 @@ namespace CloudMining.Application.Services;
 public sealed class MarketDataLoaderService : BackgroundService
 {
     private readonly TimeSpan _delay;
+    private readonly DateTime _fromDate;
+    private readonly DateTime _toDate;
     private readonly BinanceApiClient _binanceApiClient;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly List<CurrencyPairs> _сurrencyPairs;
@@ -20,10 +22,14 @@ public sealed class MarketDataLoaderService : BackgroundService
 
     public MarketDataLoaderService(BinanceApiClient binanceApiClient,
         IOptions<MarketDataLoaderSettings> settings,
-        IServiceScopeFactory scopeFactory)
+        IServiceScopeFactory scopeFactory,
+        DateTime fromDate,
+        DateTime toDate)
     {
         _scopeFactory = scopeFactory;
         _delay = settings.Value.Delay;
+        _fromDate = fromDate != default ? fromDate : new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        _toDate = toDate != default ? toDate : DateTime.UtcNow;
         _binanceApiClient = binanceApiClient;
         _сurrencyPairs = settings.Value.CurrencyPairs;
     }
@@ -44,48 +50,36 @@ public sealed class MarketDataLoaderService : BackgroundService
 
     private async Task LoadHistoricalMarketData(CloudMiningContext context)
     {
-        var marketDataList = new List<MarketData>();
-        var endDate = DateTime.UtcNow;
 
         foreach (var currencyPair in _сurrencyPairs)
         {
-            var foundedDate = await context.MarketData
-                .Where(marketData => 
-                    marketData.From == currencyPair.From && marketData.To == currencyPair.To)
-                .MaxAsync(marketData => (DateTime?)marketData.Date);
+            var startDate = await GetStartDateForCurrencyPair(context, currencyPair);
 
-            var startDate = foundedDate?.AddHours(1) ?? new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-            if ((endDate - startDate).TotalHours < 1)
-            {
+            if (IsDataLoaded(startDate))
                 break;
-            }
-
-            while (startDate < endDate)
+            
+            for (; startDate < _toDate; startDate += _delay)
             {
                 var priceData = await _binanceApiClient.GetPriceData(currencyPair.From, currencyPair.To,
                     fromDate: startDate, limit: 1000);
+                
                 if (priceData.Count == 0)
-                {
                     break;
-                }
-
-                marketDataList.AddRange(priceData.Select(data => new MarketData
+                
+                //mapper
+                var marketDataList = priceData.Select(data => new MarketData
                 {
                     From = currencyPair.From,
                     To = currencyPair.To,
                     Price = data.Price,
                     Date = data.Date
-                }));
+                }).ToList();
 
-                startDate = priceData.Max(data => data.Date).AddSeconds(1);
+                context.MarketData.AddRange(marketDataList);
+                await context.SaveChangesAsync();
+
+                startDate = priceData.Max(data => data.Date);
             }
-        }
-
-        if (marketDataList.Count != 0)
-        {
-            context.MarketData.AddRange(marketDataList);
-            await context.SaveChangesAsync();
         }
     }
 
@@ -133,5 +127,19 @@ public sealed class MarketDataLoaderService : BackgroundService
 
         await context.SaveChangesAsync()
             .ConfigureAwait(false);
+    }
+
+    private async Task<DateTime> GetStartDateForCurrencyPair(CloudMiningContext context, CurrencyPairs currencyPair)
+    {
+        var lastDate = await context.MarketData
+            .Where(m => m.From == currencyPair.From && m.To == currencyPair.To)
+            .MaxAsync(m => (DateTime?)m.Date);
+
+        return lastDate.HasValue ? lastDate.Value + _delay : _fromDate;
+    }
+
+    private bool IsDataLoaded(DateTime startDate)
+    {
+        return _toDate - startDate < _delay;
     }
 }
