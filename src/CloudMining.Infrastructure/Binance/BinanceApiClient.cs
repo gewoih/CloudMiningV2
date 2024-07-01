@@ -50,13 +50,13 @@ public sealed class BinanceApiClient
 
         if (fromDate.HasValue)
         {
-            var fromDateUnix = ((DateTimeOffset)fromDate).ToUnixTimeSeconds();
+            var fromDateUnix = ((DateTimeOffset)fromDate).ToUnixTimeMilliseconds();
             requestUrl += $"&startTime={fromDateUnix}";
         }
 
         if (toDate.HasValue)
         {
-            var toDateUnix = ((DateTimeOffset)toDate).ToUnixTimeSeconds();
+            var toDateUnix = ((DateTimeOffset)toDate).ToUnixTimeMilliseconds();
             requestUrl += $"&endTime={toDateUnix}";
         }
 
