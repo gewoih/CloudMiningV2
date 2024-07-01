@@ -33,18 +33,14 @@ public sealed class BinanceApiClient
 
         if (fromDate.HasValue)
         {
-            var unixEpoch = DateTime.UnixEpoch;
-            var startTime = fromDate.Value.ToUniversalTime();
-            var startTimeMilliseconds = (long)(startTime - unixEpoch).TotalMilliseconds;
-            requestUrl += $"&startTime={startTimeMilliseconds}";
+            var fromDateUnix = ((DateTimeOffset)fromDate).ToUnixTimeSeconds();
+            requestUrl += $"&startTime={fromDateUnix}";
         }
 
         if (toDate.HasValue)
         {
-            var unixEpoch = DateTime.UnixEpoch;
-            var endTime = toDate.Value.ToUniversalTime();
-            var endTimeMilliseconds = (long)(endTime - unixEpoch).TotalMilliseconds;
-            requestUrl += $"&endTime={endTimeMilliseconds}";
+            var toDateUnix = ((DateTimeOffset)toDate).ToUnixTimeSeconds();
+            requestUrl += $"&endTime={toDateUnix}";
         }
 
         var response = await _httpClient.GetAsync(requestUrl);
