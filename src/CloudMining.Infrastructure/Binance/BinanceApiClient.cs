@@ -28,6 +28,23 @@ public sealed class BinanceApiClient
         DateTime? toDate = null,
         int limit = 500)
     {
+        var requestUrl = GetRequestUrl(fromCurrency, toCurrency, timeFrame, fromDate, toDate, limit);
+        var response = await _httpClient.GetAsync(requestUrl);
+        response.EnsureSuccessStatusCode();
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var data = JsonConvert.DeserializeObject<List<List<object>>>(responseContent);
+
+        return GetPriceDataList(data);
+    }
+
+    private string GetRequestUrl(CurrencyCode fromCurrency,
+        CurrencyCode toCurrency,
+        CandlestickTimeFrame timeFrame,
+        DateTime? fromDate,
+        DateTime? toDate,
+        int limit)
+    {
         var symbol = $"{fromCurrency}{toCurrency}";
         var requestUrl = string.Format(_getPriceDataUrl, symbol, timeFrame.GetDescription(), limit);
 
@@ -43,19 +60,18 @@ public sealed class BinanceApiClient
             requestUrl += $"&endTime={toDateUnix}";
         }
 
-        var response = await _httpClient.GetAsync(requestUrl);
-        response.EnsureSuccessStatusCode();
+        return requestUrl;
+    }
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var data = JsonConvert.DeserializeObject<List<List<object>>>(responseContent);
-
+    private static List<PriceData> GetPriceDataList(List<List<object>>? data)
+    {
         var priceDataList = new List<PriceData>();
         foreach (var entry in data)
         {
             var unixTime = Convert.ToInt64(entry[0]);
             var date = DateTimeOffset.FromUnixTimeMilliseconds(unixTime).UtcDateTime;
-            var priceString = entry[4].ToString();
-            var price = decimal.Parse(priceString!, CultureInfo.InvariantCulture);
+            var price = decimal.Parse(entry[4].ToString(), CultureInfo.InvariantCulture);
+
             var priceData = new PriceData
             {
                 Price = price,
