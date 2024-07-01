@@ -36,6 +36,7 @@ namespace CloudMining.Infrastructure.Migrations
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
                     Patronymic = table.Column<string>(type: "text", nullable: false),
+                    RegistrationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     AvatarPath = table.Column<string>(type: "text", nullable: true),
                     TelegramUsername = table.Column<string>(type: "text", nullable: true),
                     TelegramChatId = table.Column<long>(type: "bigint", nullable: true),
@@ -99,6 +100,26 @@ namespace CloudMining.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_InboxState", x => x.Id);
                     table.UniqueConstraint("AK_InboxState_MessageId_ConsumerId", x => new { x.MessageId, x.ConsumerId });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MarketData",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    From = table.Column<int>(type: "integer", nullable: false),
+                    To = table.Column<int>(type: "integer", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Caption = table.Column<string>(type: "text", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MarketData", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -438,6 +459,7 @@ namespace CloudMining.Infrastructure.Migrations
                     { new Guid("8927702d-ae2e-4a5a-af19-2e6fa1824648"), "Etherium", 3, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 4, "ETH", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
                     { new Guid("9a3e4016-240e-44e3-a002-0ee2cff499a3"), "Bitcoin", 2, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 5, "BTC", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
                     { new Guid("a5450179-3bff-4645-9209-04acc6168c5b"), "Dogecoin", 5, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 0, "DOGE", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { new Guid("c24b466a-97c2-4d64-bbe7-c583b76a2c3c"), "Tether", 6, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 2, "USDT", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
                     { new Guid("e23a58c6-9cef-4c6f-94fc-8577a4b4fb84"), "Рубль", 1, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 2, "₽", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
                     { new Guid("f1debadf-a2c3-4908-a11c-8329df252fb8"), "Доллар", 0, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 2, "$", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
@@ -499,6 +521,12 @@ namespace CloudMining.Infrastructure.Migrations
                 name: "IX_InboxState_Delivered",
                 table: "InboxState",
                 column: "Delivered");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MarketData_From_To_Date",
+                table: "MarketData",
+                columns: new[] { "From", "To", "Date" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_NotificationSettings_UserId",
@@ -579,6 +607,9 @@ namespace CloudMining.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "InboxState");
+
+            migrationBuilder.DropTable(
+                name: "MarketData");
 
             migrationBuilder.DropTable(
                 name: "Notifications");

@@ -7,5 +7,6 @@ public enum CurrencyCode
 	BTC,
 	ETH,
 	LTC,
-	DOGE
+	DOGE,
+	USDT
 }

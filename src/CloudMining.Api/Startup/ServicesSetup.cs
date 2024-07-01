@@ -4,6 +4,7 @@ using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.UserSettings;
+using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.Emcd;
 using CloudMining.Infrastructure.Telegram;
 using CloudMining.Interfaces.DTO.Members;
@@ -47,6 +48,10 @@ public static class ServicesSetup
 
 		services.AddHttpClient<EmcdApiClient>();
 		services.AddHostedService<PayoutsLoaderService>();
+		
+		services.AddHttpClient<BinanceApiClient>();
+		services.AddHostedService<MarketDataLoaderService>();
+		
 
 		var telegramBotApiKey = configuration["Telegram:ApiKey"];
 		services.AddSingleton<ITelegramBotClient>(sp => new TelegramBotClient(telegramBotApiKey));

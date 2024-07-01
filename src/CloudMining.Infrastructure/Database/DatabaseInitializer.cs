@@ -41,6 +41,11 @@ public static class DatabaseInitializer
 			},
 			new Currency
 			{
+				Id = new Guid("C24B466A-97C2-4D64-BBE7-C583B76A2C3C"), Caption = "Tether", Code = CurrencyCode.USDT,
+				ShortName = "USDT", Precision = 2
+			},
+			new Currency
+			{
 				Id = new Guid("A5450179-3BFF-4645-9209-04ACC6168C5B"), Caption = "Dogecoin", Code = CurrencyCode.DOGE,
 				ShortName = "DOGE", Precision = 0
 			}
@@ -69,7 +74,7 @@ public static class DatabaseInitializer
 			"Раненко", 
 			"Максимович", 
 			"24042001Nr.", 
-			new(2020, 1, 1));
+			new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
 		
 		await RegisterUserIfNotExists("User", 
 			"grigmaks2014@yandex.ru", 
@@ -77,7 +82,7 @@ public static class DatabaseInitializer
 			"Григорьев", 
 			"Владимирович",
 			"24042001Nr.", 
-			new(2020, 1, 1));
+			new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
 	}
 
 	private static async Task RegisterUserIfNotExists(string role, string email, string firstName,
