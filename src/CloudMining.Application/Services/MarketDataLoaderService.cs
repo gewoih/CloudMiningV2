@@ -1,5 +1,7 @@
-﻿using CloudMining.Domain.Models.Currencies;
+﻿using CloudMining.Domain.Enums;
+using CloudMining.Domain.Models.Currencies;
 using CloudMining.Infrastructure.Binance;
+using CloudMining.Infrastructure.Cbr;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.Interfaces;
@@ -13,21 +15,26 @@ namespace CloudMining.Application.Services;
 public sealed class MarketDataLoaderService : BackgroundService
 {
     private readonly TimeSpan _loadingDelay;
+    private readonly TimeSpan _cbrLoadingDelay;
     private readonly DateTime _loadHistoricalDataFrom;
     private readonly DateTime _loadHistoricalDataTo;
     private readonly BinanceApiClient _binanceApiClient;
+    private readonly CbrApiClient _cbrApiClient;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly List<CurrencyPair> _currencyPairs;
 
     public MarketDataLoaderService(BinanceApiClient binanceApiClient,
+        CbrApiClient cbrApiClient,
         IOptions<MarketDataLoaderSettings> settings,
         IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
         _loadingDelay = settings.Value.Delay;
+        _cbrLoadingDelay = settings.Value.CbrDelay;
         _loadHistoricalDataFrom = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         _loadHistoricalDataTo = DateTime.UtcNow;
         _binanceApiClient = binanceApiClient;
+        _cbrApiClient = cbrApiClient;
         _currencyPairs = settings.Value.CurrencyPairs;
     }
 
@@ -49,36 +56,10 @@ public sealed class MarketDataLoaderService : BackgroundService
     {
         foreach (var currencyPair in _currencyPairs)
         {
-            var loadedMarketData = new List<MarketData>();
-
-            var lastMarketDataDate = await marketDataService.GetLastMarketDataDate(currencyPair.From, currencyPair.To);
-            if (lastMarketDataDate is null)
-                lastMarketDataDate = _loadHistoricalDataFrom;
-            else
-                lastMarketDataDate += _loadingDelay;
-            
-            for (; lastMarketDataDate < _loadHistoricalDataTo; lastMarketDataDate += _loadingDelay)
-            {
-                var binanceMarketData = await _binanceApiClient.GetMarketDataAsync(
-                    fromCurrency: currencyPair.From,
-                    toCurrency: currencyPair.To,
-                    fromDate: lastMarketDataDate, 
-                    limit: 1000);
-                
-                if (binanceMarketData.Count == 0)
-                    break;
-
-                var newMarketData = binanceMarketData.Select(data => new MarketData
-                {
-                    From = currencyPair.From,
-                    To = currencyPair.To,
-                    Price = data.Price,
-                    Date = data.Date
-                });
-
-				loadedMarketData.AddRange(newMarketData);
-                lastMarketDataDate = binanceMarketData.Max(data => data.Date);
-            }
+            var lastMarketDataDate = await GetLastMarketDataDate(marketDataService, currencyPair);
+            var loadedMarketData = currencyPair.From != CurrencyCode.USD
+                ? await LoadBinanceMarketData(currencyPair, lastMarketDataDate)
+                : await LoadCbrMarketData(currencyPair, lastMarketDataDate);
 
             await marketDataService.SaveMarketData(loadedMarketData);
         }
@@ -89,7 +70,9 @@ public sealed class MarketDataLoaderService : BackgroundService
         var marketDataList = new List<MarketData>();
         foreach (var currencyPair in _currencyPairs)
         {
-            var priceData = await _binanceApiClient.GetMarketDataAsync(currencyPair.From, currencyPair.To, limit: 1);
+            var priceData = currencyPair.From != CurrencyCode.USD
+                ? await _binanceApiClient.GetMarketDataAsync(currencyPair.From, currencyPair.To, limit: 1)
+                : await _cbrApiClient.GetDailyMarketDataAsync();
             foreach (var data in priceData)
             {
                 var marketData = new MarketData()
@@ -105,6 +88,64 @@ public sealed class MarketDataLoaderService : BackgroundService
 
         await marketDataService.SaveMarketData(marketDataList);
     }
+
+    private async Task<DateTime> GetLastMarketDataDate(IMarketDataService marketDataService, CurrencyPair currencyPair)
+    {
+        var lastMarketDataDate = await marketDataService.GetLastMarketDataDate(currencyPair.From, currencyPair.To);
+        if (lastMarketDataDate is null)
+        {
+            return _loadHistoricalDataFrom;
+        }
+
+        return currencyPair.From != CurrencyCode.USD
+            ? lastMarketDataDate.Value.Add(_loadingDelay)
+            : lastMarketDataDate.Value.Add(_cbrLoadingDelay);
+    }
     
-    
+    private async Task<List<MarketData>> LoadBinanceMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
+    {
+        var loadedMarketData = new List<MarketData>();
+        for (; lastMarketDataDate < _loadHistoricalDataTo; lastMarketDataDate += _loadingDelay)
+        {
+            var binanceMarketData = await _binanceApiClient.GetMarketDataAsync(
+                fromCurrency: currencyPair.From,
+                toCurrency: currencyPair.To,
+                fromDate: lastMarketDataDate,
+                limit: 1000);
+
+            if (binanceMarketData.Count == 0)
+                break;
+
+            loadedMarketData.AddRange(binanceMarketData.Select(data => new MarketData
+            {
+                From = currencyPair.From,
+                To = currencyPair.To,
+                Price = data.Price,
+                Date = data.Date
+            }));
+        
+            lastMarketDataDate = binanceMarketData.Max(data => data.Date);
+        }
+        return loadedMarketData;
+    }
+
+    private async Task<List<MarketData>> LoadCbrMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
+    {
+        var loadedMarketData = new List<MarketData>();
+
+            var cbrMarketData = await _cbrApiClient.GetHistoricalMarketDataAsync(lastMarketDataDate, _loadHistoricalDataTo);
+
+            if (cbrMarketData.Count == 0)
+                return loadedMarketData;
+
+            loadedMarketData.AddRange(cbrMarketData.Select(data => new MarketData
+            {
+                From = currencyPair.From,
+                To = currencyPair.To,
+                Price = data.Price,
+                Date = data.Date
+            }));
+
+        return loadedMarketData;
+    }
 }
