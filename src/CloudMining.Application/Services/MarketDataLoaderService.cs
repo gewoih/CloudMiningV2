@@ -80,7 +80,7 @@ public sealed class MarketDataLoaderService : BackgroundService
                 lastMarketDataDate = binanceMarketData.Max(data => data.Date);
             }
 
-            await marketDataService.SaveMarketData(loadedMarketData);
+            await marketDataService.SaveMarketDataAsync(loadedMarketData);
         }
     }
 
@@ -103,7 +103,7 @@ public sealed class MarketDataLoaderService : BackgroundService
             }
         }
 
-        await marketDataService.SaveMarketData(marketDataList);
+        await marketDataService.SaveMarketDataAsync(marketDataList);
     }
     
     

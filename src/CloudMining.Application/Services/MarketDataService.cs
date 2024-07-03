@@ -15,7 +15,7 @@ public sealed class MarketDataService : IMarketDataService
         _context = context;
     }
     
-    public async Task SaveMarketData(List<MarketData> marketData)
+    public async Task SaveMarketDataAsync(List<MarketData> marketData)
     {
         var existingCombinations = await _context.MarketData
             .Where(data => data.Date == _context.MarketData.Max(x => x.Date))

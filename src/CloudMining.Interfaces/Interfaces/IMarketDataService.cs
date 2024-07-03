@@ -5,7 +5,7 @@ namespace CloudMining.Interfaces.Interfaces;
 
 public interface IMarketDataService
 {
-    Task SaveMarketData(List<MarketData> marketData);
+    Task SaveMarketDataAsync(List<MarketData> marketData);
     Task<DateTime?> GetLastMarketDataDate(CurrencyCode fromCurrency, CurrencyCode toCurrency);
 
 }
