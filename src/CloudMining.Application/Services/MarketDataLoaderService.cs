@@ -59,7 +59,7 @@ public sealed class MarketDataLoaderService : BackgroundService
                 ? await LoadCryptoMarketData(currencyPair, lastMarketDataDate)
                 : await LoadFiatMarketData(currencyPair, lastMarketDataDate);
 
-            await marketDataService.SaveMarketData(loadedMarketData);
+            await marketDataService.SaveMarketDataAsync(loadedMarketData);
         }
     }
 
@@ -84,7 +84,7 @@ public sealed class MarketDataLoaderService : BackgroundService
             }
         }
 
-        await marketDataService.SaveMarketData(marketDataList);
+        await marketDataService.SaveMarketDataAsync(marketDataList);
     }
 
     private async Task<DateTime> GetLastMarketDataDate(IMarketDataService marketDataService, CurrencyPair currencyPair)
