@@ -2,6 +2,7 @@
 using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Settings;
+using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,24 +34,24 @@ public sealed class MarketDataLoaderService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await using var scope = _scopeFactory.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<CloudMiningContext>();
+        var marketDataService = scope.ServiceProvider.GetRequiredService<IMarketDataService>();
 
-        await LoadHistoricalMarketData(context);
+        await LoadHistoricalMarketData(marketDataService);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await LoadRealTimeMarketData(context);
+            await LoadRealTimeMarketData(marketDataService);
             await Task.Delay(_loadingDelay, stoppingToken);
         }
     }
 
-    private async Task LoadHistoricalMarketData(CloudMiningContext context)
+    private async Task LoadHistoricalMarketData(IMarketDataService marketDataService)
     {
         foreach (var currencyPair in _currencyPairs)
         {
             var loadedMarketData = new List<MarketData>();
 
-            var lastMarketDataDate = await GetLastMarketDataDate(context, currencyPair);
+            var lastMarketDataDate = await marketDataService.GetLastMarketDataDateAsync(currencyPair.From, currencyPair.To);
             if (lastMarketDataDate is null)
                 lastMarketDataDate = _loadHistoricalDataFrom;
             else
@@ -79,12 +80,11 @@ public sealed class MarketDataLoaderService : BackgroundService
                 lastMarketDataDate = binanceMarketData.Max(data => data.Date);
             }
 
-            await context.MarketData.AddRangeAsync(loadedMarketData);
-            await context.SaveChangesAsync();
+            await marketDataService.SaveMarketDataAsync(loadedMarketData);
         }
     }
 
-    private async Task LoadRealTimeMarketData(CloudMiningContext context)
+    private async Task LoadRealTimeMarketData(IMarketDataService marketDataService)
     {
         var marketDataList = new List<MarketData>();
         foreach (var currencyPair in _currencyPairs)
@@ -103,37 +103,8 @@ public sealed class MarketDataLoaderService : BackgroundService
             }
         }
 
-        await SaveRealTimeMarketData(marketDataList, context);
+        await marketDataService.SaveMarketDataAsync(marketDataList);
     }
-
-    private static async Task SaveRealTimeMarketData(IEnumerable<MarketData> marketData, CloudMiningContext context)
-    {
-        var existingCombinations = await context.MarketData
-            .Where(data => data.Date == context.MarketData.Max(x => x.Date))
-            .Select(data => new { data.From, data.To, data.Date })
-            .ToListAsync();
-
-        var existingCombinationsHashSet = existingCombinations
-            .Select(data => (data.From, data.To, data.Date))
-            .ToHashSet();
-
-        foreach (var data in marketData)
-        {
-            var combo = (data.From, data.To, data.Date);
-            if (!existingCombinationsHashSet.Contains(combo))
-                await context.MarketData.AddAsync(data);
-        }
-
-        await context.SaveChangesAsync()
-            .ConfigureAwait(false);
-    }
-
-    private static async Task<DateTime?> GetLastMarketDataDate(CloudMiningContext context, CurrencyPair currencyPair)
-    {
-        var lastMarketDataDate = await context.MarketData
-            .Where(marketData => marketData.From == currencyPair.From && marketData.To == currencyPair.To)
-            .MaxAsync(marketData => (DateTime?)marketData.Date);
-
-        return lastMarketDataDate;
-    }
+    
+    
 }
