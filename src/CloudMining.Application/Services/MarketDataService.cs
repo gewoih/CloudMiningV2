@@ -37,7 +37,7 @@ public sealed class MarketDataService : IMarketDataService
             .ConfigureAwait(false);
     }
 
-    public async Task<DateTime?> GetLastMarketDataDate(CurrencyCode fromCurrency, CurrencyCode toCurrency)
+    public async Task<DateTime?> GetLastMarketDataDateAsync(CurrencyCode fromCurrency, CurrencyCode toCurrency)
     {
         var lastMarketDataDate = await _context.MarketData
             .Where(marketData => marketData.From == fromCurrency && marketData.To == toCurrency)

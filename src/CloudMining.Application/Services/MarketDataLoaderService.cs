@@ -51,7 +51,7 @@ public sealed class MarketDataLoaderService : BackgroundService
         {
             var loadedMarketData = new List<MarketData>();
 
-            var lastMarketDataDate = await marketDataService.GetLastMarketDataDate(currencyPair.From, currencyPair.To);
+            var lastMarketDataDate = await marketDataService.GetLastMarketDataDateAsync(currencyPair.From, currencyPair.To);
             if (lastMarketDataDate is null)
                 lastMarketDataDate = _loadHistoricalDataFrom;
             else
