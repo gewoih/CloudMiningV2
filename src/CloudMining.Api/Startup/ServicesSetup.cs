@@ -5,7 +5,7 @@ using CloudMining.Domain.Models.Payments;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.UserSettings;
 using CloudMining.Infrastructure.Binance;
-using CloudMining.Infrastructure.Cbr;
+using CloudMining.Infrastructure.CentralBankRussia;
 using CloudMining.Infrastructure.Emcd;
 using CloudMining.Infrastructure.Telegram;
 using CloudMining.Interfaces.DTO.Members;
@@ -52,7 +52,7 @@ public static class ServicesSetup
 		services.AddHostedService<PayoutsLoaderService>();
 		
 		services.AddHttpClient<BinanceApiClient>();
-		services.AddHttpClient<CbrApiClient>();
+		services.AddHttpClient<CentralBankRussiaApiClient>();
 		services.AddHostedService<MarketDataLoaderService>();
 		
 

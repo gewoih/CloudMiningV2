@@ -1,7 +1,7 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Infrastructure.Binance;
-using CloudMining.Infrastructure.Cbr;
+using CloudMining.Infrastructure.CentralBankRussia;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.Interfaces;
@@ -18,12 +18,12 @@ public sealed class MarketDataLoaderService : BackgroundService
     private readonly DateTime _loadHistoricalDataFrom;
     private readonly DateTime _loadHistoricalDataTo;
     private readonly BinanceApiClient _binanceApiClient;
-    private readonly CbrApiClient _cbrApiClient;
+    private readonly CentralBankRussiaApiClient _centralBankRussiaApiClient;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly List<CurrencyPair> _currencyPairs;
 
     public MarketDataLoaderService(BinanceApiClient binanceApiClient,
-        CbrApiClient cbrApiClient,
+        CentralBankRussiaApiClient centralBankRussiaApiClient,
         IOptions<MarketDataLoaderSettings> settings,
         IServiceScopeFactory scopeFactory)
     {
@@ -32,7 +32,7 @@ public sealed class MarketDataLoaderService : BackgroundService
         _loadHistoricalDataFrom = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         _loadHistoricalDataTo = DateTime.UtcNow;
         _binanceApiClient = binanceApiClient;
-        _cbrApiClient = cbrApiClient;
+        _centralBankRussiaApiClient = centralBankRussiaApiClient;
         _currencyPairs = settings.Value.CurrencyPairs;
     }
 
@@ -70,7 +70,7 @@ public sealed class MarketDataLoaderService : BackgroundService
         {
             var priceData = currencyPair.From != CurrencyCode.USD
                 ? await _binanceApiClient.GetMarketDataAsync(currencyPair.From, currencyPair.To, limit: 1)
-                : await _cbrApiClient.GetDailyMarketDataAsync();
+                : await _centralBankRussiaApiClient.GetDailyMarketDataAsync();
             foreach (var data in priceData)
             {
                 var marketData = new MarketData()
@@ -131,12 +131,12 @@ public sealed class MarketDataLoaderService : BackgroundService
     {
         var loadedMarketData = new List<MarketData>();
 
-            var cbrMarketData = await _cbrApiClient.GetHistoricalMarketDataAsync(lastMarketDataDate, _loadHistoricalDataTo);
+            var centralBankRussiaMarketData = await _centralBankRussiaApiClient.GetHistoricalMarketDataAsync(lastMarketDataDate, _loadHistoricalDataTo);
 
-            if (cbrMarketData.Count == 0)
+            if (centralBankRussiaMarketData.Count == 0)
                 return loadedMarketData;
 
-            loadedMarketData.AddRange(cbrMarketData.Select(data => new MarketData
+            loadedMarketData.AddRange(centralBankRussiaMarketData.Select(data => new MarketData
             {
                 From = currencyPair.From,
                 To = currencyPair.To,

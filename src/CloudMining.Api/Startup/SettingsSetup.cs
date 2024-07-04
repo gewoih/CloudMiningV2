@@ -11,7 +11,7 @@ public static class SettingsSetup
 		services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 		services.Configure<StorageSettings>(configuration.GetSection(StorageSettings.SectionName));
 		services.Configure<BinanceSettings>(configuration.GetSection(BinanceSettings.SectionName));
-		services.Configure<CbrSettings>(configuration.GetSection(CbrSettings.SectionName));
+		services.Configure<CentralBankRussiaSettings>(configuration.GetSection(CentralBankRussiaSettings.SectionName));
 		services.Configure<MarketDataLoaderSettings>(configuration.GetSection(MarketDataLoaderSettings.SectionName));
 
 		return services;

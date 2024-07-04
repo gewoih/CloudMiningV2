@@ -4,19 +4,17 @@ using System.Xml;
 using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
-namespace CloudMining.Infrastructure.Cbr;
+namespace CloudMining.Infrastructure.CentralBankRussia;
 
-public sealed class CbrApiClient
+public sealed class CentralBankRussiaApiClient
 {
     private readonly string _getHistoricalPriceDataUrl;
     private readonly string _getDailyPriceDataUrl;
     private readonly string _usdCode;
     private readonly HttpClient _httpClient;
 
-    public CbrApiClient(HttpClient httpClient, IOptions<CbrSettings> settings)
+    public CentralBankRussiaApiClient(HttpClient httpClient, IOptions<CentralBankRussiaSettings> settings)
     {
         _httpClient = httpClient;
 
