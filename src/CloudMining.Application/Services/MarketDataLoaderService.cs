@@ -58,8 +58,8 @@ public sealed class MarketDataLoaderService : BackgroundService
         {
             var lastMarketDataDate = await GetLastMarketDataDate(marketDataService, currencyPair);
             var loadedMarketData = currencyPair.From != CurrencyCode.USD
-                ? await LoadBinanceMarketData(currencyPair, lastMarketDataDate)
-                : await LoadCbrMarketData(currencyPair, lastMarketDataDate);
+                ? await LoadCryptoMarketData(currencyPair, lastMarketDataDate)
+                : await LoadFiatMarketData(currencyPair, lastMarketDataDate);
 
             await marketDataService.SaveMarketData(loadedMarketData);
         }
@@ -102,7 +102,7 @@ public sealed class MarketDataLoaderService : BackgroundService
             : lastMarketDataDate.Value.Add(_cbrLoadingDelay);
     }
     
-    private async Task<List<MarketData>> LoadBinanceMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
+    private async Task<List<MarketData>> LoadCryptoMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
     {
         var loadedMarketData = new List<MarketData>();
         for (; lastMarketDataDate < _loadHistoricalDataTo; lastMarketDataDate += _loadingDelay)
@@ -129,7 +129,7 @@ public sealed class MarketDataLoaderService : BackgroundService
         return loadedMarketData;
     }
 
-    private async Task<List<MarketData>> LoadCbrMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
+    private async Task<List<MarketData>> LoadFiatMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
     {
         var loadedMarketData = new List<MarketData>();
 
