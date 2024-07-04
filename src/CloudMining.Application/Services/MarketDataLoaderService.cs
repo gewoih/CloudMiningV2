@@ -15,7 +15,6 @@ namespace CloudMining.Application.Services;
 public sealed class MarketDataLoaderService : BackgroundService
 {
     private readonly TimeSpan _loadingDelay;
-    private readonly TimeSpan _cbrLoadingDelay;
     private readonly DateTime _loadHistoricalDataFrom;
     private readonly DateTime _loadHistoricalDataTo;
     private readonly BinanceApiClient _binanceApiClient;
@@ -30,7 +29,6 @@ public sealed class MarketDataLoaderService : BackgroundService
     {
         _scopeFactory = scopeFactory;
         _loadingDelay = settings.Value.Delay;
-        _cbrLoadingDelay = settings.Value.CbrDelay;
         _loadHistoricalDataFrom = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         _loadHistoricalDataTo = DateTime.UtcNow;
         _binanceApiClient = binanceApiClient;
@@ -99,7 +97,7 @@ public sealed class MarketDataLoaderService : BackgroundService
 
         return currencyPair.From != CurrencyCode.USD
             ? lastMarketDataDate.Value.Add(_loadingDelay)
-            : lastMarketDataDate.Value.Add(_cbrLoadingDelay);
+            : lastMarketDataDate.Value.AddDays(1);
     }
     
     private async Task<List<MarketData>> LoadCryptoMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
