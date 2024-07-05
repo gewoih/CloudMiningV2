@@ -15,7 +15,7 @@ public sealed class MarketDataService : IMarketDataService
         _context = context;
     }
 
-    public async Task SaveMarketData(List<MarketData> marketData)
+    public async Task SaveMarketDataAsync(List<MarketData> marketData)
     {
         var existingCombinations = await _context.MarketData
             .GroupBy(data => new { data.From, data.To })
@@ -37,7 +37,7 @@ public sealed class MarketDataService : IMarketDataService
             .ConfigureAwait(false);
     }
 
-    public async Task<DateTime?> GetLastMarketDataDate(CurrencyCode fromCurrency, CurrencyCode toCurrency)
+    public async Task<DateTime?> GetLastMarketDataDateAsync(CurrencyCode fromCurrency, CurrencyCode toCurrency)
     {
         var lastMarketDataDate = await _context.MarketData
             .Where(marketData => marketData.From == fromCurrency && marketData.To == toCurrency)
