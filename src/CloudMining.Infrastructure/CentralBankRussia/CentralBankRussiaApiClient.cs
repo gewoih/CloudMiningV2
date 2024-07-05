@@ -4,6 +4,8 @@ using System.Xml;
 using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CloudMining.Infrastructure.CentralBankRussia;
 
@@ -32,19 +34,9 @@ public sealed class CentralBankRussiaApiClient
         var response = await _httpClient.GetAsync(requestUrl);
         response.EnsureSuccessStatusCode();
 
-        var responseBytes = await response.Content.ReadAsByteArrayAsync();
+        var jsonData = await CastXmlToJObjectAsync(response);
 
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        var responseXmlContent = Encoding.GetEncoding("windows-1251").GetString(responseBytes);
-
-        var xmlDoc = new XmlDocument
-        {
-            XmlResolver = null
-        };
-
-        xmlDoc.LoadXml(responseXmlContent);
-
-        return GetPriceDataList(xmlDoc);
+        return GetPriceDataList(jsonData);
     }
 
     public async Task<List<PriceData>> GetDailyMarketDataAsync()
@@ -54,11 +46,9 @@ public sealed class CentralBankRussiaApiClient
         var response = await _httpClient.GetAsync(requestUrl);
         response.EnsureSuccessStatusCode();
 
-        var responseXmlContent = await response.Content.ReadAsStringAsync();
-        var xmlDoc = new XmlDocument();
-        xmlDoc.LoadXml(responseXmlContent);
+        var jsonData = await CastXmlToJObjectAsync(response);
 
-        return GetDailyPriceDataList(xmlDoc);
+        return GetDailyPriceDataList(jsonData);
     }
 
     private string GetRequestUrl(
@@ -82,50 +72,69 @@ public sealed class CentralBankRussiaApiClient
         return requestUrl;
     }
 
-    private static List<PriceData> GetPriceDataList(XmlNode data)
+    private static List<PriceData> GetPriceDataList(JToken data)
     {
         var priceDataList = new List<PriceData>();
 
-        var recordNodes = data.SelectNodes("//Record");
-        if (recordNodes == null) return priceDataList;
+        var valCurs = data["ValCurs"];
+        if (valCurs == null)
+            return priceDataList;
 
-        foreach (var recordNode in recordNodes)
+        var records = valCurs["Record"];
+        if (records == null)
+            return priceDataList;
+
+        if (records.Type == JTokenType.Array)
         {
-            var xmlDate = ((XmlNode)recordNode).Attributes?["Date"]?.Value;
-            var xmlPrice = ((XmlNode)recordNode).SelectSingleNode("Value")?.InnerText;
-
-            if (string.IsNullOrEmpty(xmlDate) || string.IsNullOrEmpty(xmlPrice)) break;
-            if (!DateTime.TryParseExact(xmlDate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
-                    out var date)) break;
-            if (!decimal.TryParse(xmlPrice.Replace(",", "."), CultureInfo.InvariantCulture, out var price)) break;
-
-            var priceData = new PriceData
+            foreach (var record in records)
             {
-                Date = DateTime.SpecifyKind(date, DateTimeKind.Utc),
-                Price = price
-            };
-
-            priceDataList.Add(priceData);
+                AddPriceData(record, priceDataList);
+            }
         }
+        else
+            AddPriceData(records, priceDataList);
+
 
         return priceDataList;
     }
 
-    private List<PriceData> GetDailyPriceDataList(XmlNode data)
+    private static void AddPriceData(JToken record, List<PriceData> priceDataList)
+    {
+        var jsonDate = (string?)record["@Date"];
+        var jsonPrice = (string?)record["Value"];
+
+        if (string.IsNullOrEmpty(jsonDate) || string.IsNullOrEmpty(jsonPrice)) return;
+        if (!DateTime.TryParseExact(jsonDate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                out var date)) return;
+        if (!decimal.TryParse(jsonPrice.Replace(",", "."), CultureInfo.InvariantCulture, out var price)) return;
+
+        var priceData = new PriceData
+        {
+            Date = DateTime.SpecifyKind(date, DateTimeKind.Utc),
+            Price = price
+        };
+
+        priceDataList.Add(priceData);
+    }
+
+    private List<PriceData> GetDailyPriceDataList(JToken data)
     {
         var priceDataList = new List<PriceData>();
 
-        var xmlDate = data.Attributes?["Date"]?.Value;
-        DateTime.TryParseExact(xmlDate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+        var jsonDate = data["ValCurs"]?["@Date"]?.ToString();
+        DateTime.TryParseExact(jsonDate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
             out var date);
 
-        var currencyNode = data.SelectSingleNode($"//Valute[@ID='{_usdCode}']");
+        var currencyToken = data["ValCurs"]?["Valute"].FirstOrDefault(v => (string)v["@ID"] == _usdCode);
 
-        if (currencyNode == null) return priceDataList;
-        var xmlPrice = currencyNode.SelectSingleNode("Value")?.InnerText;
+        if (currencyToken == null) return priceDataList;
+        var jsonPrice = currencyToken["Value"]?.ToString();
 
-        if (string.IsNullOrEmpty(xmlPrice) || !decimal.TryParse(xmlPrice.Replace(",", "."), out var price))
+        if (string.IsNullOrEmpty(jsonPrice) ||
+            !decimal.TryParse(jsonPrice.Replace(",", "."), CultureInfo.InvariantCulture, out var price))
             return priceDataList;
+
+
         var priceData = new PriceData
         {
             Date = DateTime.SpecifyKind(date, DateTimeKind.Utc),
@@ -135,5 +144,17 @@ public sealed class CentralBankRussiaApiClient
         priceDataList.Add(priceData);
 
         return priceDataList;
+    }
+
+    private static async Task<JObject> CastXmlToJObjectAsync(HttpResponseMessage responseMessage)
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+        var responseXmlContent = await responseMessage.Content.ReadAsStringAsync();
+        var xmlDoc = new XmlDocument();
+        xmlDoc.LoadXml(responseXmlContent);
+
+        var jsonContent = JsonConvert.SerializeObject(xmlDoc);
+        return JObject.Parse(jsonContent);
     }
 }
