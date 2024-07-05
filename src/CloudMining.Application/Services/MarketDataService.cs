@@ -14,16 +14,16 @@ public sealed class MarketDataService : IMarketDataService
     {
         _context = context;
     }
-    
+
     public async Task SaveMarketData(List<MarketData> marketData)
     {
         var existingCombinations = await _context.MarketData
-            .Where(data => data.Date == _context.MarketData.Max(x => x.Date))
-            .Select(data => new { data.From, data.To, data.Date })
+            .GroupBy(data => new { data.From, data.To })
+            .Select(group => new { group.Key.From, group.Key.To, MaxDate = group.Max(x => x.Date)})
             .ToListAsync();
 
         var existingCombinationsHashSet = existingCombinations
-            .Select(data => (data.From, data.To, data.Date))
+            .Select(data => (data.From, data.To, data.MaxDate))
             .ToHashSet();
 
         foreach (var data in marketData)
