@@ -30,6 +30,15 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 		_publishEndpoint = publishEndpoint;
 	}
 
+	public async Task<List<ShareablePayment>> GetPayoutsAsync()
+	{
+		var payoutsList = await _context.ShareablePayments
+			.Where(payment => payment.Type == PaymentType.Crypto)
+			.Include(payment => payment.Currency)
+			.ToListAsync();
+		return payoutsList;
+	}
+
 	public async Task<int> GetUserPaymentsCount(PaymentType? paymentType = null)
 	{
 		var currentUserId = _currentUserService.GetCurrentUserId();
