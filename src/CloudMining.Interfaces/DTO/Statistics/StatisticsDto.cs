@@ -11,6 +11,6 @@ public record StatisticsDto(
     decimal PurchaseExpense,
     decimal TotalProfit,
     decimal MonthlyProfit,
-    decimal PaybackPeriod,
+    decimal PaybackPercent,
     List<ChartDto> Charts
     );

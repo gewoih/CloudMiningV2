@@ -42,22 +42,22 @@ public class StatisticsService : IStatisticsService
         {
             if ((IncomeType)type == IncomeType.Hold)
             {
-                var totalIncome = await GetTotalIncome(payoutsList, usdToRubRate);
+                var totalIncome = await GetTotalIncomeAsync(payoutsList, usdToRubRate);
                 var monthlyIncome = GetMonthlyValue(totalIncome);
-                var electricityExpense = await GetElectricityExpense();
-                var purchaseExpense = await GetPurchaseExpense();
+                var electricityExpense = await GetElectricityExpenseAsync();
+                var purchaseExpense = await GetPurchaseExpenseAsync();
                 var totalExpense = electricityExpense + purchaseExpense;
                 var totalProfit = totalIncome - totalExpense;
                 var monthlyProfit = GetMonthlyValue(totalProfit);
                 var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
-                var chartDtos = await GetChartDtos();
+                var chartDtos = await GetChartDtosAsync();
             }
         }
 
         return statisticsDtoList;
     }
 
-    private async Task<decimal> GetTotalIncome(IEnumerable<ShareablePayment> payoutsList, decimal usdToRubRate)
+    private async Task<decimal> GetTotalIncomeAsync(IEnumerable<ShareablePayment> payoutsList, decimal usdToRubRate)
     {
         var totalAmountByCurrencyCode = payoutsList
             .GroupBy(payout => payout.Currency.Code)
@@ -107,7 +107,7 @@ public class StatisticsService : IStatisticsService
         return monthlyValue;
     }
 
-    private async Task<decimal> GetElectricityExpense()
+    private async Task<decimal> GetElectricityExpenseAsync()
     {
         var electricityExpense = await _context.ShareablePayments
             .Where(payment => payment.Type == PaymentType.Electricity)
@@ -115,7 +115,7 @@ public class StatisticsService : IStatisticsService
         return electricityExpense;
     }
 
-    private async Task<decimal> GetPurchaseExpense()
+    private async Task<decimal> GetPurchaseExpenseAsync()
     {
         var purchaseExpense = await _context.ShareablePayments
             .Where(payment => payment.Type == PaymentType.Purchase)
@@ -123,7 +123,7 @@ public class StatisticsService : IStatisticsService
         return purchaseExpense;
     }
 
-    private async Task<List<ChartDto>> GetChartDtos()
+    private async Task<List<ChartDto>> GetChartDtosAsync()
     {
         
     }
