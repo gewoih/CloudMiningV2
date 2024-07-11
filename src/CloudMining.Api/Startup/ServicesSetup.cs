@@ -40,6 +40,7 @@ public static class ServicesSetup
 		services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
 		services.AddScoped<INotificationService, TelegramNotificationService>();
 		services.AddScoped<IMarketDataService, MarketDataService>();
+		services.AddScoped<IStatisticsService, StatisticsService>();
 
 		services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
 		services.AddScoped<IMapper<NotificationSettings, NotificationSettingsDto>, NotificationSettingsMapper>();
