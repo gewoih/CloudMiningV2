@@ -29,11 +29,6 @@ public class StatisticsService : IStatisticsService
     {
         var payoutsList = await _shareablePaymentService.GetPayoutsAsync();
 
-        var usdToRubRate = await _context.MarketData
-            .Where(md => md.From == CurrencyCode.USD)
-            .OrderByDescending(md => md.Date)
-            .Select(md => md.Price)
-            .FirstOrDefaultAsync();
 
         var totalIncome = 0m;
         var monthlyIncome = 0m;
@@ -43,6 +38,12 @@ public class StatisticsService : IStatisticsService
 
         if (incomeType == IncomeType.Hold)
         {
+            var usdToRubRate = await _context.MarketData
+                .Where(md => md.From == CurrencyCode.USD)
+                .OrderByDescending(md => md.Date)
+                .Select(md => md.Price)
+                .FirstOrDefaultAsync();
+
             totalIncome = await GetTotalIncomeAsync(payoutsList, usdToRubRate);
             monthlyIncome = GetMonthlyValue(totalIncome);
             incomes = await GetIncomesPriceBarListAsync(payoutsList, usdToRubRate);
