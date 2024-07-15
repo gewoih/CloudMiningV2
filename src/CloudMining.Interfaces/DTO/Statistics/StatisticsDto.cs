@@ -12,5 +12,7 @@ public record StatisticsDto(
     decimal TotalProfit,
     decimal MonthlyProfit,
     decimal PaybackPercent,
-    List<ChartDto> Charts
-    );
+    List<PriceBar> Incomes,
+    List<PriceBar> Profits,
+    List<Expense> Expenses
+);

@@ -2,7 +2,4 @@
 
 namespace CloudMining.Interfaces.DTO.Statistics;
 
-public record ChartDatasetDto(
-    ChartDataTitle Title,
-    List<decimal> Data
-);
+public record Expense(ExpenseType Type, List<PriceBar> PriceBars);

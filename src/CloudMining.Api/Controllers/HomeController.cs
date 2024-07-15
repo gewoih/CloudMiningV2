@@ -1,4 +1,5 @@
-﻿using CloudMining.Interfaces.DTO.Statistics;
+﻿using CloudMining.Domain.Enums;
+using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +19,11 @@ public class HomeController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<HomePageDto> Get()
+    public async Task<StatisticsDto> Get([FromQuery] IncomeType incomeType)
     {
 
-        var statisticList = await _statisticsService.GetStatisticsListAsync();
-        var homePageDto = new HomePageDto(statisticList);
-        return homePageDto;
+        var statisticsDto = await _statisticsService.GetStatisticsAsync(incomeType);
+        return statisticsDto;
 
     }
 
