@@ -25,7 +25,7 @@ public class StatisticsService : IStatisticsService
         _shareablePaymentService = shareablePaymentService;
     }
 
-    public async Task<List<StatisticsDto>> GetStatisticsListAsync()
+    public async Task<StatisticsDto> GetStatisticsAsync(IncomeType incomeType)
     {
         var payoutsList = await _shareablePaymentService.GetPayoutsAsync();
 
@@ -35,26 +35,48 @@ public class StatisticsService : IStatisticsService
             .Select(md => md.Price)
             .FirstOrDefaultAsync();
 
-        var statisticsDtoList = new List<StatisticsDto>();
+        var totalIncome = 0m;
+        var monthlyIncome = 0m;
+        var incomes = new List<PriceBar>();
+        var expenses = new List<Expense>();
+        var profits = new List<PriceBar>();
 
-
-        foreach (var type in Enum.GetValues(typeof(IncomeType)))
+        if (incomeType == IncomeType.Hold)
         {
-            if ((IncomeType)type == IncomeType.Hold)
-            {
-                var totalIncome = await GetTotalIncomeAsync(payoutsList, usdToRubRate);
-                var monthlyIncome = GetMonthlyValue(totalIncome);
-                var electricityExpense = await GetElectricityExpenseAsync();
-                var purchaseExpense = await GetPurchaseExpenseAsync();
-                var totalExpense = electricityExpense + purchaseExpense;
-                var totalProfit = totalIncome - totalExpense;
-                var monthlyProfit = GetMonthlyValue(totalProfit);
-                var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
-                var chartDtos = await GetChartDtosAsync();
-            }
+            totalIncome = await GetTotalIncomeAsync(payoutsList, usdToRubRate);
+            monthlyIncome = GetMonthlyValue(totalIncome);
+            incomes = await GetIncomesPriceBarListAsync(payoutsList, usdToRubRate);
+            expenses = await GetExpenseListAsync();
+            profits = GetProfitsList(incomes, expenses);
+        }
+        else
+        {
         }
 
-        return statisticsDtoList;
+        var electricityExpense = await GetElectricityExpenseAsync();
+        var purchaseExpense = await GetPurchaseExpenseAsync();
+        var totalExpense = electricityExpense + purchaseExpense;
+        var totalProfit = totalIncome - totalExpense;
+        var monthlyProfit = GetMonthlyValue(totalProfit);
+        var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
+
+
+        var statisticsDto = new StatisticsDto(
+            incomeType,
+            totalIncome,
+            monthlyIncome,
+            totalExpense,
+            electricityExpense,
+            purchaseExpense,
+            totalProfit,
+            monthlyProfit,
+            paybackPercent,
+            incomes,
+            profits,
+            expenses);
+
+
+        return statisticsDto;
     }
 
     private async Task<decimal> GetTotalIncomeAsync(IEnumerable<ShareablePayment> payoutsList, decimal usdToRubRate)
@@ -103,9 +125,15 @@ public class StatisticsService : IStatisticsService
     {
         var totalMonths = (_currentDate.Year - _projectStartDate.Year) * 12 + _currentDate.Month -
                           _projectStartDate.Month;
+
+        if (_currentDate.Day < _projectStartDate.Day)
+            totalMonths--;
+
         var monthlyValue = value / totalMonths;
+
         return monthlyValue;
     }
+
 
     private async Task<decimal> GetElectricityExpenseAsync()
     {
@@ -123,8 +151,152 @@ public class StatisticsService : IStatisticsService
         return purchaseExpense;
     }
 
-    private async Task<List<ChartDto>> GetChartDtosAsync()
+    private async Task<List<PriceBar>> GetIncomesPriceBarListAsync(IEnumerable<ShareablePayment> payoutsList,
+        decimal usdToRubRate)
     {
-        
+        var priceBars = new List<PriceBar>();
+
+        var monthlyPayouts = payoutsList
+            .GroupBy(payout => new { payout.Date.Year, payout.Date.Month })
+            .Select(group => new
+            {
+                group.Key.Year,
+                group.Key.Month,
+                Payouts = group.ToList()
+            })
+            .OrderBy(g => g.Year).ThenBy(g => g.Month)
+            .ToList();
+
+        var currentExchangeRates = await _context.MarketData
+            .Where(md => md.Date <= _currentDate)
+            .GroupBy(md => md.From)
+            .Select(group => group.OrderByDescending(md => md.Date).First())
+            .ToDictionaryAsync(md => md.From, md => md.Price);
+
+        var date = _projectStartDate;
+
+        while (date <= _currentDate)
+        {
+            var month = date.Month;
+            var year = date.Year;
+
+            var monthlyPayout = monthlyPayouts.Find(p => p.Year == year && p.Month == month);
+            decimal totalIncomeRub = 0;
+
+            if (monthlyPayout != null)
+            {
+                var totalIncomeUsd = monthlyPayout.Payouts
+                    .GroupBy(payout => payout.Currency.Code)
+                    .Select(group => new
+                    {
+                        CurrencyCode = group.Key,
+                        TotalAmount = group.Sum(payout => payout.Amount)
+                    })
+                    .Select(payout =>
+                        payout.TotalAmount * currentExchangeRates.GetValueOrDefault(payout.CurrencyCode, 1m))
+                    .Sum();
+
+                totalIncomeRub = totalIncomeUsd * usdToRubRate;
+            }
+
+            priceBars.Add(new PriceBar(totalIncomeRub, new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc)));
+
+            date = date.AddMonths(1);
+        }
+
+        return priceBars;
+    }
+
+    private async Task<List<Expense>> GetExpenseListAsync()
+    {
+        var expenses = await _context.ShareablePayments
+            .Where(payment => payment.Type == PaymentType.Electricity || payment.Type == PaymentType.Purchase)
+            .ToListAsync();
+
+        var monthlyExpenses = expenses
+            .GroupBy(payment => new { payment.Type, payment.Date.Year, payment.Date.Month })
+            .Select(group => new
+            {
+                group.Key.Type,
+                group.Key.Year,
+                group.Key.Month,
+                TotalAmount = group.Sum(payment => payment.Amount)
+            })
+            .ToList();
+
+        var expenseList = new List<Expense>();
+
+        var specificExpenseTypes = new[] { ExpenseType.Electricity, ExpenseType.Purchase };
+
+        foreach (var expenseType in specificExpenseTypes)
+        {
+            var priceBars = new List<PriceBar>();
+
+            var date = _projectStartDate;
+            while (date <= _currentDate)
+            {
+                var totalAmount = monthlyExpenses
+                    .Where(e => e.Type == (PaymentType)expenseType &&
+                                e.Year == date.Year &&
+                                e.Month == date.Month)
+                    .Sum(e => e.TotalAmount);
+
+                priceBars.Add(new PriceBar(
+                    totalAmount,
+                    new DateTime(date.Year, date.Month, 1, 0, 0, 0, DateTimeKind.Utc)));
+
+                date = date.AddMonths(1);
+            }
+
+            expenseList.Add(new Expense(expenseType, priceBars));
+        }
+
+        var generalPriceBars = new List<PriceBar>();
+        var generalDate = _projectStartDate;
+        while (generalDate <= _currentDate)
+        {
+            var totalGeneralAmount = specificExpenseTypes
+                .Select(expenseType => monthlyExpenses
+                    .Where(e => e.Type == (PaymentType)expenseType &&
+                                e.Year == generalDate.Year &&
+                                e.Month == generalDate.Month)
+                    .Sum(e => e.TotalAmount))
+                .Sum();
+
+            generalPriceBars.Add(new PriceBar(
+                totalGeneralAmount,
+                new DateTime(generalDate.Year, generalDate.Month, 1, 0, 0, 0, DateTimeKind.Utc)));
+
+            generalDate = generalDate.AddMonths(1);
+        }
+
+        expenseList.Add(new Expense(ExpenseType.General, generalPriceBars));
+
+        return expenseList;
+    }
+
+    private static List<PriceBar> GetProfitsList(List<PriceBar> incomes, List<Expense> expenses)
+    {
+        var generalExpenses = expenses.Find(e => e.Type == ExpenseType.General)?.PriceBars;
+
+        if (generalExpenses == null)
+        {
+            return incomes;
+        }
+
+        var profits = new List<PriceBar>();
+
+        foreach (var income in incomes)
+        {
+            var generalExpense =
+                generalExpenses.Find(e => e.Date.Year == income.Date.Year && e.Date.Month == income.Date.Month);
+
+            if (generalExpense == null) continue;
+            var profitValue = income.Value - generalExpense.Value;
+
+            profits.Add(income with { Value = profitValue });
+        }
+
+        return profits;
     }
 }
