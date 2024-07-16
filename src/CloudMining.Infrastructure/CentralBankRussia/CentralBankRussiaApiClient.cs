@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 using System.Xml;
+using CloudMining.Application.Services;
 using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
@@ -33,8 +34,12 @@ public sealed class CentralBankRussiaApiClient
         var requestUrl = GetRequestUrl(fromDate, toDate);
         var response = await _httpClient.GetAsync(requestUrl);
         response.EnsureSuccessStatusCode();
+        
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        var jsonData = await CastXmlToJObjectAsync(response);
+        var responseXmlContent = await response.Content.ReadAsStringAsync();
+
+        var jsonData = CastService.CastXmlToJObject(responseXmlContent);
 
         return GetPriceDataList(jsonData);
     }
@@ -46,7 +51,9 @@ public sealed class CentralBankRussiaApiClient
         var response = await _httpClient.GetAsync(requestUrl);
         response.EnsureSuccessStatusCode();
 
-        var jsonData = await CastXmlToJObjectAsync(response);
+        var responseXmlContent = await response.Content.ReadAsStringAsync();
+
+        var jsonData = CastService.CastXmlToJObject(responseXmlContent);
 
         return GetDailyPriceDataList(jsonData);
     }
@@ -145,16 +152,5 @@ public sealed class CentralBankRussiaApiClient
 
         return priceDataList;
     }
-
-    private static async Task<JObject> CastXmlToJObjectAsync(HttpResponseMessage responseMessage)
-    {
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-        var responseXmlContent = await responseMessage.Content.ReadAsStringAsync();
-        var xmlDoc = new XmlDocument();
-        xmlDoc.LoadXml(responseXmlContent);
-
-        var jsonContent = JsonConvert.SerializeObject(xmlDoc);
-        return JObject.Parse(jsonContent);
-    }
+    
 }
