@@ -54,7 +54,7 @@ public sealed class MarketDataLoaderService : BackgroundService
     {
         foreach (var currencyPair in _currencyPairs)
         {
-            var lastMarketDataDate = await GetLastMarketDataDate(marketDataService, currencyPair);
+            var lastMarketDataDate = await GetDelayedLastMarketDataDate(marketDataService, currencyPair);
             var loadedMarketData = currencyPair.From != CurrencyCode.USD
                 ? await LoadCryptoMarketData(currencyPair, lastMarketDataDate)
                 : await LoadFiatMarketData(currencyPair, lastMarketDataDate);
@@ -68,9 +68,10 @@ public sealed class MarketDataLoaderService : BackgroundService
         var marketDataList = new List<MarketData>();
         foreach (var currencyPair in _currencyPairs)
         {
-            var priceData = currencyPair.From != CurrencyCode.USD
-                ? await _binanceApiClient.GetMarketDataAsync(currencyPair.From, currencyPair.To, limit: 1)
-                : await _centralBankRussiaApiClient.GetDailyMarketDataAsync();
+            var priceData = currencyPair is { From: CurrencyCode.USD, To: CurrencyCode.RUB }
+                ? await _centralBankRussiaApiClient.GetDailyMarketDataAsync()
+                : await _binanceApiClient.GetMarketDataAsync(currencyPair.From, currencyPair.To, limit: 1);
+            
             foreach (var data in priceData)
             {
                 var marketData = new MarketData()
@@ -87,7 +88,7 @@ public sealed class MarketDataLoaderService : BackgroundService
         await marketDataService.SaveMarketDataAsync(marketDataList);
     }
 
-    private async Task<DateTime> GetLastMarketDataDate(IMarketDataService marketDataService, CurrencyPair currencyPair)
+    private async Task<DateTime> GetDelayedLastMarketDataDate(IMarketDataService marketDataService, CurrencyPair currencyPair)
     {
         var lastMarketDataDate = await marketDataService.GetLastMarketDataDateAsync(currencyPair.From, currencyPair.To);
         if (lastMarketDataDate is null)
@@ -95,11 +96,13 @@ public sealed class MarketDataLoaderService : BackgroundService
             return _loadHistoricalDataFrom;
         }
 
-        return currencyPair.From != CurrencyCode.USD
-            ? lastMarketDataDate.Value.Add(_loadingDelay)
-            : lastMarketDataDate.Value.AddDays(1);
+        var delayedLastMarketDataDate = currencyPair is { From: CurrencyCode.USD, To: CurrencyCode.RUB }
+            ? lastMarketDataDate.Value.AddDays(1)
+            : lastMarketDataDate.Value.Add(_loadingDelay);
+
+        return delayedLastMarketDataDate;
     }
-    
+
     private async Task<List<MarketData>> LoadCryptoMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
     {
         var loadedMarketData = new List<MarketData>();
@@ -121,9 +124,10 @@ public sealed class MarketDataLoaderService : BackgroundService
                 Price = data.Price,
                 Date = data.Date
             }));
-        
+
             lastMarketDataDate = binanceMarketData.Max(data => data.Date);
         }
+
         return loadedMarketData;
     }
 
@@ -131,18 +135,19 @@ public sealed class MarketDataLoaderService : BackgroundService
     {
         var loadedMarketData = new List<MarketData>();
 
-            var centralBankRussiaMarketData = await _centralBankRussiaApiClient.GetHistoricalMarketDataAsync(lastMarketDataDate, _loadHistoricalDataTo);
+        var centralBankRussiaMarketData =
+            await _centralBankRussiaApiClient.GetHistoricalMarketDataAsync(lastMarketDataDate, _loadHistoricalDataTo);
 
-            if (centralBankRussiaMarketData.Count == 0)
-                return loadedMarketData;
+        if (centralBankRussiaMarketData.Count == 0)
+            return loadedMarketData;
 
-            loadedMarketData.AddRange(centralBankRussiaMarketData.Select(data => new MarketData
-            {
-                From = currencyPair.From,
-                To = currencyPair.To,
-                Price = data.Price,
-                Date = data.Date
-            }));
+        loadedMarketData.AddRange(centralBankRussiaMarketData.Select(data => new MarketData
+        {
+            From = currencyPair.From,
+            To = currencyPair.To,
+            Price = data.Price,
+            Date = data.Date
+        }));
 
         return loadedMarketData;
     }
