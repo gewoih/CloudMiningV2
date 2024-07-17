@@ -31,10 +31,7 @@ public class StatisticsService : IStatisticsService
 
 
         var totalIncome = 0m;
-        var monthlyIncome = 0m;
         var incomes = new List<PriceBar>();
-        var expenses = new List<Expense>();
-        var profits = new List<PriceBar>();
 
         if (incomeType == IncomeType.Hold)
         {
@@ -44,22 +41,22 @@ public class StatisticsService : IStatisticsService
                 .Select(md => md.Price)
                 .FirstOrDefaultAsync();
 
-            totalIncome = await GetTotalIncomeAsync(payoutsList, usdToRubRate);
-            monthlyIncome = GetMonthlyValue(totalIncome);
-            incomes = await GetIncomesPriceBarListAsync(payoutsList, usdToRubRate);
-            expenses = await GetExpenseListAsync();
-            profits = GetProfitsList(incomes, expenses);
+            totalIncome = await GetTotalHoldIncomeAsync(payoutsList, usdToRubRate);
+            incomes = await GetHoldIncomesPriceBarListAsync(payoutsList, usdToRubRate);
         }
         else
         {
         }
 
+        var monthlyIncome = GetMonthlyValue(totalIncome);
         var electricityExpense = await GetElectricityExpenseAsync();
         var purchaseExpense = await GetPurchaseExpenseAsync();
         var totalExpense = electricityExpense + purchaseExpense;
         var totalProfit = totalIncome - totalExpense;
         var monthlyProfit = GetMonthlyValue(totalProfit);
         var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
+        var expenses = await GetExpenseListAsync();
+        var profits = GetProfitsList(incomes, expenses);
 
 
         var statisticsDto = new StatisticsDto(
@@ -80,7 +77,7 @@ public class StatisticsService : IStatisticsService
         return statisticsDto;
     }
 
-    private async Task<decimal> GetTotalIncomeAsync(IEnumerable<ShareablePayment> payoutsList, decimal usdToRubRate)
+    private async Task<decimal> GetTotalHoldIncomeAsync(IEnumerable<ShareablePayment> payoutsList, decimal usdToRubRate)
     {
         var totalAmountByCurrencyCode = payoutsList
             .GroupBy(payout => payout.Currency.Code)
@@ -152,7 +149,7 @@ public class StatisticsService : IStatisticsService
         return purchaseExpense;
     }
 
-    private async Task<List<PriceBar>> GetIncomesPriceBarListAsync(IEnumerable<ShareablePayment> payoutsList,
+    private async Task<List<PriceBar>> GetHoldIncomesPriceBarListAsync(IEnumerable<ShareablePayment> payoutsList,
         decimal usdToRubRate)
     {
         var priceBars = new List<PriceBar>();
