@@ -14,11 +14,13 @@ public sealed class FiatMarketDataLoaderStrategy : IMarketDataLoaderStrategy
 		_centralBankRussiaApiClient = centralBankRussiaApiClient;
 	}
 
-	public async Task<List<MarketData>> GetMarketDataAsync(CurrencyPair currencyPair, DateTime fromDate, DateTime toDate)
+	public async Task<List<MarketData>> GetMarketDataAsync(CurrencyPair currencyPair, 
+		DateTime? fromDate = null,
+		DateTime? toDate = null)
 	{
 		var loadedMarketData = new List<MarketData>();
 
-		var centralBankRussiaMarketData = await _centralBankRussiaApiClient.GetHistoricalMarketDataAsync(fromDate, toDate);
+		var centralBankRussiaMarketData = await _centralBankRussiaApiClient.GetMarketDataAsync(fromDate, toDate);
 
 		if (centralBankRussiaMarketData.Count == 0)
 			return loadedMarketData;

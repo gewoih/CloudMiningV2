@@ -18,7 +18,9 @@ public sealed class CryptoMarketDataLoaderStrategy : IMarketDataLoaderStrategy
 		_loadingDelay = settings.Value.Delay;
 	}
 
-	public async Task<List<MarketData>> GetMarketDataAsync(CurrencyPair currencyPair, DateTime fromDate, DateTime toDate)
+	public async Task<List<MarketData>> GetMarketDataAsync(CurrencyPair currencyPair, 
+		DateTime? fromDate = null, 
+		DateTime? toDate = null)
 	{
 		var loadedMarketData = new List<MarketData>();
 		for (; fromDate < toDate; fromDate += _loadingDelay)
