@@ -1,11 +1,9 @@
 ﻿using System.Globalization;
 using System.Text;
-using System.Xml;
-using CloudMining.Application.Services;
+using CloudMining.Domain.Utils;
 using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace CloudMining.Infrastructure.CentralBankRussia;
@@ -39,7 +37,7 @@ public sealed class CentralBankRussiaApiClient
 
         var responseXmlContent = await response.Content.ReadAsStringAsync();
 
-        var jsonData = CastService.CastXmlToJObject(responseXmlContent);
+        var jsonData = XmlUtils.ToJson(responseXmlContent);
 
         return GetPriceDataList(jsonData);
     }
@@ -53,7 +51,7 @@ public sealed class CentralBankRussiaApiClient
 
         var responseXmlContent = await response.Content.ReadAsStringAsync();
 
-        var jsonData = CastService.CastXmlToJObject(responseXmlContent);
+        var jsonData = XmlUtils.ToJson(responseXmlContent);
 
         return GetDailyPriceDataList(jsonData);
     }
