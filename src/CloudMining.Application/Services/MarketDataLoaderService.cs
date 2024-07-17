@@ -2,10 +2,8 @@
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.CentralBankRussia;
-using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -14,141 +12,85 @@ namespace CloudMining.Application.Services;
 
 public sealed class MarketDataLoaderService : BackgroundService
 {
-    private readonly TimeSpan _loadingDelay;
-    private readonly DateTime _loadHistoricalDataFrom;
-    private readonly DateTime _loadHistoricalDataTo;
-    private readonly BinanceApiClient _binanceApiClient;
-    private readonly CentralBankRussiaApiClient _centralBankRussiaApiClient;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly List<CurrencyPair> _currencyPairs;
+	private readonly TimeSpan _loadingDelay;
 
-    public MarketDataLoaderService(BinanceApiClient binanceApiClient,
-        CentralBankRussiaApiClient centralBankRussiaApiClient,
-        IOptions<MarketDataLoaderSettings> settings,
-        IServiceScopeFactory scopeFactory)
-    {
-        _scopeFactory = scopeFactory;
-        _loadingDelay = settings.Value.Delay;
-        _loadHistoricalDataFrom = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        _loadHistoricalDataTo = DateTime.UtcNow;
-        _binanceApiClient = binanceApiClient;
-        _centralBankRussiaApiClient = centralBankRussiaApiClient;
-        _currencyPairs = settings.Value.CurrencyPairs;
-    }
+	//TODO: Вынести параметры с датами в appsettings
+	private readonly DateTime _loadHistoricalDataFrom = new(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+	private readonly DateTime _loadHistoricalDataTo = DateTime.UtcNow;
+	private readonly BinanceApiClient _binanceApiClient;
+	private readonly CentralBankRussiaApiClient _centralBankRussiaApiClient;
+	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly List<CurrencyPair> _currencyPairs;
+	private readonly IMarketDataLoaderStrategyFactory _marketDataLoaderStrategyFactory;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        await using var scope = _scopeFactory.CreateAsyncScope();
-        var marketDataService = scope.ServiceProvider.GetRequiredService<IMarketDataService>();
+	public MarketDataLoaderService(BinanceApiClient binanceApiClient,
+		CentralBankRussiaApiClient centralBankRussiaApiClient,
+		IOptions<MarketDataLoaderSettings> settings,
+		IServiceScopeFactory scopeFactory,
+		IMarketDataLoaderStrategyFactory marketDataLoaderStrategyFactory)
+	{
+		_scopeFactory = scopeFactory;
+		_marketDataLoaderStrategyFactory = marketDataLoaderStrategyFactory;
+		_loadingDelay = settings.Value.Delay;
+		_binanceApiClient = binanceApiClient;
+		_centralBankRussiaApiClient = centralBankRussiaApiClient;
+		_currencyPairs = settings.Value.CurrencyPairs;
+	}
 
-        await LoadHistoricalMarketData(marketDataService);
+	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+	{
+		await using var scope = _scopeFactory.CreateAsyncScope();
+		var marketDataService = scope.ServiceProvider.GetRequiredService<IMarketDataService>();
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await LoadRealTimeMarketData(marketDataService);
-            await Task.Delay(_loadingDelay, stoppingToken);
-        }
-    }
+		await LoadHistoricalMarketData(marketDataService);
 
-    private async Task LoadHistoricalMarketData(IMarketDataService marketDataService)
-    {
-        foreach (var currencyPair in _currencyPairs)
-        {
-            var lastMarketDataDate = await GetDelayedLastMarketDataDate(marketDataService, currencyPair);
-            var loadedMarketData = currencyPair.From != CurrencyCode.USD
-                ? await LoadCryptoMarketData(currencyPair, lastMarketDataDate)
-                : await LoadFiatMarketData(currencyPair, lastMarketDataDate);
+		while (!stoppingToken.IsCancellationRequested)
+		{
+			await LoadRealTimeMarketData(marketDataService);
+			await Task.Delay(_loadingDelay, stoppingToken);
+		}
+	}
 
-            await marketDataService.SaveMarketDataAsync(loadedMarketData);
-        }
-    }
+	private async Task LoadHistoricalMarketData(IMarketDataService marketDataService)
+	{
+		foreach (var currencyPair in _currencyPairs)
+		{
+			var loadDataFrom =
+				await marketDataService.GetLastMarketDataDateAsync(currencyPair.From, currencyPair.To) ??
+				_loadHistoricalDataFrom;
 
-    private async Task LoadRealTimeMarketData(IMarketDataService marketDataService)
-    {
-        var marketDataList = new List<MarketData>();
-        foreach (var currencyPair in _currencyPairs)
-        {
-            var priceData = currencyPair is { From: CurrencyCode.USD, To: CurrencyCode.RUB }
-                ? await _centralBankRussiaApiClient.GetDailyMarketDataAsync()
-                : await _binanceApiClient.GetMarketDataAsync(currencyPair.From, currencyPair.To, limit: 1);
-            
-            foreach (var data in priceData)
-            {
-                var marketData = new MarketData()
-                {
-                    From = currencyPair.From,
-                    To = currencyPair.To,
-                    Price = data.Price,
-                    Date = data.Date
-                };
-                marketDataList.Add(marketData);
-            }
-        }
+			var marketDataLoaderStrategy = _marketDataLoaderStrategyFactory.Create(currencyPair);
+			var marketData =
+				await marketDataLoaderStrategy.GetMarketDataAsync(currencyPair, loadDataFrom,
+					_loadHistoricalDataTo);
 
-        await marketDataService.SaveMarketDataAsync(marketDataList);
-    }
+			await marketDataService.SaveMarketDataAsync(marketData);
+		}
+	}
 
-    private async Task<DateTime> GetDelayedLastMarketDataDate(IMarketDataService marketDataService, CurrencyPair currencyPair)
-    {
-        var lastMarketDataDate = await marketDataService.GetLastMarketDataDateAsync(currencyPair.From, currencyPair.To);
-        if (lastMarketDataDate is null)
-        {
-            return _loadHistoricalDataFrom;
-        }
+	private async Task LoadRealTimeMarketData(IMarketDataService marketDataService)
+	{
+		var marketDataList = new List<MarketData>();
+		foreach (var currencyPair in _currencyPairs)
+		{
+			var priceData = currencyPair is { From: CurrencyCode.USD, To: CurrencyCode.RUB }
+				? await _centralBankRussiaApiClient.GetDailyMarketDataAsync()
+				: await _binanceApiClient.GetMarketDataAsync(currencyPair.From, currencyPair.To, limit: 1);
 
-        var delayedLastMarketDataDate = currencyPair is { From: CurrencyCode.USD, To: CurrencyCode.RUB }
-            ? lastMarketDataDate.Value.AddDays(1)
-            : lastMarketDataDate.Value.Add(_loadingDelay);
+			foreach (var data in priceData)
+			{
+				var marketData = new MarketData
+				{
+					From = currencyPair.From,
+					To = currencyPair.To,
+					Price = data.Price,
+					Date = data.Date
+				};
 
-        return delayedLastMarketDataDate;
-    }
+				marketDataList.Add(marketData);
+			}
+		}
 
-    private async Task<List<MarketData>> LoadCryptoMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
-    {
-        var loadedMarketData = new List<MarketData>();
-        for (; lastMarketDataDate < _loadHistoricalDataTo; lastMarketDataDate += _loadingDelay)
-        {
-            var binanceMarketData = await _binanceApiClient.GetMarketDataAsync(
-                fromCurrency: currencyPair.From,
-                toCurrency: currencyPair.To,
-                fromDate: lastMarketDataDate,
-                limit: 1000);
-
-            if (binanceMarketData.Count == 0)
-                break;
-
-            loadedMarketData.AddRange(binanceMarketData.Select(data => new MarketData
-            {
-                From = currencyPair.From,
-                To = currencyPair.To,
-                Price = data.Price,
-                Date = data.Date
-            }));
-
-            lastMarketDataDate = binanceMarketData.Max(data => data.Date);
-        }
-
-        return loadedMarketData;
-    }
-
-    private async Task<List<MarketData>> LoadFiatMarketData(CurrencyPair currencyPair, DateTime lastMarketDataDate)
-    {
-        var loadedMarketData = new List<MarketData>();
-
-        var centralBankRussiaMarketData =
-            await _centralBankRussiaApiClient.GetHistoricalMarketDataAsync(lastMarketDataDate, _loadHistoricalDataTo);
-
-        if (centralBankRussiaMarketData.Count == 0)
-            return loadedMarketData;
-
-        loadedMarketData.AddRange(centralBankRussiaMarketData.Select(data => new MarketData
-        {
-            From = currencyPair.From,
-            To = currencyPair.To,
-            Price = data.Price,
-            Date = data.Date
-        }));
-
-        return loadedMarketData;
-    }
+		await marketDataService.SaveMarketDataAsync(marketDataList);
+	}
 }
