@@ -10,9 +10,10 @@ namespace CloudMining.Infrastructure.CentralBankRussia;
 
 public sealed class CentralBankRussiaApiClient
 {
+    private const string UsdCode = "R01235";
+    
     private readonly string _getHistoricalPriceDataUrl;
     private readonly string _getDailyPriceDataUrl;
-    private readonly string _usdCode;
     private readonly HttpClient _httpClient;
 
     public CentralBankRussiaApiClient(HttpClient httpClient, IOptions<CentralBankRussiaSettings> settings)
@@ -22,7 +23,6 @@ public sealed class CentralBankRussiaApiClient
         var baseUrl = settings.Value.BaseUrl;
         _getHistoricalPriceDataUrl = baseUrl + settings.Value.Endpoints.GetHistoricalPriceDataUrl;
         _getDailyPriceDataUrl = baseUrl + settings.Value.Endpoints.GetDailyPriceDataUrl;
-        _usdCode = settings.Value.UsdCode;
     }
 
     public async Task<List<PriceData>> GetHistoricalMarketDataAsync(
@@ -66,7 +66,7 @@ public sealed class CentralBankRussiaApiClient
         {
             var formattedFromDate = fromDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
             var formattedToDate = toDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-            requestUrl = string.Format(_getHistoricalPriceDataUrl, formattedFromDate, formattedToDate, _usdCode);
+            requestUrl = string.Format(_getHistoricalPriceDataUrl, formattedFromDate, formattedToDate, UsdCode);
         }
         else
         {
@@ -130,7 +130,7 @@ public sealed class CentralBankRussiaApiClient
         DateTime.TryParseExact(jsonDate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
             out var date);
 
-        var currencyToken = data["ValCurs"]?["Valute"].FirstOrDefault(v => (string)v["@ID"] == _usdCode);
+        var currencyToken = data["ValCurs"]?["Valute"].FirstOrDefault(v => (string)v["@ID"] == UsdCode);
 
         if (currencyToken == null) return priceDataList;
         var jsonPrice = currencyToken["Value"]?.ToString();

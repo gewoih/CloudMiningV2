@@ -4,7 +4,6 @@ public class CentralBankRussiaSettings
 {
     public static readonly string SectionName = "CentralBankRussia";
     public string BaseUrl { get; set; }
-    public string UsdCode { get; set; }
     public CentralBankRussiaEndpoints Endpoints { get; set; }
 }
 
