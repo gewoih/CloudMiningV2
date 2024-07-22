@@ -1,20 +1,23 @@
-﻿using CloudMining.Api.Startup;
+﻿using System.Text;
+using CloudMining.Api.Startup;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-	.ConfigureControllers()
-	.ConfigureFluentValidation()
-	.ConfigureCors()
-	.ConfigureSwagger()
-	.ConfigureSettings(builder.Configuration)
-	.ConfigureDbContext(builder.Configuration)
-	.ConfigureIdentity()
-	.ConfigureAuthentication(builder.Configuration)
-	.RegisterServices(builder.Configuration)
-	.ConfigureMassTransit();
+    .ConfigureControllers()
+    .ConfigureFluentValidation()
+    .ConfigureCors()
+    .ConfigureSwagger()
+    .ConfigureSettings(builder.Configuration)
+    .ConfigureDbContext(builder.Configuration)
+    .ConfigureIdentity()
+    .ConfigureAuthentication(builder.Configuration)
+    .RegisterServices(builder.Configuration)
+    .ConfigureMassTransit();
+
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var app = builder.Build();
 
@@ -24,11 +27,11 @@ await database.MigrateAsync();
 
 if (app.Environment.IsDevelopment())
 {
-	await DatabaseInitializer.CreateRolesAsync(scope.ServiceProvider);
-	await DatabaseInitializer.CreateUsersAsync(scope.ServiceProvider);
+    await DatabaseInitializer.CreateRolesAsync(scope.ServiceProvider);
+    await DatabaseInitializer.CreateUsersAsync(scope.ServiceProvider);
 
-	app.UseSwagger();
-	app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseCors("AllowSpecificOrigin");
