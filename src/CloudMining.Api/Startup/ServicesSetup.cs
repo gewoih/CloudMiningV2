@@ -5,6 +5,7 @@ using CloudMining.Domain.Models.Payments;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.UserSettings;
 using CloudMining.Infrastructure.Binance;
+using CloudMining.Infrastructure.CentralBankRussia;
 using CloudMining.Infrastructure.Emcd;
 using CloudMining.Infrastructure.Telegram;
 using CloudMining.Interfaces.DTO.Members;
@@ -39,6 +40,9 @@ public static class ServicesSetup
 		services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
 		services.AddScoped<INotificationService, TelegramNotificationService>();
 		services.AddScoped<IMarketDataService, MarketDataService>();
+		services.AddScoped<CryptoMarketDataLoaderStrategy>();
+		services.AddScoped<FiatMarketDataLoaderStrategy>();
+		services.AddScoped<IMarketDataLoaderStrategyFactory, MarketDataLoaderStrategyFactory>();
 
 		services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
 		services.AddScoped<IMapper<NotificationSettings, NotificationSettingsDto>, NotificationSettingsMapper>();
@@ -51,6 +55,7 @@ public static class ServicesSetup
 		services.AddHostedService<PayoutsLoaderService>();
 		
 		services.AddHttpClient<BinanceApiClient>();
+		services.AddHttpClient<CentralBankRussiaApiClient>();
 		services.AddHostedService<MarketDataLoaderService>();
 		
 
