@@ -47,17 +47,19 @@ public sealed class MarketDataService : IMarketDataService
         return lastMarketDataDate;
     }
 
-    public async Task<List<MarketData>> GetCurrencyRatesForPayoutsAsync(IEnumerable<ShareablePayment> payoutsList)
+    public async Task<Dictionary<Tuple<CurrencyCode, CurrencyCode>, List<MarketData>>> GetMarketDataByDatesAsync(IEnumerable<DateOnly> dates)
     {
-        var payoutDates = payoutsList
-            .Select(payout => payout.Date.Date)
-            .Distinct()
-            .ToList();
-        
-        var currencyRates = await _context.MarketData
-            .Where(md => payoutDates.Contains(md.Date.Date))
-            .ToListAsync();
+        var currenciesMarketData = await _context.MarketData
+            .Where(marketData => dates.Contains(DateOnly.FromDateTime(marketData.Date)))
+            .GroupBy(marketData => new Tuple<CurrencyCode, CurrencyCode>(marketData.From, marketData.To))
+            .ToDictionaryAsync(
+                group => group.Key,
+                group => group
+                    .GroupBy(marketData => DateOnly.FromDateTime(marketData.Date))
+                    .Select(dateGroup => dateGroup.OrderByDescending(marketData => marketData.Date).First())
+                    .ToList()
+            );
 
-        return currencyRates;
+        return currenciesMarketData;
     }
 }

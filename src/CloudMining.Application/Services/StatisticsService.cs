@@ -49,8 +49,10 @@ public class StatisticsService : IStatisticsService
         }
         else
         {
-            totalIncome = await GetTotalReceiveAndSellIncomeAsync(payoutsList);
-            incomes = await GetReceiveAndSellIncomesPriceBarListAsync(payoutsList);
+            var payoutsDates = payoutsList.Select(payout => DateOnly.FromDateTime(payout.Date));
+            var marketDataByDates = await _marketDataService.GetMarketDataByDatesAsync(payoutsDates);
+            //totalIncome = await GetTotalReceiveAndSellIncomeAsync(payoutsList);
+            //incomes = await GetReceiveAndSellIncomesPriceBarListAsync(payoutsList);
         }
 
         var monthlyIncome = GetMonthlyValue(totalIncome);
@@ -124,61 +126,61 @@ public class StatisticsService : IStatisticsService
         return totalIncome;
     }
 
-    private async Task<decimal> GetTotalReceiveAndSellIncomeAsync(IReadOnlyCollection<ShareablePayment> payoutsList)
-    {
-        var currencyRates = await _marketDataService.GetCurrencyRatesForPayoutsAsync(payoutsList);
-
-        var totalIncomeRub = 0m;
-
-        var payoutsByDate = payoutsList
-            .GroupBy(payout => payout.Date.Date)
-            .Select(group => new
-            {
-                Date = group.Key,
-                Payouts = group.ToList()
-            })
-            .ToList();
-
-        foreach (var dailyPayouts in payoutsByDate)
-        {
-            var dailyIncomeUsd = 0m;
-
-            var payoutsByCurrency = dailyPayouts.Payouts
-                .GroupBy(payout => payout.Currency.Code)
-                .Select(group => new
-                {
-                    CurrencyCode = group.Key,
-                    TotalAmount = group.Sum(payout => payout.Amount)
-                })
-                .ToList();
-
-            foreach (var payout in payoutsByCurrency)
-            {
-                var usdMarketData = currencyRates
-                    .Where(md =>
-                        md.From == payout.CurrencyCode && md.To == CurrencyCode.USDT &&
-                        md.Date.Date <= dailyPayouts.Date)
-                    .MaxBy(md => md.Date);
-
-                if (usdMarketData == null)
-                    break;
-
-                dailyIncomeUsd += payout.TotalAmount * usdMarketData.Price;
-            }
-
-            var rubMarketData = currencyRates
-                .Where(md =>
-                    md is { From: CurrencyCode.USD, To: CurrencyCode.RUB } && md.Date.Date <= dailyPayouts.Date)
-                .MaxBy(md => md.Date);
-
-            if (rubMarketData == null)
-                break;
-
-            totalIncomeRub += dailyIncomeUsd * rubMarketData.Price;
-        }
-
-        return totalIncomeRub;
-    }
+    // private async Task<decimal> GetTotalReceiveAndSellIncomeAsync(IReadOnlyCollection<ShareablePayment> payoutsList)
+    // {
+    //     var currencyRates = await _marketDataService.GetMarketDataByDatesAsync(payoutsList.Select(payout => payout.Date));
+    //
+    //     var totalIncomeRub = 0m;
+    //
+    //     var payoutsByDate = payoutsList
+    //         .GroupBy(payout => payout.Date.Date)
+    //         .Select(group => new
+    //         {
+    //             Date = group.Key,
+    //             Payouts = group.ToList()
+    //         })
+    //         .ToList();
+    //
+    //     foreach (var dailyPayouts in payoutsByDate)
+    //     {
+    //         var dailyIncomeUsd = 0m;
+    //
+    //         var payoutsByCurrency = dailyPayouts.Payouts
+    //             .GroupBy(payout => payout.Currency.Code)
+    //             .Select(group => new
+    //             {
+    //                 CurrencyCode = group.Key,
+    //                 TotalAmount = group.Sum(payout => payout.Amount)
+    //             })
+    //             .ToList();
+    //
+    //         foreach (var payout in payoutsByCurrency)
+    //         {
+    //             var usdMarketData = currencyRates
+    //                 .Where(md =>
+    //                     md.From == payout.CurrencyCode && md.To == CurrencyCode.USDT &&
+    //                     md.Date.Date <= dailyPayouts.Date)
+    //                 .MaxBy(md => md.Date);
+    //
+    //             if (usdMarketData == null)
+    //                 break;
+    //
+    //             dailyIncomeUsd += payout.TotalAmount * usdMarketData.Price;
+    //         }
+    //
+    //         var rubMarketData = currencyRates
+    //             .Where(md =>
+    //                 md is { From: CurrencyCode.USD, To: CurrencyCode.RUB } && md.Date.Date <= dailyPayouts.Date)
+    //             .MaxBy(md => md.Date);
+    //
+    //         if (rubMarketData == null)
+    //             break;
+    //
+    //         totalIncomeRub += dailyIncomeUsd * rubMarketData.Price;
+    //     }
+    //
+    //     return totalIncomeRub;
+    // }
 
     private decimal GetMonthlyValue(decimal value)
     {
@@ -266,72 +268,72 @@ public class StatisticsService : IStatisticsService
         return priceBars;
     }
 
-    private async Task<List<PriceBar>> GetReceiveAndSellIncomesPriceBarListAsync(
-        IReadOnlyCollection<ShareablePayment> payoutsList)
-    {
-        var currencyRates = await _marketDataService.GetCurrencyRatesForPayoutsAsync(payoutsList);
-
-        var priceBars = new List<PriceBar>();
-
-        var monthlyPayouts = payoutsList
-            .GroupBy(payout => new { payout.Date.Year, payout.Date.Month })
-            .Select(group => new
-            {
-                group.Key.Year,
-                group.Key.Month,
-                Payouts = group.ToList()
-            })
-            .OrderBy(g => g.Year).ThenBy(g => g.Month)
-            .ToList();
-
-        var date = _projectStartDate;
-
-        while (date <= _currentDate)
-        {
-            var month = date.Month;
-            var year = date.Year;
-
-            var monthlyPayout = monthlyPayouts.Find(p => p.Year == year && p.Month == month);
-            decimal totalIncomeRub = 0;
-
-            if (monthlyPayout != null)
-            {
-                var totalIncomeUsd = 0m;
-
-                foreach (var payout in monthlyPayout.Payouts)
-                {
-                    var usdMarketData = currencyRates
-                        .Where(md =>
-                            md.From == payout.Currency.Code && md.To == CurrencyCode.USDT &&
-                            md.Date.Date <= payout.Date.Date)
-                        .MaxBy(md => md.Date);
-
-                    if (usdMarketData != null)
-                    {
-                        totalIncomeUsd += payout.Amount * usdMarketData.Price;
-                    }
-                }
-
-                var rubMarketData = currencyRates
-                    .Where(md =>
-                        md is { From: CurrencyCode.USD, To: CurrencyCode.RUB } &&
-                        md.Date.Date <= new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc).Date)
-                    .MaxBy(md => md.Date);
-
-
-                if (rubMarketData == null)
-                    break;
-
-                totalIncomeRub = totalIncomeUsd * rubMarketData.Price;
-            }
-
-            priceBars.Add(new PriceBar(totalIncomeRub, new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc)));
-
-            date = date.AddMonths(1);
-        }
-
-        return priceBars;
-    }
+    // private async Task<List<PriceBar>> GetReceiveAndSellIncomesPriceBarListAsync(
+    //     IReadOnlyCollection<ShareablePayment> payoutsList)
+    // {
+    //     var currencyRates = await _marketDataService.GetMarketDataByDatesAsync(payoutsList.Select(payout => payout.Date));
+    //
+    //     var priceBars = new List<PriceBar>();
+    //
+    //     var monthlyPayouts = payoutsList
+    //         .GroupBy(payout => new { payout.Date.Year, payout.Date.Month })
+    //         .Select(group => new
+    //         {
+    //             group.Key.Year,
+    //             group.Key.Month,
+    //             Payouts = group.ToList()
+    //         })
+    //         .OrderBy(g => g.Year).ThenBy(g => g.Month)
+    //         .ToList();
+    //
+    //     var date = _projectStartDate;
+    //
+    //     while (date <= _currentDate)
+    //     {
+    //         var month = date.Month;
+    //         var year = date.Year;
+    //
+    //         var monthlyPayout = monthlyPayouts.Find(p => p.Year == year && p.Month == month);
+    //         decimal totalIncomeRub = 0;
+    //
+    //         if (monthlyPayout != null)
+    //         {
+    //             var totalIncomeUsd = 0m;
+    //
+    //             foreach (var payout in monthlyPayout.Payouts)
+    //             {
+    //                 var usdMarketData = currencyRates
+    //                     .Where(md =>
+    //                         md.From == payout.Currency.Code && md.To == CurrencyCode.USDT &&
+    //                         md.Date.Date <= payout.Date.Date)
+    //                     .MaxBy(md => md.Date);
+    //
+    //                 if (usdMarketData != null)
+    //                 {
+    //                     totalIncomeUsd += payout.Amount * usdMarketData.Price;
+    //                 }
+    //             }
+    //
+    //             var rubMarketData = currencyRates
+    //                 .Where(md =>
+    //                     md is { From: CurrencyCode.USD, To: CurrencyCode.RUB } &&
+    //                     md.Date.Date <= new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc).Date)
+    //                 .MaxBy(md => md.Date);
+    //
+    //
+    //             if (rubMarketData == null)
+    //                 break;
+    //
+    //             totalIncomeRub = totalIncomeUsd * rubMarketData.Price;
+    //         }
+    //
+    //         priceBars.Add(new PriceBar(totalIncomeRub, new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc)));
+    //
+    //         date = date.AddMonths(1);
+    //     }
+    //
+    //     return priceBars;
+    // }
 
     private async Task<List<Expense>> GetExpenseListAsync()
     {

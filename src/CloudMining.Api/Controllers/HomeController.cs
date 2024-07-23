@@ -8,7 +8,7 @@ namespace CloudMining.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
+//[Authorize]
 public class HomeController : ControllerBase
 {
     private readonly IStatisticsService _statisticsService;
@@ -26,5 +26,4 @@ public class HomeController : ControllerBase
         return statisticsDto;
 
     }
-
 }
