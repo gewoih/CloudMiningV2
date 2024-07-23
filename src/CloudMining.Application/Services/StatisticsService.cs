@@ -1,4 +1,5 @@
 ﻿using CloudMining.Domain.Enums;
+using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.DTO.Statistics;
@@ -13,16 +14,18 @@ public class StatisticsService : IStatisticsService
     private readonly IShareablePaymentService _shareablePaymentService;
     private readonly DateTime _projectStartDate;
     private readonly DateTime _currentDate;
+    private readonly IMarketDataService _marketDataService;
 
     public StatisticsService(
         CloudMiningContext context,
-        IShareablePaymentService shareablePaymentService
-    )
+        IShareablePaymentService shareablePaymentService,
+        IMarketDataService marketDataService)
     {
         _context = context;
         _projectStartDate = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         _currentDate = DateTime.UtcNow;
         _shareablePaymentService = shareablePaymentService;
+        _marketDataService = marketDataService;
     }
 
     public async Task<StatisticsDto> GetStatisticsAsync(IncomeType incomeType)
@@ -121,8 +124,10 @@ public class StatisticsService : IStatisticsService
         return totalIncome;
     }
 
-    private async Task<decimal> GetTotalReceiveAndSellIncomeAsync(IEnumerable<ShareablePayment> payoutsList)
+    private async Task<decimal> GetTotalReceiveAndSellIncomeAsync(IReadOnlyCollection<ShareablePayment> payoutsList)
     {
+        var currencyRates = await _marketDataService.GetCurrencyRatesForPayoutsAsync(payoutsList);
+
         var totalIncomeRub = 0m;
 
         var payoutsByDate = payoutsList
@@ -149,11 +154,11 @@ public class StatisticsService : IStatisticsService
 
             foreach (var payout in payoutsByCurrency)
             {
-                var usdMarketData = await _context.MarketData
+                var usdMarketData = currencyRates
                     .Where(md =>
-                        md.From == payout.CurrencyCode && md.To == CurrencyCode.USDT && md.Date <= dailyPayouts.Date)
-                    .OrderByDescending(md => md.Date)
-                    .FirstOrDefaultAsync();
+                        md.From == payout.CurrencyCode && md.To == CurrencyCode.USDT &&
+                        md.Date.Date <= dailyPayouts.Date)
+                    .MaxBy(md => md.Date);
 
                 if (usdMarketData == null)
                     break;
@@ -161,10 +166,10 @@ public class StatisticsService : IStatisticsService
                 dailyIncomeUsd += payout.TotalAmount * usdMarketData.Price;
             }
 
-            var rubMarketData = await _context.MarketData
-                .Where(md => md.From == CurrencyCode.USD && md.To == CurrencyCode.RUB && md.Date <= dailyPayouts.Date)
-                .OrderByDescending(md => md.Date)
-                .FirstOrDefaultAsync();
+            var rubMarketData = currencyRates
+                .Where(md =>
+                    md is { From: CurrencyCode.USD, To: CurrencyCode.RUB } && md.Date.Date <= dailyPayouts.Date)
+                .MaxBy(md => md.Date);
 
             if (rubMarketData == null)
                 break;
@@ -262,8 +267,10 @@ public class StatisticsService : IStatisticsService
     }
 
     private async Task<List<PriceBar>> GetReceiveAndSellIncomesPriceBarListAsync(
-        IEnumerable<ShareablePayment> payoutsList)
+        IReadOnlyCollection<ShareablePayment> payoutsList)
     {
+        var currencyRates = await _marketDataService.GetCurrencyRatesForPayoutsAsync(payoutsList);
+
         var priceBars = new List<PriceBar>();
 
         var monthlyPayouts = payoutsList
@@ -293,11 +300,11 @@ public class StatisticsService : IStatisticsService
 
                 foreach (var payout in monthlyPayout.Payouts)
                 {
-                    var usdMarketData = await _context.MarketData
+                    var usdMarketData = currencyRates
                         .Where(md =>
-                            md.From == payout.Currency.Code && md.To == CurrencyCode.USDT && md.Date <= payout.Date)
-                        .OrderByDescending(md => md.Date)
-                        .FirstOrDefaultAsync();
+                            md.From == payout.Currency.Code && md.To == CurrencyCode.USDT &&
+                            md.Date.Date <= payout.Date.Date)
+                        .MaxBy(md => md.Date);
 
                     if (usdMarketData != null)
                     {
@@ -305,17 +312,17 @@ public class StatisticsService : IStatisticsService
                     }
                 }
 
-                var rubMarketData = await _context.MarketData
+                var rubMarketData = currencyRates
                     .Where(md =>
-                        md.From == CurrencyCode.USD && md.To == CurrencyCode.RUB &&
-                        md.Date <= new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc))
-                    .OrderByDescending(md => md.Date)
-                    .FirstOrDefaultAsync();
+                        md is { From: CurrencyCode.USD, To: CurrencyCode.RUB } &&
+                        md.Date.Date <= new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc).Date)
+                    .MaxBy(md => md.Date);
 
-                if (rubMarketData != null)
-                {
-                    totalIncomeRub = totalIncomeUsd * rubMarketData.Price;
-                }
+
+                if (rubMarketData == null)
+                    break;
+
+                totalIncomeRub = totalIncomeUsd * rubMarketData.Price;
             }
 
             priceBars.Add(new PriceBar(totalIncomeRub, new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc)));

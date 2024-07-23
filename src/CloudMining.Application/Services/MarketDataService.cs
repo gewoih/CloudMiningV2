@@ -1,5 +1,6 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
+using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -44,5 +45,19 @@ public sealed class MarketDataService : IMarketDataService
             .MaxAsync(marketData => (DateTime?)marketData.Date);
 
         return lastMarketDataDate;
+    }
+
+    public async Task<List<MarketData>> GetCurrencyRatesForPayoutsAsync(IEnumerable<ShareablePayment> payoutsList)
+    {
+        var payoutDates = payoutsList
+            .Select(payout => payout.Date.Date)
+            .Distinct()
+            .ToList();
+        
+        var currencyRates = await _context.MarketData
+            .Where(md => payoutDates.Contains(md.Date.Date))
+            .ToListAsync();
+
+        return currencyRates;
     }
 }
