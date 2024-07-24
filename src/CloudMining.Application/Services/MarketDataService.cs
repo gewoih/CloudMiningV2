@@ -46,20 +46,4 @@ public sealed class MarketDataService : IMarketDataService
 
         return lastMarketDataDate;
     }
-
-    public async Task<Dictionary<Tuple<CurrencyCode, CurrencyCode>, List<MarketData>>> GetMarketDataByDatesAsync(IEnumerable<DateOnly> dates)
-    {
-        var currenciesMarketData = await _context.MarketData
-            .Where(marketData => dates.Contains(DateOnly.FromDateTime(marketData.Date)))
-            .GroupBy(marketData => new Tuple<CurrencyCode, CurrencyCode>(marketData.From, marketData.To))
-            .ToDictionaryAsync(
-                group => group.Key,
-                group => group
-                    .GroupBy(marketData => DateOnly.FromDateTime(marketData.Date))
-                    .Select(dateGroup => dateGroup.OrderByDescending(marketData => marketData.Date).First())
-                    .ToList()
-            );
-
-        return currenciesMarketData;
-    }
 }

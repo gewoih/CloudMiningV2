@@ -8,6 +8,4 @@ public interface IMarketDataService
 {
     Task SaveMarketDataAsync(List<MarketData> marketData);
     Task<DateTime?> GetLastMarketDataDateAsync(CurrencyCode fromCurrency, CurrencyCode toCurrency);
-    Task<Dictionary<Tuple<CurrencyCode, CurrencyCode>, List<MarketData>>> GetMarketDataByDatesAsync(
-	    IEnumerable<DateOnly> dates);
 }
