@@ -1,6 +1,5 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
-using CloudMining.Domain.Models.Payments.Shareable;
 
 namespace CloudMining.Interfaces.Interfaces;
 

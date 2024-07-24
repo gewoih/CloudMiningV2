@@ -28,7 +28,8 @@ public class StatisticsService : IStatisticsService
 
     public async Task<StatisticsDto> GetStatisticsAsync(StatisticsCalculationStrategy statisticsCalculationStrategy)
     {
-        var payoutsList = await _shareablePaymentService.GetPayoutsAsync();
+        var payoutsList =
+            await _shareablePaymentService.GetAsync(paymentType: PaymentType.Crypto, includePaymentShares: false);
         
         decimal totalIncome;
         var incomes = new List<PriceBar>();

@@ -30,15 +30,6 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 		_publishEndpoint = publishEndpoint;
 	}
 
-	public async Task<List<ShareablePayment>> GetPayoutsAsync()
-	{
-		var payoutsList = await _context.ShareablePayments
-			.Where(payment => payment.Type == PaymentType.Crypto)
-			.Include(payment => payment.Currency)
-			.ToListAsync();
-		return payoutsList;
-	}
-
 	public async Task<int> GetUserPaymentsCount(PaymentType? paymentType = null)
 	{
 		var currentUserId = _currentUserService.GetCurrentUserId();
@@ -126,25 +117,32 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 		return true;
 	}
 
-	public async Task<List<ShareablePayment>> GetAsync(int skip, int take, PaymentType? paymentType = null)
+	public async Task<List<ShareablePayment>> GetAsync(
+		int skip = 0, 
+		int take = int.MaxValue, 
+		PaymentType? paymentType = null,
+		bool includePaymentShares = true)
 	{
 		var currentUserId = _currentUserService.GetCurrentUserId();
 		if (currentUserId == null)
 			return [];
 
 		var paymentsQuery = _context.ShareablePayments
-			.Include(payment => payment.PaymentShares)
 			.Include(payment => payment.Currency)
 			.AsQueryable();
 
 		if (paymentType != null)
 			paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
 
-		//TODO: Необходимо забирать только те PaymentShare, которые относятся к пользователю. Он не должен видеть чужие доли.
-		var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
-		if (!isCurrentUserAdmin)
-			paymentsQuery = paymentsQuery.Where(payment =>
-				payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
+		if (includePaymentShares)
+		{
+			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
+			if (!isCurrentUserAdmin)
+				paymentsQuery = paymentsQuery
+					.Include(payment => payment.PaymentShares)
+					.Where(payment => 
+						payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
+		}
 
 		var payments = await paymentsQuery
 			.OrderByDescending(payment => payment.Date)
