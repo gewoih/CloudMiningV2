@@ -2,7 +2,7 @@
 
 public enum ExpenseType
 {
-    General,
-    Electricity,
-    Purchase
+    Total,
+    OnlyElectricity,
+    OnlyPurchases
 }

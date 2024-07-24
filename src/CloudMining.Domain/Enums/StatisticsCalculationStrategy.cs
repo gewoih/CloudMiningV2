@@ -1,6 +1,6 @@
 ﻿namespace CloudMining.Domain.Enums;
 
-public enum IncomeType
+public enum StatisticsCalculationStrategy
 {
     Hold,
     ReceiveAndSell

@@ -8,22 +8,20 @@ namespace CloudMining.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-//[Authorize]
-public class HomeController : ControllerBase
+//[Authorize] //TODO: На время тестирования
+public class StatisticsController : ControllerBase
 {
     private readonly IStatisticsService _statisticsService;
 
-    public HomeController(IStatisticsService statisticsService)
+    public StatisticsController(IStatisticsService statisticsService)
     {
         _statisticsService = statisticsService;
     }
     
     [HttpGet]
-    public async Task<StatisticsDto> Get([FromQuery] IncomeType incomeType)
+    public async Task<StatisticsDto> Get([FromQuery] StatisticsCalculationStrategy statisticsCalculationStrategy)
     {
-
-        var statisticsDto = await _statisticsService.GetStatisticsAsync(incomeType);
+        var statisticsDto = await _statisticsService.GetStatisticsAsync(statisticsCalculationStrategy);
         return statisticsDto;
-
     }
 }

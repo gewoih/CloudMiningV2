@@ -26,7 +26,7 @@ public class StatisticsService : IStatisticsService
         _shareablePaymentService = shareablePaymentService;
     }
 
-    public async Task<StatisticsDto> GetStatisticsAsync(IncomeType incomeType)
+    public async Task<StatisticsDto> GetStatisticsAsync(StatisticsCalculationStrategy statisticsCalculationStrategy)
     {
         var payoutsList = await _shareablePaymentService.GetPayoutsAsync();
 
@@ -34,7 +34,7 @@ public class StatisticsService : IStatisticsService
         var totalIncome = 0m;
         var incomes = new List<PriceBar>();
 
-        if (incomeType == IncomeType.Hold)
+        if (statisticsCalculationStrategy == StatisticsCalculationStrategy.Hold)
         {
             var usdToRubRate = await _context.MarketData
                 .Where(md => md.From == CurrencyCode.USD)
@@ -61,7 +61,7 @@ public class StatisticsService : IStatisticsService
 
 
         var statisticsDto = new StatisticsDto(
-            incomeType,
+            statisticsCalculationStrategy,
             totalIncome,
             monthlyIncome,
             totalExpense,
@@ -225,7 +225,7 @@ public class StatisticsService : IStatisticsService
 
         var expenseList = new List<Expense>();
 
-        var specificExpenseTypes = new[] { ExpenseType.Electricity, ExpenseType.Purchase };
+        var specificExpenseTypes = new[] { ExpenseType.OnlyElectricity, ExpenseType.OnlyPurchases };
 
         foreach (var expenseType in specificExpenseTypes)
         {
@@ -269,14 +269,14 @@ public class StatisticsService : IStatisticsService
             generalDate = generalDate.AddMonths(1);
         }
 
-        expenseList.Add(new Expense(ExpenseType.General, generalPriceBars));
+        expenseList.Add(new Expense(ExpenseType.Total, generalPriceBars));
 
         return expenseList;
     }
 
     private static List<PriceBar> GetProfitsList(List<PriceBar> incomes, List<Expense> expenses)
     {
-        var generalExpenses = expenses.Find(e => e.Type == ExpenseType.General)?.PriceBars;
+        var generalExpenses = expenses.Find(e => e.Type == ExpenseType.Total)?.PriceBars;
 
         if (generalExpenses == null)
         {
