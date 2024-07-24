@@ -12,18 +12,25 @@ public class StatisticsService : IStatisticsService
 {
     private readonly CloudMiningContext _context;
     private readonly IShareablePaymentService _shareablePaymentService;
-    private readonly DateTime _projectStartDate;
-    private readonly DateTime _currentDate;
-    private readonly IMarketDataService _marketDataService;
+    //TODO: Вынести в appsettings
+    private readonly DateTime _projectStartDate = new(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    private readonly DateTime _currentDate = DateTime.UtcNow;
+    private readonly int _monthsSinceProjectStartDate;
 
-    public StatisticsService(
-        CloudMiningContext context,
-        IShareablePaymentService shareablePaymentService)
+    public StatisticsService(CloudMiningContext context, IShareablePaymentService shareablePaymentService)
     {
         _context = context;
-        _projectStartDate = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        _currentDate = DateTime.UtcNow;
         _shareablePaymentService = shareablePaymentService;
+        _monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
+    }
+
+    private int CalculateMonthsSinceProjectStart()
+    {
+        var totalMonths = (_currentDate.Year - _projectStartDate.Year) * 12 + _currentDate.Month - _projectStartDate.Month;
+        if (_currentDate.Day < _projectStartDate.Day)
+            totalMonths--;
+
+        return totalMonths;
     }
 
     public async Task<StatisticsDto> GetStatisticsAsync(StatisticsCalculationStrategy statisticsCalculationStrategy)
@@ -32,14 +39,14 @@ public class StatisticsService : IStatisticsService
             await _shareablePaymentService.GetAsync(paymentType: PaymentType.Crypto, includePaymentShares: false);
         
         decimal totalIncome;
-        var incomes = new List<PriceBar>();
+        List<PriceBar> incomes;
 
         if (statisticsCalculationStrategy == StatisticsCalculationStrategy.Hold)
         {
             var usdToRubRate = await _context.MarketData
-                .Where(md => md.From == CurrencyCode.USD)
-                .OrderByDescending(md => md.Date)
-                .Select(md => md.Price)
+                .Where(marketData => marketData.From == CurrencyCode.USD && marketData.To == CurrencyCode.RUB)
+                .OrderByDescending(marketData => marketData.Date)
+                .Select(marketData => marketData.Price)
                 .FirstOrDefaultAsync();
 
             totalIncome = await GetTotalHoldIncomeAsync(payoutsList, usdToRubRate);
@@ -48,28 +55,29 @@ public class StatisticsService : IStatisticsService
         else
             throw new NotImplementedException();
 
-        var monthlyIncome = GetMonthlyValue(totalIncome);
-        var electricityExpense = await GetElectricityExpenseAsync();
-        var purchaseExpense = await GetPurchaseExpenseAsync();
-        var totalExpense = electricityExpense + purchaseExpense;
+        var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
+        var expenses = await GetExpensesAsync();
+        var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity).Sum(payment => payment.Amount);
+        var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase).Sum(payment => payment.Amount);
+        var totalExpense = spentOnElectricity + spentOnPurchases;
         var totalProfit = totalIncome - totalExpense;
-        var monthlyProfit = GetMonthlyValue(totalProfit);
+        var monthlyProfit = totalProfit / _monthsSinceProjectStartDate;
         var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
-        var expenses = await GetExpenseListAsync();
+        var expensesList = await GetExpenseListAsync();
         var profits = GetProfitsList(incomes, expenses);
         
         var statisticsDto = new StatisticsDto(
             totalIncome,
             monthlyIncome,
             totalExpense,
-            electricityExpense,
-            purchaseExpense,
+            spentOnElectricity,
+            spentOnPurchases,
             totalProfit,
             monthlyProfit,
             paybackPercent,
             incomes,
             profits,
-            expenses);
+            expensesList);
         
         return statisticsDto;
     }
@@ -116,34 +124,13 @@ public class StatisticsService : IStatisticsService
         return totalIncome;
     }
 
-    private decimal GetMonthlyValue(decimal value)
+    private async Task<List<ShareablePayment>> GetExpensesAsync()
     {
-        var totalMonths = (_currentDate.Year - _projectStartDate.Year) * 12 + _currentDate.Month -
-                          _projectStartDate.Month;
-
-        if (_currentDate.Day < _projectStartDate.Day)
-            totalMonths--;
-
-        var monthlyValue = value / totalMonths;
-
-        return monthlyValue;
-    }
-
-
-    private async Task<decimal> GetElectricityExpenseAsync()
-    {
-        var electricityExpense = await _context.ShareablePayments
-            .Where(payment => payment.Type == PaymentType.Electricity)
-            .SumAsync(payment => payment.Amount);
-        return electricityExpense;
-    }
-
-    private async Task<decimal> GetPurchaseExpenseAsync()
-    {
-        var purchaseExpense = await _context.ShareablePayments
-            .Where(payment => payment.Type == PaymentType.Purchase)
-            .SumAsync(payment => payment.Amount);
-        return purchaseExpense;
+        var expenses = await _context.ShareablePayments
+            .Where(payment => payment.Type == PaymentType.Electricity || payment.Type == PaymentType.Purchase)
+            .ToListAsync();
+            
+        return expenses;
     }
 
     private async Task<List<PriceBar>> GetHoldIncomesPriceBarListAsync(IEnumerable<ShareablePayment> payoutsList,
