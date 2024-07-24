@@ -1,7 +1,7 @@
 ﻿using CloudMining.Domain.Enums;
-using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +16,15 @@ public class StatisticsService : IStatisticsService
     private readonly DateTime _projectStartDate = new(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     private readonly DateTime _currentDate = DateTime.UtcNow;
     private readonly int _monthsSinceProjectStartDate;
+    private readonly IMarketDataService _marketDataService;
 
-    public StatisticsService(CloudMiningContext context, IShareablePaymentService shareablePaymentService)
+    public StatisticsService(CloudMiningContext context, 
+        IShareablePaymentService shareablePaymentService, 
+        IMarketDataService marketDataService)
     {
         _context = context;
         _shareablePaymentService = shareablePaymentService;
+        _marketDataService = marketDataService;
         _monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
     }
 
@@ -82,46 +86,26 @@ public class StatisticsService : IStatisticsService
         return statisticsDto;
     }
 
+    //TODO: Удалить
     private async Task<decimal> GetTotalHoldIncomeAsync(IEnumerable<ShareablePayment> payoutsList, decimal usdToRubRate)
     {
-        var totalAmountByCurrencyCode = payoutsList
-            .GroupBy(payout => payout.Currency.Code)
-            .Select(group => new
-            {
-                CurrencyCode = group.Key,
-                TotalAmount = group.Sum(payout => payout.Amount)
-            })
-            .ToList();
+        //Группировка всех выплат по Currency и сумме выплат
+        var currencyPairsPayoutAmounts = payoutsList
+            .ToDictionary(payment => new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT }, payment => payment.Amount);
 
-        var latestMarketDataByCurrencyCode = await _context.MarketData
-            .Where(marketData => totalAmountByCurrencyCode
-                .Select(payout => payout.CurrencyCode)
-                .Contains(marketData.From))
-            .GroupBy(marketData => marketData.From)
-            .Select(group => group
-                .OrderByDescending(marketData => marketData.Date)
-                .First())
-            .ToListAsync();
+        //Получить последние курсы всех валют
+        var allCurrencyPairs = currencyPairsPayoutAmounts.Select(pair => pair.Key);
+        var currenciesRates =
+            await _marketDataService.GetLatestMarketDataForCurrenciesAsync(allCurrencyPairs);
 
-        var combinedPayoutsAndMarketData = totalAmountByCurrencyCode
-            .Join(latestMarketDataByCurrencyCode,
-                payout => payout.CurrencyCode,
-                marketData => marketData.From,
-                (payout, marketData) => new
-                {
-                    payout.CurrencyCode,
-                    payout.TotalAmount,
-                    marketData.Price
-                })
-            .ToList();
+        var totalIncomeRub = 0m;
+        foreach (var currencyTotalPayouts in currencyPairsPayoutAmounts)
+        {
+            if (currenciesRates.TryGetValue(currencyTotalPayouts.Key, out var currencyUsdMarketData))
+                totalIncomeRub += currencyTotalPayouts.Value * currencyUsdMarketData!.Price * usdToRubRate;
+        }
 
-        var totalIncomeUsd = combinedPayoutsAndMarketData
-            .Select(data => data.TotalAmount * data.Price)
-            .Sum();
-
-        var totalIncome = totalIncomeUsd * usdToRubRate;
-
-        return totalIncome;
+        return totalIncomeRub;
     }
 
     private async Task<List<ShareablePayment>> GetExpensesAsync()
@@ -133,8 +117,8 @@ public class StatisticsService : IStatisticsService
         return expenses;
     }
 
-    private async Task<List<PriceBar>> GetHoldIncomesPriceBarListAsync(IEnumerable<ShareablePayment> payoutsList,
-        decimal usdToRubRate)
+    //TODO: Рефакторинг
+    private async Task<List<PriceBar>> GetHoldIncomesPriceBarListAsync(IEnumerable<ShareablePayment> payoutsList, decimal usdToRubRate)
     {
         var priceBars = new List<PriceBar>();
 
@@ -146,14 +130,15 @@ public class StatisticsService : IStatisticsService
                 group.Key.Month,
                 Payouts = group.ToList()
             })
-            .OrderBy(g => g.Year).ThenBy(g => g.Month)
+            .OrderBy(g => g.Year)
+                .ThenBy(g => g.Month)
             .ToList();
 
-        var currentExchangeRates = await _context.MarketData
-            .Where(md => md.Date <= _currentDate)
-            .GroupBy(md => md.From)
-            .Select(group => group.OrderByDescending(md => md.Date).First())
-            .ToDictionaryAsync(md => md.From, md => md.Price);
+        var allCurrencyPairs = payoutsList.Select(payment => 
+            new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT });
+        
+        var currenciesRates =
+            await _marketDataService.GetLatestMarketDataForCurrenciesAsync(allCurrencyPairs);
 
         var date = _projectStartDate;
 
@@ -175,7 +160,7 @@ public class StatisticsService : IStatisticsService
                         TotalAmount = group.Sum(payout => payout.Amount)
                     })
                     .Select(payout =>
-                        payout.TotalAmount * currentExchangeRates.GetValueOrDefault(payout.CurrencyCode, 1m))
+                        payout.TotalAmount * currenciesRates.GetValueOrDefault(payout.CurrencyCode, 1m))
                     .Sum();
 
                 totalIncomeRub = totalIncomeUsd * usdToRubRate;
@@ -189,6 +174,7 @@ public class StatisticsService : IStatisticsService
         return priceBars;
     }
 
+    //TODO: Пиздец
     private async Task<List<Expense>> GetExpenseListAsync()
     {
         var expenses = await _context.ShareablePayments
