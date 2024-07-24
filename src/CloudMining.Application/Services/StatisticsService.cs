@@ -29,9 +29,8 @@ public class StatisticsService : IStatisticsService
     public async Task<StatisticsDto> GetStatisticsAsync(StatisticsCalculationStrategy statisticsCalculationStrategy)
     {
         var payoutsList = await _shareablePaymentService.GetPayoutsAsync();
-
-
-        var totalIncome = 0m;
+        
+        decimal totalIncome;
         var incomes = new List<PriceBar>();
 
         if (statisticsCalculationStrategy == StatisticsCalculationStrategy.Hold)
@@ -46,8 +45,7 @@ public class StatisticsService : IStatisticsService
             incomes = await GetHoldIncomesPriceBarListAsync(payoutsList, usdToRubRate);
         }
         else
-        {
-        }
+            throw new NotImplementedException();
 
         var monthlyIncome = GetMonthlyValue(totalIncome);
         var electricityExpense = await GetElectricityExpenseAsync();
@@ -58,10 +56,8 @@ public class StatisticsService : IStatisticsService
         var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
         var expenses = await GetExpenseListAsync();
         var profits = GetProfitsList(incomes, expenses);
-
-
+        
         var statisticsDto = new StatisticsDto(
-            statisticsCalculationStrategy,
             totalIncome,
             monthlyIncome,
             totalExpense,
@@ -73,8 +69,7 @@ public class StatisticsService : IStatisticsService
             incomes,
             profits,
             expenses);
-
-
+        
         return statisticsDto;
     }
 

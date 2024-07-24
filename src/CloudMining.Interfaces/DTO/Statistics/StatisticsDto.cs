@@ -3,7 +3,6 @@
 namespace CloudMining.Interfaces.DTO.Statistics;
 
 public record StatisticsDto(
-    StatisticsCalculationStrategy StatisticsCalculationStrategy,
     decimal TotalIncome,
     decimal MonthlyIncome,
     decimal TotalExpense,
