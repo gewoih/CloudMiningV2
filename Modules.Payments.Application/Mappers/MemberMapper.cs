@@ -1,7 +1,7 @@
 ﻿using CloudMining.Common.Mappers;
-using CloudMining.Common.Models.Identity;
 using Modules.Payments.Contracts.DTO.User;
 using Modules.Payments.Contracts.Interfaces;
+using Modules.Users.Domain.Models;
 
 namespace Modules.Payments.Application.Mappers;
 

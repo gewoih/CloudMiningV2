@@ -14,7 +14,7 @@ public sealed class MarketDataService : IMarketDataService
         _context = context;
     }
 
-    public async Task SaveMarketDataAsync(List<CloudMining.Common.Models.Currencies.MarketData> marketData)
+    public async Task SaveMarketDataAsync(List<Domain.Models.MarketData> marketData)
     {
         var existingCombinations = await _context.MarketData
             .GroupBy(data => new { data.From, data.To })

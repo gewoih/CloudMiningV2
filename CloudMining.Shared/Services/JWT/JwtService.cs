@@ -1,11 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using CloudMining.Common.Models.Identity;
 using CloudMining.Common.Settings;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Modules.Users.Domain.Models;
 
 namespace CloudMining.Common.Services.JWT;
 

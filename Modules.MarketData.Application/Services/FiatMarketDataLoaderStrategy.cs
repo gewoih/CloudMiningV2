@@ -14,18 +14,18 @@ public sealed class FiatMarketDataLoaderStrategy : IMarketDataLoaderStrategy
 		_centralBankRussiaApiClient = centralBankRussiaApiClient;
 	}
 
-	public async Task<List<CloudMining.Common.Models.Currencies.MarketData>> GetMarketDataAsync(CurrencyPair currencyPair, 
+	public async Task<List<Domain.Models.MarketData>> GetMarketDataAsync(CurrencyPair currencyPair, 
 		DateTime? fromDate = null,
 		DateTime? toDate = null)
 	{
-		var loadedMarketData = new List<CloudMining.Common.Models.Currencies.MarketData>();
+		var loadedMarketData = new List<Domain.Models.MarketData>();
 
 		var centralBankRussiaMarketData = await _centralBankRussiaApiClient.GetMarketDataAsync(fromDate, toDate);
 
 		if (centralBankRussiaMarketData.Count == 0)
 			return loadedMarketData;
 
-		loadedMarketData.AddRange(centralBankRussiaMarketData.Select(data => new CloudMining.Common.Models.Currencies.MarketData
+		loadedMarketData.AddRange(centralBankRussiaMarketData.Select(data => new Domain.Models.MarketData
 		{
 			From = currencyPair.From,
 			To = currencyPair.To,

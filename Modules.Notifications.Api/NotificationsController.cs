@@ -1,9 +1,9 @@
 using CloudMining.Common.Mappers;
-using CloudMining.Common.Models.UserSettings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Modules.Notifications.Contracts.DTO;
 using Modules.Notifications.Contracts.Interfaces;
+using Modules.Notifications.Domain.Models;
 using Modules.Users.Contracts.Interfaces;
 
 namespace Modules.Notifications.Api;

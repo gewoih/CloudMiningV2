@@ -1,7 +1,7 @@
-﻿using CloudMining.Common.Models.Base;
+﻿using CloudMining.Domain.Models;
 using Modules.Currencies.Domain.Enums;
 
-namespace CloudMining.Common.Models.Currencies;
+namespace Modules.Currencies.Domain.Models;
 
 public class Currency : Entity
 {

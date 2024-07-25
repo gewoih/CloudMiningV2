@@ -1,8 +1,4 @@
 ﻿using CloudMining.Common.Mappers;
-using CloudMining.Common.Models.Identity;
-using CloudMining.Common.Models.Payments;
-using CloudMining.Common.Models.Payments.Shareable;
-using CloudMining.Common.Models.UserSettings;
 using CloudMining.Common.Services.JWT;
 using CloudMining.Common.Services.Storage;
 using Modules.Currencies.Application.Services;
@@ -15,15 +11,18 @@ using Modules.Notifications.Application.Mappers;
 using Modules.Notifications.Application.Services;
 using Modules.Notifications.Contracts.DTO;
 using Modules.Notifications.Contracts.Interfaces;
+using Modules.Notifications.Domain.Models;
 using Modules.Payments.Application.Mappers;
 using Modules.Payments.Application.Services;
 using Modules.Payments.Contracts.DTO.Admin;
 using Modules.Payments.Contracts.DTO.Deposits;
 using Modules.Payments.Contracts.DTO.User;
 using Modules.Payments.Contracts.Interfaces;
+using Modules.Payments.Domain.Models;
 using Modules.Payments.Infrastructure.Emcd;
 using Modules.Users.Application.Services;
 using Modules.Users.Contracts.Interfaces;
+using Modules.Users.Domain.Models;
 using Modules.Users.Infrastructure.Telegram;
 using Telegram.Bot;
 

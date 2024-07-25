@@ -1,11 +1,10 @@
 ﻿using CloudMining.Common.Database;
-using CloudMining.Common.Models.Currencies;
-using CloudMining.Common.Models.Payments.Shareable;
-using CloudMining.Common.Models.Shares;
 using Microsoft.EntityFrameworkCore;
+using Modules.Currencies.Domain.Models;
 using Modules.Payments.Contracts.DTO;
 using Modules.Payments.Contracts.Interfaces;
 using Modules.Payments.Domain.Enums;
+using Modules.Payments.Domain.Models;
 
 namespace Modules.Payments.Application.Services;
 

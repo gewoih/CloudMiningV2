@@ -1,6 +1,6 @@
 using CloudMining.Common.Mappers;
-using CloudMining.Common.Models.UserSettings;
 using Modules.Notifications.Contracts.DTO;
+using Modules.Notifications.Domain.Models;
 
 namespace Modules.Notifications.Application.Mappers;
 

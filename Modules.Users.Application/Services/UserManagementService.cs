@@ -1,9 +1,9 @@
 ﻿using CloudMining.Common.Database;
-using CloudMining.Common.Models.Identity;
 using Microsoft.EntityFrameworkCore;
 using Modules.Notifications.Contracts.Interfaces;
 using Modules.Users.Contracts.DTO;
 using Modules.Users.Contracts.Interfaces;
+using Modules.Users.Domain.Models;
 
 namespace Modules.Users.Application.Services;
 

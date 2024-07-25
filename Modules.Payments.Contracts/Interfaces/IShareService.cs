@@ -1,7 +1,6 @@
-﻿using CloudMining.Common.Models.Currencies;
-using CloudMining.Common.Models.Payments.Shareable;
-using CloudMining.Common.Models.Shares;
+﻿using Modules.Currencies.Domain.Models;
 using Modules.Payments.Contracts.DTO;
+using Modules.Payments.Domain.Models;
 
 namespace Modules.Payments.Contracts.Interfaces;
 

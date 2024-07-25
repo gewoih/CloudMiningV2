@@ -1,7 +1,7 @@
-﻿using CloudMining.Common.Models.Base;
-using CloudMining.Common.Models.Currencies;
+﻿using CloudMining.Domain.Models;
+using Modules.Currencies.Domain.Models;
 
-namespace CloudMining.Common.Models.Payments;
+namespace Modules.Payments.Domain.Models;
 
 public abstract class Payment : Entity
 {

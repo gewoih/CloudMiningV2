@@ -1,6 +1,6 @@
-using CloudMining.Common.Models.Base;
+using CloudMining.Domain.Models;
 
-namespace CloudMining.Common.Models.Notifications;
+namespace Modules.Notifications.Domain.Models;
 
 public class Notification : Entity
 {

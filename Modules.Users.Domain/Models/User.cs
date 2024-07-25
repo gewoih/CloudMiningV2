@@ -1,9 +1,8 @@
-﻿using CloudMining.Common.Models.Payments;
-using CloudMining.Common.Models.Shares;
-using CloudMining.Common.Models.UserSettings;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Modules.Notifications.Domain.Models;
+using Modules.Payments.Domain.Models;
 
-namespace CloudMining.Common.Models.Identity;
+namespace Modules.Users.Domain.Models;
 
 public class User : IdentityUser<Guid>
 {

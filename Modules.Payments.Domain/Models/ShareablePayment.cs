@@ -1,6 +1,6 @@
 ﻿using Modules.Payments.Domain.Enums;
 
-namespace CloudMining.Common.Models.Payments.Shareable;
+namespace Modules.Payments.Domain.Models;
 
 public class ShareablePayment : Payment
 {

@@ -1,6 +1,6 @@
-﻿using CloudMining.Common.Models.Payments.Shareable;
-using Modules.Payments.Contracts.DTO;
+﻿using Modules.Payments.Contracts.DTO;
 using Modules.Payments.Domain.Enums;
+using Modules.Payments.Domain.Models;
 
 namespace Modules.Payments.Contracts.Interfaces;
 

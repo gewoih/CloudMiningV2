@@ -1,5 +1,5 @@
-﻿using CloudMining.Common.Models.Identity;
-using Modules.Users.Contracts.DTO;
+﻿using Modules.Users.Contracts.DTO;
+using Modules.Users.Domain.Models;
 
 namespace Modules.Users.Contracts.Interfaces;
 

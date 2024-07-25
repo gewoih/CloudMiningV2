@@ -1,4 +1,4 @@
-namespace CloudMining.Common.Models.Notifications;
+namespace Modules.Notifications.Domain.Models;
 
 public enum NotificationMethod
 {

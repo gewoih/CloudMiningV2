@@ -1,5 +1,5 @@
-using CloudMining.Common.Models.Notifications;
 using Modules.Notifications.Contracts.Interfaces;
+using Modules.Notifications.Domain.Models;
 using Modules.Users.Contracts.Interfaces;
 using Telegram.Bot;
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace CloudMining.Common.Models.Identity;
+namespace Modules.Users.Domain.Models;
 
 public class Role : IdentityRole<Guid>
 {

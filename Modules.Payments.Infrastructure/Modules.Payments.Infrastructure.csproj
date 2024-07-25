@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CloudMining.Common\CloudMining.Common.csproj" />
+      <ProjectReference Include="..\CloudMining.Shared\CloudMining.Shared.csproj" />
     </ItemGroup>
 
 </Project>

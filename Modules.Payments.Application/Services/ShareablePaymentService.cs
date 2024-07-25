@@ -1,5 +1,4 @@
 ﻿using CloudMining.Common.Database;
-using CloudMining.Common.Models.Payments.Shareable;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Modules.Currencies.Contracts.Interfaces;
@@ -7,6 +6,7 @@ using Modules.Notifications.Application.Services.MassTransit.Events;
 using Modules.Payments.Contracts.DTO;
 using Modules.Payments.Contracts.Interfaces;
 using Modules.Payments.Domain.Enums;
+using Modules.Payments.Domain.Models;
 using Modules.Users.Contracts.Interfaces;
 
 namespace Modules.Payments.Application.Services;
@@ -96,7 +96,8 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 
 		//TODO: Получать User (ФИО) не из БД, а из UserService
 		var userPaymentSharesQuery = _context.PaymentShares
-			.Include(paymentShare => paymentShare.User)
+			//TODO: Починить
+			//.Include(paymentShare => paymentShare.User)
 			.Where(paymentShare => paymentShare.ShareablePaymentId == paymentId);
 
 		if (!isCurrentUserAdmin)

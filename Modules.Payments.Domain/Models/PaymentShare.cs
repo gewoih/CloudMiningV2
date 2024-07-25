@@ -1,12 +1,10 @@
-﻿using CloudMining.Common.Models.Base;
-using CloudMining.Common.Models.Identity;
+﻿using CloudMining.Domain.Models;
 using Modules.Payments.Domain.Enums;
 
-namespace CloudMining.Common.Models.Payments.Shareable;
+namespace Modules.Payments.Domain.Models;
 
 public class PaymentShare : Entity
 {
-	public User User { get; set; }
 	public Guid UserId { get; set; }
 	public Guid ShareablePaymentId { get; set; }
 	public DateTime Date { get; set; }

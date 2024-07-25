@@ -1,8 +1,8 @@
-using CloudMining.Common.Models.Identity;
 using CloudMining.Common.Services.JWT;
 using Microsoft.AspNetCore.Identity;
 using Modules.Users.Contracts.DTO;
 using Modules.Users.Contracts.Interfaces;
+using Modules.Users.Domain.Models;
 
 namespace Modules.Users.Application.Services;
 

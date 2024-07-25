@@ -1,6 +1,6 @@
-﻿using CloudMining.Common.Models.Base;
+﻿using CloudMining.Domain.Models;
 
-namespace CloudMining.Common.Models.Shares;
+namespace Modules.Payments.Domain.Models;
 
 public sealed class ShareChange : Entity
 {

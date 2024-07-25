@@ -1,5 +1,5 @@
-﻿using CloudMining.Common.Models.Currencies;
-using Modules.Currencies.Domain.Enums;
+﻿using Modules.Currencies.Domain.Enums;
+using Modules.Currencies.Domain.Models;
 
 namespace Modules.Currencies.Contracts.Interfaces;
 

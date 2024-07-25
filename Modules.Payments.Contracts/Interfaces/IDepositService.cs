@@ -1,5 +1,5 @@
-﻿using CloudMining.Common.Models.Payments;
-using Modules.Payments.Contracts.DTO.Deposits;
+﻿using Modules.Payments.Contracts.DTO.Deposits;
+using Modules.Payments.Domain.Models;
 
 namespace Modules.Payments.Contracts.Interfaces;
 

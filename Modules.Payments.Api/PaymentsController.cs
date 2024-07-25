@@ -1,5 +1,4 @@
 ﻿using CloudMining.Common.Mappers;
-using CloudMining.Common.Models.Payments.Shareable;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Modules.Payments.Contracts.DTO;
@@ -7,6 +6,7 @@ using Modules.Payments.Contracts.DTO.Admin;
 using Modules.Payments.Contracts.DTO.User;
 using Modules.Payments.Contracts.Interfaces;
 using Modules.Payments.Domain.Enums;
+using Modules.Payments.Domain.Models;
 using Modules.Users.Contracts.Interfaces;
 
 namespace Modules.Payments.Api;

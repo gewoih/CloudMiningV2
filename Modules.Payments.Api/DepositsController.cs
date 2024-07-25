@@ -1,12 +1,12 @@
 ﻿using CloudMining.Common.Mappers;
-using CloudMining.Common.Models.Identity;
-using CloudMining.Common.Models.Payments;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Modules.Payments.Contracts.DTO.Deposits;
 using Modules.Payments.Contracts.DTO.User;
 using Modules.Payments.Contracts.Interfaces;
+using Modules.Payments.Domain.Models;
 using Modules.Users.Contracts.Interfaces;
+using Modules.Users.Domain.Models;
 
 namespace Modules.Payments.Api;
 

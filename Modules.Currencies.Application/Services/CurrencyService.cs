@@ -1,8 +1,8 @@
 ﻿using CloudMining.Common.Database;
-using CloudMining.Common.Models.Currencies;
 using Microsoft.EntityFrameworkCore;
 using Modules.Currencies.Contracts.Interfaces;
 using Modules.Currencies.Domain.Enums;
+using Modules.Currencies.Domain.Models;
 
 namespace Modules.Currencies.Application.Services;
 

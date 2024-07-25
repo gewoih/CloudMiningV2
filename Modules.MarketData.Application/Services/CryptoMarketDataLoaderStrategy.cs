@@ -18,11 +18,11 @@ public sealed class CryptoMarketDataLoaderStrategy : IMarketDataLoaderStrategy
 		_loadingDelay = settings.Value.Delay;
 	}
 
-	public async Task<List<CloudMining.Common.Models.Currencies.MarketData>> GetMarketDataAsync(CurrencyPair currencyPair, 
+	public async Task<List<Domain.Models.MarketData>> GetMarketDataAsync(CurrencyPair currencyPair, 
 		DateTime? fromDate = null, 
 		DateTime? toDate = null)
 	{
-		var loadedMarketData = new List<CloudMining.Common.Models.Currencies.MarketData>();
+		var loadedMarketData = new List<Domain.Models.MarketData>();
 		for (; fromDate < toDate; fromDate += _loadingDelay)
 		{
 			var binanceMarketData = await _binanceApiClient.GetMarketDataAsync(
@@ -34,7 +34,7 @@ public sealed class CryptoMarketDataLoaderStrategy : IMarketDataLoaderStrategy
 			if (binanceMarketData.Count == 0)
 				break;
 
-			loadedMarketData.AddRange(binanceMarketData.Select(data => new CloudMining.Common.Models.Currencies.MarketData
+			loadedMarketData.AddRange(binanceMarketData.Select(data => new Domain.Models.MarketData
 			{
 				From = currencyPair.From,
 				To = currencyPair.To,

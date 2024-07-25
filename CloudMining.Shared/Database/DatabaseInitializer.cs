@@ -1,9 +1,9 @@
-﻿using CloudMining.Common.Models.Currencies;
-using CloudMining.Common.Models.Identity;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Modules.Currencies.Domain.Enums;
+using Modules.Currencies.Domain.Models;
 using Modules.Users.Domain.Enums;
+using Modules.Users.Domain.Models;
 
 namespace CloudMining.Common.Database;
 

@@ -1,11 +1,11 @@
 ﻿using CloudMining.Common.Database;
 using CloudMining.Common.Mappers;
-using CloudMining.Common.Models.Payments;
 using Microsoft.EntityFrameworkCore;
 using Modules.Currencies.Contracts.Interfaces;
 using Modules.Currencies.Domain.Enums;
 using Modules.Payments.Contracts.DTO.Deposits;
 using Modules.Payments.Contracts.Interfaces;
+using Modules.Payments.Domain.Models;
 
 namespace Modules.Payments.Application.Services;
 

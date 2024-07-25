@@ -1,4 +1,4 @@
-﻿namespace CloudMining.Common.Models.Base;
+﻿namespace CloudMining.Domain.Models;
 
 public abstract class Entity
 {

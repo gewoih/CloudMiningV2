@@ -1,15 +1,13 @@
-﻿using CloudMining.Common.Models.Base;
-using CloudMining.Common.Models.Currencies;
-using CloudMining.Common.Models.Identity;
-using CloudMining.Common.Models.Notifications;
-using CloudMining.Common.Models.Payments;
-using CloudMining.Common.Models.Payments.Shareable;
-using CloudMining.Common.Models.Shares;
-using CloudMining.Common.Models.UserSettings;
+﻿using CloudMining.Domain.Models;
 using MassTransit;
 using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Modules.Currencies.Domain.Models;
+using Modules.MarketData.Domain.Models;
+using Modules.Notifications.Domain.Models;
+using Modules.Payments.Domain.Models;
+using Modules.Users.Domain.Models;
 
 namespace CloudMining.Common.Database;
 

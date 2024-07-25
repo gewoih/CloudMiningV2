@@ -1,6 +1,6 @@
-using CloudMining.Common.Models.Base;
+using CloudMining.Domain.Models;
 
-namespace CloudMining.Common.Models.UserSettings;
+namespace Modules.Notifications.Domain.Models;
 
 public sealed class NotificationSettings : Entity
 {

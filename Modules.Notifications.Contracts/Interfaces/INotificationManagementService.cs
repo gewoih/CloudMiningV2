@@ -1,4 +1,4 @@
-using CloudMining.Common.Models.Notifications;
+using Modules.Notifications.Domain.Models;
 
 namespace Modules.Notifications.Contracts.Interfaces;
 

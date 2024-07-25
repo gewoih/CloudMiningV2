@@ -1,6 +1,6 @@
 ﻿using CloudMining.Common.Mappers;
-using CloudMining.Common.Models.Payments;
 using Modules.Payments.Contracts.DTO.Deposits;
+using Modules.Payments.Domain.Models;
 
 namespace Modules.Payments.Application.Mappers;
 

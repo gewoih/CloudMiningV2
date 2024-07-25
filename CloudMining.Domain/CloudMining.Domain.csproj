@@ -6,8 +6,4 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\CloudMining.Shared\CloudMining.Shared.csproj" />
-    </ItemGroup>
-
 </Project>

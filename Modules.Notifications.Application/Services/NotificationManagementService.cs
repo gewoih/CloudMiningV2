@@ -1,6 +1,6 @@
 using CloudMining.Common.Database;
-using CloudMining.Common.Models.Notifications;
 using Modules.Notifications.Contracts.Interfaces;
+using Modules.Notifications.Domain.Models;
 
 namespace Modules.Notifications.Application.Services;
 

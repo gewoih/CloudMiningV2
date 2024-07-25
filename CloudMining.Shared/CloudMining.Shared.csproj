@@ -4,6 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>CloudMining.Common</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,6 +20,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Modules.Currencies.Domain\Modules.Currencies.Domain.csproj" />
+      <ProjectReference Include="..\Modules.MarketData.Domain\Modules.MarketData.Domain.csproj" />
       <ProjectReference Include="..\Modules.Payments.Domain\Modules.Payments.Domain.csproj" />
       <ProjectReference Include="..\Modules.Users.Domain\Modules.Users.Domain.csproj" />
     </ItemGroup>
