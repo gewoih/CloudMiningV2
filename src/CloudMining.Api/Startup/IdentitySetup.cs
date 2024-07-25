@@ -1,5 +1,5 @@
-﻿using CloudMining.Domain.Models.Identity;
-using CloudMining.Infrastructure.Database;
+﻿using CloudMining.Common.Database;
+using CloudMining.Common.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 
 namespace CloudMining.Api.Startup;

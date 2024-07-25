@@ -1,11 +1,10 @@
-﻿using CloudMining.Api.Validators.Deposit;
-using CloudMining.Api.Validators.Payment;
-using CloudMining.Api.Validators.User;
-using CloudMining.Interfaces.DTO.Payments;
-using CloudMining.Interfaces.DTO.Payments.Deposits;
-using CloudMining.Interfaces.DTO.Users;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using Modules.Payments.Api.Validators;
+using Modules.Payments.Contracts.DTO;
+using Modules.Payments.Contracts.DTO.Deposits;
+using Modules.Users.Api.Validators;
+using Modules.Users.Contracts.DTO;
 
 namespace CloudMining.Api.Startup;
 

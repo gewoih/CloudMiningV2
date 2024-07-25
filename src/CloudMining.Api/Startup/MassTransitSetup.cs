@@ -1,6 +1,6 @@
-using CloudMining.Application.Services.MassTransit.Consumers;
-using CloudMining.Infrastructure.Database;
+using CloudMining.Common.Database;
 using MassTransit;
+using Modules.Notifications.Application.Services.MassTransit.Consumers;
 
 namespace CloudMining.Api.Startup;
 

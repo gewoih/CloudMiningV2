@@ -14,21 +14,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="Views\ShareablePayment\Index.cshtml">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-        </None>
-        <None Include="Views\User\Login.cshtml">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-        </None>
-        <None Include="Views\User\Register.cshtml">
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-        </None>
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0"/>
         <PackageReference Include="MassTransit.AspNetCore" Version="7.3.1"/>
         <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.2.2"/>
@@ -45,7 +30,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CloudMining.Application\CloudMining.Application.csproj"/>
+      <ProjectReference Include="..\..\Modules.Currencies.Application\Modules.Currencies.Application.csproj" />
+      <ProjectReference Include="..\..\Modules.MarketData.Application\Modules.MarketData.Application.csproj" />
+      <ProjectReference Include="..\..\Modules.MarketData.Contracts\Modules.MarketData.Contracts.csproj" />
+      <ProjectReference Include="..\..\Modules.Notifications.Application\Modules.Notifications.Application.csproj" />
+      <ProjectReference Include="..\..\Modules.Payments.Api\Modules.Payments.Api.csproj" />
+      <ProjectReference Include="..\..\Modules.Payments.Application\Modules.Payments.Application.csproj" />
+      <ProjectReference Include="..\..\Modules.Payments.Contracts\Modules.Payments.Contracts.csproj" />
+      <ProjectReference Include="..\..\Modules.Users.Api\Modules.Users.Api.csproj" />
+      <ProjectReference Include="..\..\Modules.Users.Application\Modules.Users.Application.csproj" />
+      <ProjectReference Include="..\..\Modules.Users.Contracts\Modules.Users.Contracts.csproj" />
+      <ProjectReference Include="..\..\Modules.Users.Infrastructure\Modules.Users.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

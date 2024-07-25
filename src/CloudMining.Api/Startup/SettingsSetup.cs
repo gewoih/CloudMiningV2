@@ -1,4 +1,6 @@
-﻿using CloudMining.Infrastructure.Settings;
+﻿using CloudMining.Common.Settings;
+using Modules.MarketData.Infrastructure.Settings;
+using Modules.Payments.Infrastructure.Settings;
 
 namespace CloudMining.Api.Startup;
 

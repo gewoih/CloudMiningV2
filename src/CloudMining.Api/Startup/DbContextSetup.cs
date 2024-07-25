@@ -1,4 +1,4 @@
-﻿using CloudMining.Infrastructure.Database;
+﻿using CloudMining.Common.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Api.Startup;

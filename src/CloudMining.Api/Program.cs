@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using CloudMining.Api.Startup;
-using CloudMining.Infrastructure.Database;
+using CloudMining.Common.Database;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,4 +43,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

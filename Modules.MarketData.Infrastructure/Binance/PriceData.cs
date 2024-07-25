@@ -1,0 +1,8 @@
+﻿namespace Modules.MarketData.Infrastructure.Binance;
+
+public sealed class PriceData
+{
+    public DateTime Date { get; set; }
+    public decimal Price { get; set; }
+    
+}

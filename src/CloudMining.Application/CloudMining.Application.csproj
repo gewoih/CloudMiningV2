@@ -17,8 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CloudMining.Domain\CloudMining.Domain.csproj"/>
-        <ProjectReference Include="..\CloudMining.Infrastructure\CloudMining.Infrastructure.csproj"/>
+        <ProjectReference Include="..\..\Modules.Currencies.Contracts\Modules.Currencies.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

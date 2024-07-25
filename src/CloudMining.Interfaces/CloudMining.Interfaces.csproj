@@ -17,10 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\CloudMining.Domain\CloudMining.Domain.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2.0"/>
     </ItemGroup>
 
