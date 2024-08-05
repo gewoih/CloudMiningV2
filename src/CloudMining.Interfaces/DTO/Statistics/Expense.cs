@@ -2,4 +2,4 @@
 
 namespace CloudMining.Interfaces.DTO.Statistics;
 
-public record Expense(ExpenseType Type, List<PriceBar> PriceBars);
+public record Expense(ExpenseType Type, List<MonthlyPriceBar> PriceBars);

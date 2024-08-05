@@ -49,14 +49,18 @@ public sealed class MarketDataService : IMarketDataService
 
     public async Task<Dictionary<CurrencyPair, MarketData?>> GetLatestMarketDataForCurrenciesAsync(IEnumerable<CurrencyPair> currencyPairs)
     {
-        var latestCurrencyPairsMarketData = await _context.MarketData
-            .Where(marketData => currencyPairs.Any(pair => pair.From == marketData.From && pair.To == marketData.To))
-            .OrderByDescending(marketData => marketData.Date)
-            .GroupBy(marketData => new CurrencyPair { From = marketData.From, To = marketData.To })
-            .ToDictionaryAsync(marketData => 
-                marketData.Key, 
-                marketData => marketData.FirstOrDefault());
+        var result = new Dictionary<CurrencyPair, MarketData?>();
+        
+        foreach (var currencyPair in currencyPairs)
+        {
+            var latestMarketData = await _context.MarketData
+                .Where(marketData => marketData.From == currencyPair.From && marketData.To == currencyPair.To)
+                .OrderByDescending(marketData => marketData.Date)
+                .FirstOrDefaultAsync();
+            
+            result[currencyPair] = latestMarketData;
+        }
 
-        return latestCurrencyPairsMarketData;
+        return result;
     }
 }
