@@ -1,5 +1,5 @@
 using CloudMining.Domain.Models.Currencies;
-using CloudMining.Infrastructure.Settings;
+using CloudMining.Interfaces.DTO.Currencies;
 
 namespace CloudMining.Interfaces.Interfaces;
 

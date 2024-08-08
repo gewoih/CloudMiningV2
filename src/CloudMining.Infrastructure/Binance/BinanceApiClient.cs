@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
-using CloudMining.Application.Utils;
 using CloudMining.Domain.Enums;
+using CloudMining.Domain.Utils;
 using CloudMining.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;

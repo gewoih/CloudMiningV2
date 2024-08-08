@@ -1,6 +1,8 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Infrastructure.Settings;
+using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,5 +46,22 @@ public sealed class MarketDataService : IMarketDataService
             .MaxAsync(marketData => (DateTime?)marketData.Date);
 
         return lastMarketDataDate;
+    }
+
+    public async Task<Dictionary<CurrencyPair, MarketData?>> GetLatestMarketDataForCurrenciesAsync(IEnumerable<CurrencyPair> currencyPairs)
+    {
+        var result = new Dictionary<CurrencyPair, MarketData?>();
+        
+        foreach (var currencyPair in currencyPairs)
+        {
+            var latestMarketData = await _context.MarketData
+                .Where(marketData => marketData.From == currencyPair.From && marketData.To == currencyPair.To)
+                .OrderByDescending(marketData => marketData.Date)
+                .FirstOrDefaultAsync();
+            
+            result[currencyPair] = latestMarketData;
+        }
+
+        return result;
     }
 }
