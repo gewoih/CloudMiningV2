@@ -2,6 +2,7 @@
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Settings;
+using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
 

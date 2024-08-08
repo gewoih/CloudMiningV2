@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 
-namespace CloudMining.Application.Utils;
+namespace CloudMining.Domain.Utils;
 
 public static class EnumUtils
 {

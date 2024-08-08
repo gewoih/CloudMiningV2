@@ -1,4 +1,6 @@
-﻿namespace CloudMining.Infrastructure.Settings;
+﻿using CloudMining.Interfaces.DTO.Currencies;
+
+namespace CloudMining.Infrastructure.Settings;
 
 public sealed class MarketDataLoaderSettings
 {
