@@ -40,7 +40,7 @@ public sealed class PayoutsLoaderService : BackgroundService
 		var latestCryptoPaymentDate = await shareablePaymentService.GetLatestPaymentDateAsync(PaymentType.Crypto);
 		var latestPayouts = await _emcdApiClient.GetPayouts(latestCryptoPaymentDate);
 
-		foreach (var payout in latestPayouts.Take(10))
+		foreach (var payout in latestPayouts)
 		{
 			var createPaymentDto = new CreatePaymentDto(
 				null,

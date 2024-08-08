@@ -2,7 +2,6 @@
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
-using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
@@ -95,6 +94,7 @@ public class StatisticsService : IStatisticsService
 
     private async Task<List<ShareablePayment>> GetExpensesAsync()
     {
+        //TODO: Вынести в отдельный сервис
         var expenses = await _context.ShareablePayments
             .Where(payment => payment.Type == PaymentType.Electricity || payment.Type == PaymentType.Purchase)
             .ToListAsync();
@@ -113,19 +113,16 @@ public class StatisticsService : IStatisticsService
         var currencyRates = await _marketDataService.GetLatestMarketDataForCurrenciesAsync(uniqueCurrencyPairs);
 
         var priceBars = new List<MonthlyPriceBar>();
-
-
         for (var processingDate = _projectStartDate;
              processingDate <= _currentDate;
              processingDate = processingDate.AddMonths(1))
         {
             var incomeByCurrencies = GetIncomeByDate(payouts, processingDate.Year, processingDate.Month);
-            var usdIncome = CalculateUsdIncome(incomeByCurrencies, currencyRates);
+            var usdIncome = CalculateTotalIncome(incomeByCurrencies, currencyRates);
+            
             var rubIncome = usdIncome * usdToRubRate;
-            if (rubIncome == 0)
-                continue;
-
-            priceBars.Add(new MonthlyPriceBar(rubIncome, new DateOnly(processingDate.Year, processingDate.Month, 1)));
+            if (rubIncome != 0)
+                priceBars.Add(new MonthlyPriceBar(rubIncome, new DateOnly(processingDate.Year, processingDate.Month, 1)));
         }
 
         return priceBars;
@@ -139,7 +136,6 @@ public class StatisticsService : IStatisticsService
             .GroupBy(payment => payment.Currency.Code);
 
         var incomeByCurrency = new Dictionary<CurrencyCode, decimal>();
-
         foreach (var group in payoutsForDate)
         {
             var currencyCode = group.Key;
@@ -150,48 +146,35 @@ public class StatisticsService : IStatisticsService
         return incomeByCurrency;
     }
 
-    private static decimal CalculateUsdIncome(IReadOnlyDictionary<CurrencyCode, decimal> incomeByCurrencies,
-        Dictionary<CurrencyPair, MarketData?> currencyRates)
+    private static decimal CalculateTotalIncome(IReadOnlyDictionary<CurrencyCode, decimal> incomeByCurrencies,
+        Dictionary<CurrencyPair, MarketData?> currencyRates, CurrencyCode toCurrency = CurrencyCode.USDT)
     {
-        var usdIncome = 0m;
-
+        var totalIncome = 0m;
         foreach (var (currencyCode, incomeAmount) in incomeByCurrencies)
         {
-            var requiredCurrencyPair = new CurrencyPair { From = currencyCode, To = CurrencyCode.USDT };
+            var requiredCurrencyPair = new CurrencyPair { From = currencyCode, To = toCurrency };
 
             if (currencyRates.TryGetValue(requiredCurrencyPair, out var marketData) && marketData != null)
-            {
-                usdIncome += incomeAmount * marketData.Price;
-            }
+                totalIncome += incomeAmount * marketData.Price;
         }
 
-        return usdIncome;
+        return totalIncome;
     }
 
     private List<Expense> GetExpenses(List<ShareablePayment> payments)
     {
-        var specificExpenseTypes = new[] { ExpenseType.OnlyElectricity, ExpenseType.OnlyPurchases };
         var expenseList = new List<Expense>();
+        var electricityPayments = payments.Where(payment => payment.Type == PaymentType.Electricity);
+        var purchases = payments.Where(payment => payment.Type == PaymentType.Purchase);
+        
+        var electricityMonthlyPriceBars = CalculateMonthlyExpenses(electricityPayments);
+        var purchasesMonthlyPriceBars = CalculateMonthlyExpenses(purchases);
 
-        foreach (var expenseType in specificExpenseTypes)
-        {
-            List<MonthlyPriceBar> priceBars;
+        var totalMonthlyPriceBars = electricityMonthlyPriceBars.Concat(purchasesMonthlyPriceBars);
+        var generalExpensePriceBars = CalculateGeneralMonthlyExpenses(totalMonthlyPriceBars);
 
-            if (expenseType == ExpenseType.OnlyElectricity)
-            {
-                priceBars = CalculateMonthlyExpenses(payments.Where(payment =>
-                    payment.Type == PaymentType.Electricity));
-            }
-            else
-            {
-                priceBars = CalculateMonthlyExpenses(payments.Where(payment =>
-                    payment.Type == PaymentType.Purchase));
-            }
-
-            expenseList.Add(new Expense(expenseType, priceBars));
-        }
-
-        var generalExpensePriceBars = CalculateGeneralMonthlyExpenses(expenseList);
+        expenseList.Add(new Expense(ExpenseType.OnlyElectricity, electricityMonthlyPriceBars));
+        expenseList.Add(new Expense(ExpenseType.OnlyPurchases, purchasesMonthlyPriceBars));
         expenseList.Add(new Expense(ExpenseType.Total, generalExpensePriceBars));
 
         return expenseList;
@@ -226,20 +209,9 @@ public class StatisticsService : IStatisticsService
         return priceBars;
     }
 
-    private static List<MonthlyPriceBar> CalculateGeneralMonthlyExpenses(IReadOnlyCollection<Expense> expenseList)
+    private static List<MonthlyPriceBar> CalculateGeneralMonthlyExpenses(IEnumerable<MonthlyPriceBar> monthlyPriceBars)
     {
-        var electricityPriceBars = expenseList
-            .Where(expense => expense.Type == ExpenseType.OnlyElectricity)
-            .SelectMany(expense => expense.PriceBars)
-            .ToList();
-
-        var purchasePriceBars = expenseList
-            .Where(expense => expense.Type == ExpenseType.OnlyPurchases)
-            .SelectMany(expense => expense.PriceBars)
-            .ToList();
-
-        var generalExpensePriceBars = electricityPriceBars
-            .Concat(purchasePriceBars)
+        var generalExpensePriceBars = monthlyPriceBars
             .GroupBy(priceBar => priceBar.Date)
             .Select(group => new MonthlyPriceBar(
                 Value: group.Sum(priceBar => priceBar.Value),
