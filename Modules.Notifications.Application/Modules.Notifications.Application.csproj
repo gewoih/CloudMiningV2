@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\CloudMining.Shared\CloudMining.Shared.csproj" />
       <ProjectReference Include="..\Modules.Notifications.Contracts\Modules.Notifications.Contracts.csproj" />
+      <ProjectReference Include="..\Modules.Notifications.Infrastructure\Modules.Notifications.Infrastructure.csproj" />
       <ProjectReference Include="..\Modules.Users.Contracts\Modules.Users.Contracts.csproj" />
     </ItemGroup>
 

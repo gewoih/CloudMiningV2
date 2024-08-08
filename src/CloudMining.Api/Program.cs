@@ -2,6 +2,11 @@
 using CloudMining.Api.Startup;
 using CloudMining.Common.Database;
 using Microsoft.EntityFrameworkCore;
+using Modules.Currencies.Infrastructure.Database;
+using Modules.MarketData.Infrastructure.Database;
+using Modules.Notifications.Infrastructure.Database;
+using Modules.Payments.Infrastructure.Database;
+using Modules.Users.Infrastructure.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +27,11 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 var app = builder.Build();
 
 var scope = app.Services.CreateScope();
-var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
-await database.MigrateAsync();
+await scope.ServiceProvider.GetService<UsersContext>()!.Database.MigrateAsync();
+await scope.ServiceProvider.GetService<CurrenciesContext>()!.Database.MigrateAsync();
+await scope.ServiceProvider.GetService<PaymentsContext>()!.Database.MigrateAsync();
+await scope.ServiceProvider.GetService<NotificationsContext>()!.Database.MigrateAsync();
+await scope.ServiceProvider.GetService<MarketDataContext>()!.Database.MigrateAsync();
 
 if (app.Environment.IsDevelopment())
 {

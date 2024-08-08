@@ -1,5 +1,4 @@
-﻿using CloudMining.Common.Database;
-using MassTransit;
+﻿using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Modules.Currencies.Contracts.Interfaces;
 using Modules.Notifications.Application.Services.MassTransit.Events;
@@ -7,19 +6,20 @@ using Modules.Payments.Contracts.DTO;
 using Modules.Payments.Contracts.Interfaces;
 using Modules.Payments.Domain.Enums;
 using Modules.Payments.Domain.Models;
+using Modules.Payments.Infrastructure.Database;
 using Modules.Users.Contracts.Interfaces;
 
 namespace Modules.Payments.Application.Services;
 
 public sealed class ShareablePaymentService : IShareablePaymentService
 {
-	private readonly CloudMiningContext _context;
+	private readonly PaymentsContext _context;
 	private readonly ICurrencyService _currencyService;
 	private readonly ICurrentUserService _currentUserService;
 	private readonly IPublishEndpoint _publishEndpoint;
 	private readonly IShareService _shareService;
 
-	public ShareablePaymentService(CloudMiningContext context,
+	public ShareablePaymentService(PaymentsContext context,
 		ICurrencyService currencyService,
 		IShareService shareService,
 		ICurrentUserService currentUserService,

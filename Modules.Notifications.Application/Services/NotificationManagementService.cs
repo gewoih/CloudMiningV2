@@ -1,14 +1,14 @@
-using CloudMining.Common.Database;
 using Modules.Notifications.Contracts.Interfaces;
 using Modules.Notifications.Domain.Models;
+using Modules.Notifications.Infrastructure.Database;
 
 namespace Modules.Notifications.Application.Services;
 
 public sealed class NotificationManagementService : INotificationManagementService
 {
-	private readonly CloudMiningContext _context;
+	private readonly NotificationsContext _context;
 
-	public NotificationManagementService(CloudMiningContext context)
+	public NotificationManagementService(NotificationsContext context)
 	{
 		_context = context;
 	}

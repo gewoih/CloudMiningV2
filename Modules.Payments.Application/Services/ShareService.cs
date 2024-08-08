@@ -1,20 +1,23 @@
-﻿using CloudMining.Common.Database;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Modules.Currencies.Domain.Models;
 using Modules.Payments.Contracts.DTO;
 using Modules.Payments.Contracts.Interfaces;
 using Modules.Payments.Domain.Enums;
 using Modules.Payments.Domain.Models;
+using Modules.Payments.Infrastructure.Database;
+using Modules.Users.Contracts.Interfaces;
 
 namespace Modules.Payments.Application.Services;
 
 public sealed class ShareService : IShareService
 {
-	private readonly CloudMiningContext _context;
+	private readonly PaymentsContext _context;
+	private readonly IUserManagementService _userManagementService;
 
-	public ShareService(CloudMiningContext context)
+	public ShareService(PaymentsContext context, IUserManagementService userManagementService)
 	{
 		_context = context;
+		_userManagementService = userManagementService;
 	}
 
 	public async Task<decimal> GetUserShareAsync(Guid userId)
@@ -31,16 +34,14 @@ public sealed class ShareService : IShareService
 
 	public async Task<List<UserShare>> GetUsersSharesAsync()
 	{
-		var usersWithShares = await _context.Users
-			.Select(user => new
+		//TODO: Проверить корректность, переписывался
+		var users = await _userManagementService.GetUsersAsync(withShareChanges: true);
+		var usersWithShares = users.Select(user =>
+			new
 			{
 				User = user,
-				LastShareChange = user.ShareChanges
-					.OrderByDescending(shareChange => shareChange.CreatedDate)
-					.FirstOrDefault()
-			})
-			.ToListAsync()
-			.ConfigureAwait(false);
+				LastShareChange = user.ShareChanges.MaxBy(shareChange => shareChange.CreatedDate)
+			});
 
 		var usersShares = usersWithShares.Select(u =>
 			new UserShare(u.User.Id, u.LastShareChange?.After ?? 0)).ToList();
@@ -52,7 +53,7 @@ public sealed class ShareService : IShareService
 	{
 		if (shareChanges.Count == 0)
 			return 0;
-		
+
 		var userShare = shareChanges
 			.OrderByDescending(shareChange => shareChange.Date)
 			.First()

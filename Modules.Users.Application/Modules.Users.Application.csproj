@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Modules.Notifications.Contracts\Modules.Notifications.Contracts.csproj" />
       <ProjectReference Include="..\Modules.Users.Contracts\Modules.Users.Contracts.csproj" />
+      <ProjectReference Include="..\Modules.Users.Infrastructure\Modules.Users.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

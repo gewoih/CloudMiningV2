@@ -1,22 +1,24 @@
-﻿using CloudMining.Common.Database;
-using CloudMining.Common.Mappers;
+﻿using CloudMining.Common.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Modules.Currencies.Contracts.Interfaces;
 using Modules.Currencies.Domain.Enums;
 using Modules.Payments.Contracts.DTO.Deposits;
 using Modules.Payments.Contracts.Interfaces;
 using Modules.Payments.Domain.Models;
+using Modules.Payments.Infrastructure.Database;
 
 namespace Modules.Payments.Application.Services;
 
 public sealed class DepositService : IDepositService
 {
-    private readonly CloudMiningContext _context;
+    private readonly PaymentsContext _context;
     private readonly ICurrencyService _currencyService;
     private readonly IMapper<Deposit, DepositDto> _depositMapper;
     private readonly IShareService _shareService;
 
-    public DepositService(CloudMiningContext context, IShareService shareService, ICurrencyService currencyService,
+    public DepositService(PaymentsContext context, 
+        IShareService shareService, 
+        ICurrencyService currencyService,
         IMapper<Deposit, DepositDto> depositMapper)
     {
         _context = context;
@@ -50,10 +52,10 @@ public sealed class DepositService : IDepositService
 
     private async Task<Dictionary<Guid, decimal>> GetUsersDeposits()
     {
-        var usersDeposits = await _context.Users
-            .Include(user => user.Deposits)
-            .ToDictionaryAsync(group => group.Id, group => group.Deposits.Sum(deposit => deposit.Amount))
-            .ConfigureAwait(false);
+        //TODO: Проверить корректность, переписывалось
+        var usersDeposits = await _context.Deposits
+            .GroupBy(deposit => deposit.UserId)
+            .ToDictionaryAsync(group => group.Key, group => group.Sum(deposit => deposit.Amount));
 
         return usersDeposits;
     }

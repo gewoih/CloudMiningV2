@@ -1,18 +1,18 @@
-﻿using CloudMining.Common.Database;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Modules.Notifications.Contracts.Interfaces;
 using Modules.Users.Contracts.DTO;
 using Modules.Users.Contracts.Interfaces;
 using Modules.Users.Domain.Models;
+using Modules.Users.Infrastructure.Database;
 
 namespace Modules.Users.Application.Services;
 
 public sealed class UserManagementService : IUserManagementService
 {
-	private readonly CloudMiningContext _context;
+	private readonly UsersContext _context;
 	private readonly INotificationSettingsService _notificationSettingsService;
 
-	public UserManagementService(CloudMiningContext context, INotificationSettingsService notificationSettingsService)
+	public UserManagementService(UsersContext context, INotificationSettingsService notificationSettingsService)
 	{
 		_context = context;
 		_notificationSettingsService = notificationSettingsService;

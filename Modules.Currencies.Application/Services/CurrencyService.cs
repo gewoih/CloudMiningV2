@@ -1,16 +1,16 @@
-﻿using CloudMining.Common.Database;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Modules.Currencies.Contracts.Interfaces;
 using Modules.Currencies.Domain.Enums;
 using Modules.Currencies.Domain.Models;
+using Modules.Currencies.Infrastructure.Database;
 
 namespace Modules.Currencies.Application.Services;
 
 public sealed class CurrencyService : ICurrencyService
 {
-	private readonly CloudMiningContext _context;
+	private readonly CurrenciesContext _context;
 
-	public CurrencyService(CloudMiningContext context)
+	public CurrencyService(CurrenciesContext context)
 	{
 		_context = context;
 	}

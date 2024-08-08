@@ -1,6 +1,6 @@
-using CloudMining.Common.Database;
 using MassTransit;
 using Modules.Notifications.Application.Services.MassTransit.Consumers;
+using Modules.Notifications.Infrastructure.Database;
 
 namespace CloudMining.Api.Startup;
 
@@ -10,7 +10,7 @@ public static class MassTransitSetup
 	{
 		services.AddMassTransit(x =>
 		{
-			x.AddEntityFrameworkOutbox<CloudMiningContext>(configurator =>
+			x.AddEntityFrameworkOutbox<NotificationsContext>(configurator =>
 			{
 				configurator.UsePostgres();
 				configurator.UseBusOutbox();

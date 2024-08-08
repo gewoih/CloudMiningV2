@@ -1,15 +1,15 @@
-﻿using CloudMining.Common.Database;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Modules.Currencies.Domain.Enums;
 using Modules.MarketData.Contracts.Interfaces;
+using Modules.MarketData.Infrastructure.Database;
 
 namespace Modules.MarketData.Application.Services;
 
 public sealed class MarketDataService : IMarketDataService
 {
-    private readonly CloudMiningContext _context;
+    private readonly MarketDataContext _context;
 
-    public MarketDataService(CloudMiningContext context)
+    public MarketDataService(MarketDataContext context)
     {
         _context = context;
     }

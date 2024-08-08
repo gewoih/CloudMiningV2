@@ -1,45 +1,12 @@
 ﻿using CloudMining.Domain.Models;
-using MassTransit;
-using MassTransit.EntityFrameworkCoreIntegration;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Modules.Currencies.Domain.Models;
-using Modules.MarketData.Domain.Models;
-using Modules.Notifications.Domain.Models;
-using Modules.Payments.Domain.Models;
-using Modules.Users.Domain.Models;
 
 namespace CloudMining.Common.Database;
 
-public class CloudMiningContext : IdentityDbContext<User, Role, Guid>
+public abstract class CloudMiningContext : DbContext
 {
-	public CloudMiningContext(DbContextOptions<CloudMiningContext> options) : base(options)
+	protected CloudMiningContext(DbContextOptions options) : base(options) 
 	{
-	}
-
-	public DbSet<Currency> Currencies { get; set; }
-	public DbSet<Deposit> Deposits { get; set; }
-	public DbSet<PaymentShare> PaymentShares { get; set; }
-	public DbSet<ShareablePayment> ShareablePayments { get; set; }
-	public DbSet<ShareChange> ShareChanges { get; set; }
-	public DbSet<NotificationSettings> NotificationSettings { get; set; }
-	public DbSet<Notification> Notifications { get; set; }
-	public DbSet<OutboxState> OutboxStates { get; set; }
-	public DbSet<MarketData> MarketData { get; set; }
-
-	protected override void OnModelCreating(ModelBuilder builder)
-	{
-		base.OnModelCreating(builder);
-
-		builder.Entity<Currency>().HasData(DatabaseInitializer.GetCurrencies());
-		builder.Entity<Currency>().HasIndex(currency => currency.Code).IsUnique();
-		builder.Entity<MarketData>()
-			.HasIndex(data => new { data.From, data.To, data.Date })
-			.IsUnique();
-
-		builder.AddInboxStateEntity();
-		builder.AddOutboxMessageEntity();
-		builder.AddOutboxStateEntity();
 	}
 
 	public override int SaveChanges()

@@ -1,18 +1,18 @@
-using CloudMining.Common.Database;
 using CloudMining.Common.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Modules.Notifications.Contracts.DTO;
 using Modules.Notifications.Contracts.Interfaces;
 using Modules.Notifications.Domain.Models;
+using Modules.Notifications.Infrastructure.Database;
 
 namespace Modules.Notifications.Application.Services;
 
 public sealed class NotificationSettingsService : INotificationSettingsService
 {
-	private readonly CloudMiningContext _context;
+	private readonly NotificationsContext _context;
 	private readonly IMapper<NotificationSettings, NotificationSettingsDto> _notificationSettingsMapper;
 
-	public NotificationSettingsService(CloudMiningContext context,
+	public NotificationSettingsService(NotificationsContext context,
 		IMapper<NotificationSettings, NotificationSettingsDto> notificationSettingsMapper)
 	{
 		_context = context;
