@@ -58,7 +58,7 @@ public sealed class EmcdApiClient
 		DateTime? toDate = null)
 	{
 		if (fromDate.HasValue)
-			payouts = payouts.Where(p => p.GmtTime >= fromDate.Value).ToList();
+			payouts = payouts.Where(p => p.GmtTime > fromDate.Value).ToList();
 		if (toDate.HasValue)
 			payouts = payouts.Where(p => p.GmtTime <= toDate.Value).ToList();
 

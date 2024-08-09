@@ -55,7 +55,7 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 			return null;
 
 		var usersPaymentShares =
-			await _shareService.CreatePaymentShares(createPaymentDto.Amount, foundCurrency, createPaymentDto.Date);
+			await _shareService.CreatePaymentShares(createPaymentDto.Amount, foundCurrency);
 
 		//TODO: Mapper?
 		var newPayment = new ShareablePayment
@@ -79,7 +79,7 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 	public async Task<DateTime> GetLatestPaymentDateAsync(PaymentType paymentType)
 	{
 		var latestPaymentDate = await _context.ShareablePayments
-			.Where(payment => payment.Type == paymentType)
+			.Where(payment => payment.Type == paymentType && payment.Currency.Code != CurrencyCode.ETH)
 			.OrderByDescending(payment => payment.Date)
 			.Select(payment => payment.Date)
 			.FirstOrDefaultAsync();

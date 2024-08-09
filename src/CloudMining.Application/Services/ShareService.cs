@@ -93,7 +93,7 @@ public sealed class ShareService : IShareService
 		return sharesChanges;
 	}
 
-	public async Task<List<PaymentShare>> CreatePaymentShares(decimal amount, Currency currency, DateTime date)
+	public async Task<List<PaymentShare>> CreatePaymentShares(decimal amount, Currency currency)
 	{
 		IEnumerable<UserCalculatedShare> usersShares = await CalculateUsersSharesAsync(amount, currency);
 		usersShares = usersShares.Where(userShare => userShare.Amount != 0);
@@ -106,7 +106,6 @@ public sealed class ShareService : IShareService
 				UserId = userShare.UserId,
 				Amount = userShare.Amount,
 				Share = userShare.Share,
-				Date = date.ToUniversalTime(),
 				Status = ShareStatus.Created
 			};
 

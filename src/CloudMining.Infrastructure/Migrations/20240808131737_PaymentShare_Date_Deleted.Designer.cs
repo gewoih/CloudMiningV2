@@ -3,6 +3,7 @@ using System;
 using CloudMining.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CloudMining.Infrastructure.Migrations
 {
     [DbContext(typeof(CloudMiningContext))]
-    partial class CloudMiningContextModelSnapshot : ModelSnapshot
+    [Migration("20240808131737_PaymentShare_Date_Deleted")]
+    partial class PaymentShare_Date_Deleted
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
