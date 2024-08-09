@@ -27,8 +27,9 @@ public sealed class CentralBankRussiaApiClient
         _retryPolicy = Policy
             .Handle<HttpRequestException>()
             .WaitAndRetryForeverAsync(
-                sleepDurationProvider: _ => TimeSpan.FromSeconds(20)
-               );
+                sleepDurationProvider: retryAttempt =>
+                    TimeSpan.FromSeconds(Math.Min(Math.Pow(2, retryAttempt), 60))
+            );
     }
 
     public async Task<List<PriceData>> GetMarketDataAsync(DateTime? fromDate = null, DateTime? toDate = null)
