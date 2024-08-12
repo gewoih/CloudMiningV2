@@ -64,7 +64,8 @@ public class StatisticsService : IStatisticsService
 
         var totalIncome = incomes.Sum(priceBar => priceBar.Value);
         var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
-        var expenses = await GetExpensesAsync();
+        var expenses = await _shareablePaymentService.GetAsync(paymentType: PaymentType.Electricity,
+            optionalPaymentType: PaymentType.Purchase, includePaymentShares: false);
         var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
             .Sum(payment => payment.Amount);
         var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase)
@@ -92,16 +93,6 @@ public class StatisticsService : IStatisticsService
         return statisticsDto;
     }
 
-    private async Task<List<ShareablePayment>> GetExpensesAsync()
-    {
-        //TODO: Вынести в отдельный сервис
-        var expenses = await _context.ShareablePayments
-            .Where(payment => payment.Type == PaymentType.Electricity || payment.Type == PaymentType.Purchase)
-            .ToListAsync();
-
-        return expenses;
-    }
-
     private async Task<List<MonthlyPriceBar>> GetHoldIncomePriceBarsAsync(
         List<ShareablePayment> payouts, decimal usdToRubRate)
     {
@@ -119,10 +110,11 @@ public class StatisticsService : IStatisticsService
         {
             var incomeByCurrencies = GetIncomeByDate(payouts, processingDate.Year, processingDate.Month);
             var usdIncome = CalculateTotalIncome(incomeByCurrencies, currencyRates);
-            
+
             var rubIncome = usdIncome * usdToRubRate;
             if (rubIncome != 0)
-                priceBars.Add(new MonthlyPriceBar(rubIncome, new DateOnly(processingDate.Year, processingDate.Month, 1)));
+                priceBars.Add(
+                    new MonthlyPriceBar(rubIncome, new DateOnly(processingDate.Year, processingDate.Month, 1)));
         }
 
         return priceBars;
@@ -166,7 +158,7 @@ public class StatisticsService : IStatisticsService
         var expenseList = new List<Expense>();
         var electricityPayments = payments.Where(payment => payment.Type == PaymentType.Electricity);
         var purchases = payments.Where(payment => payment.Type == PaymentType.Purchase);
-        
+
         var electricityMonthlyPriceBars = CalculateMonthlyExpenses(electricityPayments);
         var purchasesMonthlyPriceBars = CalculateMonthlyExpenses(purchases);
 
@@ -231,12 +223,12 @@ public class StatisticsService : IStatisticsService
 
         if (generalExpenses.Count == 0)
             return incomes;
-        
+
         var profits = incomes
             .Concat(generalExpenses.Select(expense => expense with { Value = -expense.Value }))
             .GroupBy(priceBar => priceBar.Date)
             .Select(group => new MonthlyPriceBar(
-                group.Sum(priceBar => priceBar.Value), 
+                group.Sum(priceBar => priceBar.Value),
                 group.Key))
             .ToList();
 
