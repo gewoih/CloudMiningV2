@@ -2,10 +2,12 @@
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
+using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace CloudMining.Application.Services;
 
@@ -15,19 +17,20 @@ public class StatisticsService : IStatisticsService
 
     private readonly IShareablePaymentService _shareablePaymentService;
 
-    //TODO: Вынести в appsettings
-    private readonly DateTime _projectStartDate = new(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     private readonly DateTime _currentDate = DateTime.UtcNow;
+    private readonly DateTime _projectStartDate;
     private readonly int _monthsSinceProjectStartDate;
     private readonly IMarketDataService _marketDataService;
 
     public StatisticsService(CloudMiningContext context,
         IShareablePaymentService shareablePaymentService,
+        IOptions<ProjectInformationSettings> projectInformation,
         IMarketDataService marketDataService)
     {
         _context = context;
         _shareablePaymentService = shareablePaymentService;
         _marketDataService = marketDataService;
+        _projectStartDate = DateTime.SpecifyKind(projectInformation.Value.ProjectStartDate, DateTimeKind.Utc);
         _monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
     }
 
