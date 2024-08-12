@@ -91,8 +91,7 @@ public sealed class ShareablePaymentService : IShareablePaymentService
     {
         var currentUserId = _currentUserService.GetCurrentUserId();
         var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
-
-        //TODO: Получать User (ФИО) не из БД, а из UserService
+        
         var userPaymentSharesQuery = _context.PaymentShares
             .Include(paymentShare => paymentShare.User)
             .Where(paymentShare => paymentShare.ShareablePaymentId == paymentId);
