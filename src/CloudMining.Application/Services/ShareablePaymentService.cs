@@ -1,4 +1,5 @@
-﻿using CloudMining.Application.Services.MassTransit.Events;
+﻿using CloudMining.Application.Mappings;
+using CloudMining.Application.Services.MassTransit.Events;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
@@ -16,18 +17,21 @@ public sealed class ShareablePaymentService : IShareablePaymentService
     private readonly ICurrentUserService _currentUserService;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly IShareService _shareService;
+    private readonly IMapper<ShareablePayment, CreatePaymentDto> _shareablePaymentMapper;
 
     public ShareablePaymentService(CloudMiningContext context,
         ICurrencyService currencyService,
         IShareService shareService,
         ICurrentUserService currentUserService,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        IMapper<ShareablePayment, CreatePaymentDto> shareablePaymentMapper)
     {
         _context = context;
         _currencyService = currencyService;
         _shareService = shareService;
         _currentUserService = currentUserService;
         _publishEndpoint = publishEndpoint;
+        _shareablePaymentMapper = shareablePaymentMapper;
     }
 
     public async Task<int> GetUserPaymentsCount(PaymentType? paymentType = null)
@@ -57,16 +61,9 @@ public sealed class ShareablePaymentService : IShareablePaymentService
         var usersPaymentShares =
             await _shareService.CreatePaymentShares(createPaymentDto.Amount, foundCurrency);
 
-        //TODO: Mapper?
-        var newPayment = new ShareablePayment
-        {
-            Amount = createPaymentDto.Amount,
-            Caption = createPaymentDto.Caption,
-            CurrencyId = foundCurrency.Id,
-            Type = createPaymentDto.PaymentType,
-            PaymentShares = usersPaymentShares,
-            Date = createPaymentDto.Date.ToUniversalTime()
-        };
+        var newPayment = _shareablePaymentMapper.ToDomain(createPaymentDto);
+        newPayment.CurrencyId = foundCurrency.Id;
+        newPayment.PaymentShares = usersPaymentShares;
 
         await _context.ShareablePayments.AddAsync(newPayment).ConfigureAwait(false);
         await _publishEndpoint.Publish(new PaymentCreated { Payment = newPayment });
@@ -91,7 +88,7 @@ public sealed class ShareablePaymentService : IShareablePaymentService
     {
         var currentUserId = _currentUserService.GetCurrentUserId();
         var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
-        
+
         var userPaymentSharesQuery = _context.PaymentShares
             .Include(paymentShare => paymentShare.User)
             .Where(paymentShare => paymentShare.ShareablePaymentId == paymentId);

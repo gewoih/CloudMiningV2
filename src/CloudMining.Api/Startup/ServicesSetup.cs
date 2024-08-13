@@ -10,6 +10,7 @@ using CloudMining.Infrastructure.Emcd;
 using CloudMining.Infrastructure.Telegram;
 using CloudMining.Interfaces.DTO.Members;
 using CloudMining.Interfaces.DTO.NotificationSettings;
+using CloudMining.Interfaces.DTO.Payments;
 using CloudMining.Interfaces.DTO.Payments.Admin;
 using CloudMining.Interfaces.DTO.Payments.Deposits;
 using CloudMining.Interfaces.DTO.Payments.User;
@@ -51,6 +52,7 @@ public static class ServicesSetup
 		services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();
 		services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
 		services.AddSingleton<IMapper<Deposit, DepositDto>, DepositMapper>();
+		services.AddSingleton<IMapper<ShareablePayment, CreatePaymentDto>, ShareablePaymentMapper>();
 
 		services.AddHttpClient<EmcdApiClient>();
 		services.AddHostedService<PayoutsLoaderService>();
