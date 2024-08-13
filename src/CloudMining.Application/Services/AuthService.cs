@@ -1,3 +1,4 @@
+using CloudMining.Application.Mappings;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Interfaces.DTO.Users;
 using CloudMining.Interfaces.Interfaces;
@@ -11,31 +12,26 @@ public sealed class AuthService : IAuthService
 	private readonly JwtService _jwtService;
 	private readonly SignInManager<User> _signInManager;
 	private readonly UserManager<User> _userManager;
+	private readonly IMapper<User, RegisterDto> _userRegistrationMapper;
 
 	public AuthService(UserManager<User> userManager,
 		SignInManager<User> signInManager,
 		JwtService jwtService,
-		ICurrentUserService currentUserService)
+		ICurrentUserService currentUserService,
+		IMapper<User, RegisterDto> userRegistrationMapper)
 	{
 		_userManager = userManager;
 		_signInManager = signInManager;
 		_jwtService = jwtService;
 		_currentUserService = currentUserService;
+		_userRegistrationMapper = userRegistrationMapper;
 	}
 
-	public async Task<IdentityResult> RegisterAsync(RegisterDto dto)
+	public async Task<IdentityResult> RegisterAsync(RegisterDto credentials)
 	{
-		//TODO: Добавить маппер
-		var newUser = new User
-		{
-			Email = dto.Email,
-			UserName = dto.Email,
-			FirstName = dto.FirstName,
-			LastName = dto.LastName,
-			Patronymic = dto.Patronymic
-		};
+		var user = _userRegistrationMapper.ToDomain(credentials);
 
-		return await _userManager.CreateAsync(newUser, dto.Password);
+		return await _userManager.CreateAsync(user, credentials.Password);
 	}
 
 	public async Task<string> LoginAsync(LoginDto credentials)
