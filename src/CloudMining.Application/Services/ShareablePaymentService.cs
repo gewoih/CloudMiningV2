@@ -148,6 +148,8 @@ public sealed class ShareablePaymentService : IShareablePaymentService
                     .Include(payment => payment.PaymentShares)
                     .Where(payment =>
                         payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
+            else
+                paymentsQuery = paymentsQuery.Include(payment => payment.PaymentShares);
         }
 
         var payments = await paymentsQuery
