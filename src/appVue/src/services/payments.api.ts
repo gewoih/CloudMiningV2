@@ -6,7 +6,9 @@ import {CreatePayment} from "@/models/CreatePayment.ts";
 
 class PaymentsService {
     async createPayment(paymentData: CreatePayment) {
-        return apiService.axiosInstance.post("/payments", paymentData)
+        const response = await apiService.axiosInstance
+            .post("/payments", paymentData);
+        return response.data;
     }
 
     async getPayments(skip: number, take: number, paymentType: PaymentType): Promise<PaymentList> {

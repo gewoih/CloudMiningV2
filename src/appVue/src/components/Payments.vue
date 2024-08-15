@@ -418,9 +418,9 @@ const fetchPayments = async () => {
 
 const createPayment = async () => {
   newPayment.value.paymentType = selectedPaymentType.value;
-  await paymentsService.createPayment(newPayment.value);
-  //TODO: Заменить на получение созданного платежа
-  await fetchPayments();
+  const response = await paymentsService.createPayment(newPayment.value);
+  payments.value?.push(response);
+
   newPayment.value = {
     caption: null,
     currencyCode: CurrencyCode.RUB,
