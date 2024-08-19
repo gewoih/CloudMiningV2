@@ -3,7 +3,7 @@ using CloudMining.Interfaces.DTO.Statistics;
 
 namespace CloudMining.Interfaces.Interfaces;
 
-public interface IStatisticsService
+public interface IStatisticsCalculationStrategy
 {
-   Task<StatisticsDto> GetStatisticsAsync(StatisticsCalculationStrategy strategy);
+    Task<StatisticsDto> GetStatisticsAsync();
 }

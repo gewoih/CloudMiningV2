@@ -42,10 +42,13 @@ public static class ServicesSetup
 		services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
 		services.AddScoped<INotificationService, TelegramNotificationService>();
 		services.AddScoped<IMarketDataService, MarketDataService>();
-		services.AddScoped<IStatisticsService, StatisticsService>();
 		services.AddScoped<CryptoMarketDataLoaderStrategy>();
 		services.AddScoped<FiatMarketDataLoaderStrategy>();
+		services.AddScoped<HoldCalculationStrategy>();
+		services.AddScoped<ReceiveAndSellCalculationStrategy>();
 		services.AddScoped<IMarketDataLoaderStrategyFactory, MarketDataLoaderStrategyFactory>();
+		services.AddScoped<IStatisticsCalculationStrategyFactory, StatisticsCalculationStrategyFactory>();
+		services.AddScoped<IStatisticsService, StatisticsService>();
 
 		services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
 		services.AddScoped<IMapper<NotificationSettings, NotificationSettingsDto>, NotificationSettingsMapper>();
