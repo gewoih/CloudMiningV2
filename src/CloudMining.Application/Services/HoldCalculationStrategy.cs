@@ -13,7 +13,6 @@ namespace CloudMining.Application.Services;
 
 public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 {
-    private readonly CloudMiningContext _context;
 
     private readonly IShareablePaymentService _shareablePaymentService;
 
@@ -27,13 +26,12 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
         IOptions<ProjectInformationSettings> projectInformation,
         IMarketDataService marketDataService)
     {
-        _context = context;
         _shareablePaymentService = shareablePaymentService;
         _marketDataService = marketDataService;
         _projectStartDate = DateTime.SpecifyKind(projectInformation.Value.ProjectStartDate, DateTimeKind.Utc);
         _monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
     }
-    
+
     private int CalculateMonthsSinceProjectStart()
     {
         var totalMonths = (_currentDate.Year - _projectStartDate.Year) * 12 + _currentDate.Month -
@@ -43,25 +41,13 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 
         return totalMonths;
     }
-    
+
     public async Task<StatisticsDto> GetStatisticsAsync()
     {
+        var usdToRubRate = await _marketDataService.GetLastUsdToRubRate();
         var payoutsList =
             await _shareablePaymentService.GetAsync(paymentType: PaymentType.Crypto, includePaymentShares: false);
-
-        List<MonthlyPriceBar> incomes;
-        
-
-
-        var usdToRubRate = await _context.MarketData
-            .Where(marketData => marketData.From == CurrencyCode.USD && marketData.To == CurrencyCode.RUB)
-            .OrderByDescending(marketData => marketData.Date)
-            .Select(marketData => marketData.Price)
-            .FirstOrDefaultAsync();
-
-        incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate);
-
-
+        var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate);
         var totalIncome = incomes.Sum(priceBar => priceBar.Value);
         var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
         var expenses = await _shareablePaymentService.GetAsync(paymentType: PaymentType.Electricity,
@@ -92,8 +78,8 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 
         return statisticsDto;
     }
-    
-     private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
+
+    private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
         List<ShareablePayment> payouts, decimal usdToRubRate)
     {
         var uniqueCurrencyPairs = payouts

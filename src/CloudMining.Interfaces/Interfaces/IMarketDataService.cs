@@ -11,4 +11,6 @@ public interface IMarketDataService
 
     Task<Dictionary<CurrencyPair, MarketData?>> GetLatestMarketDataForCurrenciesAsync(
         IEnumerable<CurrencyPair> currencyPairs);
+
+    Task<decimal> GetLastUsdToRubRate();
 }
