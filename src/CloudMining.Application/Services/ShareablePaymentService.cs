@@ -116,8 +116,7 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 	public async Task<List<ShareablePayment>> GetAsync(
 		int skip = 0,
 		int take = int.MaxValue,
-		PaymentType? paymentType = null,
-		PaymentType? optionalPaymentType = null,
+		List<PaymentType>? paymentTypes = null,
 		bool includePaymentShares = true)
 	{
 		var currentUserId = _currentUserService.GetCurrentUserId();
@@ -128,17 +127,8 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 			.Include(payment => payment.Currency)
 			.AsQueryable();
 
-		if (optionalPaymentType == null)
-		{
-			if (paymentType != null)
-				paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
-		}
-		else
-		{
-			if (paymentType != null)
-				paymentsQuery = paymentsQuery.Where(payment =>
-					payment.Type == paymentType || payment.Type == optionalPaymentType);
-		}
+		if (paymentTypes != null)
+			paymentsQuery = paymentsQuery.Where(payment => paymentTypes.Contains(payment.Type));
 
 		if (includePaymentShares)
 		{

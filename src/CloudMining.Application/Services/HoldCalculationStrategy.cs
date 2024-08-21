@@ -31,12 +31,12 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 	{
 		var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
 		var payoutsList =
-			await _shareablePaymentService.GetAsync(paymentType: PaymentType.Crypto, includePaymentShares: false);
+			await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Crypto ], includePaymentShares: false);
 		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate);
 		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
 		var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
-		var expenses = await _shareablePaymentService.GetAsync(paymentType: PaymentType.Electricity,
-			optionalPaymentType: PaymentType.Purchase, includePaymentShares: false);
+		var expenses = await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Electricity, PaymentType.Purchase ], 
+			includePaymentShares: false);
 		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
 			.Sum(payment => payment.Amount);
 		var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase)
