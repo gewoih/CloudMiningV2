@@ -1,7 +1,6 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudMining.Api.Controllers;

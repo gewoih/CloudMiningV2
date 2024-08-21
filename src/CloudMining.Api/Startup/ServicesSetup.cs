@@ -11,7 +11,6 @@ using CloudMining.Infrastructure.Telegram;
 using CloudMining.Interfaces.DTO.Members;
 using CloudMining.Interfaces.DTO.NotificationSettings;
 using CloudMining.Interfaces.DTO.Payments.Admin;
-using CloudMining.Interfaces.DTO.Payments.Deposits;
 using CloudMining.Interfaces.DTO.Payments.User;
 using CloudMining.Interfaces.Interfaces;
 using Telegram.Bot;

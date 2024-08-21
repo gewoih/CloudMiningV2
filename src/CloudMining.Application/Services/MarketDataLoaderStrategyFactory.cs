@@ -1,5 +1,4 @@
 using CloudMining.Domain.Enums;
-using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.Extensions.DependencyInjection;

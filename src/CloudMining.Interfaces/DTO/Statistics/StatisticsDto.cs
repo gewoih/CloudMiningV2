@@ -1,6 +1,4 @@
-﻿using CloudMining.Domain.Enums;
-
-namespace CloudMining.Interfaces.DTO.Statistics;
+﻿namespace CloudMining.Interfaces.DTO.Statistics;
 
 public record StatisticsDto(
     decimal TotalIncome,
