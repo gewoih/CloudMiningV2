@@ -44,7 +44,7 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 
     public async Task<StatisticsDto> GetStatisticsAsync()
     {
-        var usdToRubRate = await _marketDataService.GetLastUsdToRubRate();
+        var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
         var payoutsList =
             await _shareablePaymentService.GetAsync(paymentType: PaymentType.Crypto, includePaymentShares: false);
         var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate);
