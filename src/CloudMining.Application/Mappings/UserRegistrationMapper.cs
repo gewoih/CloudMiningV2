@@ -7,7 +7,7 @@ public class UserRegistrationMapper : IMapper<User, RegisterDto>
 {
     public RegisterDto ToDto(User model)
     {
-        throw new NotImplementedException();
+        return new RegisterDto(model.FirstName, model.LastName, model.Patronymic, model.Email, model.PasswordHash);
     }
 
     public User ToDomain(RegisterDto dto)
