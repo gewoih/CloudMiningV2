@@ -1,223 +1,216 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
-using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace CloudMining.Application.Services;
 
 public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 {
+	private readonly DateTime _currentDate = DateTime.UtcNow;
+	private readonly IMarketDataService _marketDataService;
+	private readonly int _monthsSinceProjectStartDate;
+	private readonly DateTime _projectStartDate;
+	private readonly IShareablePaymentService _shareablePaymentService;
 
-    private readonly IShareablePaymentService _shareablePaymentService;
+	public HoldCalculationStrategy(IShareablePaymentService shareablePaymentService,
+		IOptions<ProjectInformationSettings> projectInformation,
+		IMarketDataService marketDataService)
+	{
+		_shareablePaymentService = shareablePaymentService;
+		_marketDataService = marketDataService;
+		_projectStartDate = DateTime.SpecifyKind(projectInformation.Value.ProjectStartDate, DateTimeKind.Utc);
+		_monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
+	}
 
-    private readonly DateTime _currentDate = DateTime.UtcNow;
-    private readonly DateTime _projectStartDate;
-    private readonly int _monthsSinceProjectStartDate;
-    private readonly IMarketDataService _marketDataService;
+	public async Task<StatisticsDto> GetStatisticsAsync()
+	{
+		var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
+		var payoutsList =
+			await _shareablePaymentService.GetAsync(paymentType: PaymentType.Crypto, includePaymentShares: false);
+		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate);
+		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
+		var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
+		var expenses = await _shareablePaymentService.GetAsync(paymentType: PaymentType.Electricity,
+			optionalPaymentType: PaymentType.Purchase, includePaymentShares: false);
+		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
+			.Sum(payment => payment.Amount);
+		var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase)
+			.Sum(payment => payment.Amount);
+		var totalExpense = spentOnElectricity + spentOnPurchases;
+		var totalProfit = totalIncome - totalExpense;
+		var monthlyProfit = totalProfit / _monthsSinceProjectStartDate;
+		var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
+		var expensesList = GetExpenses(expenses);
+		var profits = GetProfitsList(incomes, expensesList);
 
-    public HoldCalculationStrategy(CloudMiningContext context,
-        IShareablePaymentService shareablePaymentService,
-        IOptions<ProjectInformationSettings> projectInformation,
-        IMarketDataService marketDataService)
-    {
-        _shareablePaymentService = shareablePaymentService;
-        _marketDataService = marketDataService;
-        _projectStartDate = DateTime.SpecifyKind(projectInformation.Value.ProjectStartDate, DateTimeKind.Utc);
-        _monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
-    }
+		var statisticsDto = new StatisticsDto(
+			totalIncome,
+			monthlyIncome,
+			totalExpense,
+			spentOnElectricity,
+			spentOnPurchases,
+			totalProfit,
+			monthlyProfit,
+			paybackPercent,
+			incomes,
+			profits,
+			expensesList);
 
-    private int CalculateMonthsSinceProjectStart()
-    {
-        var totalMonths = (_currentDate.Year - _projectStartDate.Year) * 12 + _currentDate.Month -
-                          _projectStartDate.Month;
-        if (_currentDate.Day < _projectStartDate.Day)
-            totalMonths--;
+		return statisticsDto;
+	}
 
-        return totalMonths;
-    }
+	private int CalculateMonthsSinceProjectStart()
+	{
+		var totalMonths = (_currentDate.Year - _projectStartDate.Year) * 12 + _currentDate.Month -
+		                  _projectStartDate.Month;
+		if (_currentDate.Day < _projectStartDate.Day)
+			totalMonths--;
 
-    public async Task<StatisticsDto> GetStatisticsAsync()
-    {
-        var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
-        var payoutsList =
-            await _shareablePaymentService.GetAsync(paymentType: PaymentType.Crypto, includePaymentShares: false);
-        var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate);
-        var totalIncome = incomes.Sum(priceBar => priceBar.Value);
-        var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
-        var expenses = await _shareablePaymentService.GetAsync(paymentType: PaymentType.Electricity,
-            optionalPaymentType: PaymentType.Purchase, includePaymentShares: false);
-        var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
-            .Sum(payment => payment.Amount);
-        var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase)
-            .Sum(payment => payment.Amount);
-        var totalExpense = spentOnElectricity + spentOnPurchases;
-        var totalProfit = totalIncome - totalExpense;
-        var monthlyProfit = totalProfit / _monthsSinceProjectStartDate;
-        var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
-        var expensesList = GetExpenses(expenses);
-        var profits = GetProfitsList(incomes, expensesList);
+		return totalMonths;
+	}
 
-        var statisticsDto = new StatisticsDto(
-            totalIncome,
-            monthlyIncome,
-            totalExpense,
-            spentOnElectricity,
-            spentOnPurchases,
-            totalProfit,
-            monthlyProfit,
-            paybackPercent,
-            incomes,
-            profits,
-            expensesList);
+	private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
+		List<ShareablePayment> payouts, decimal usdToRubRate)
+	{
+		var uniqueCurrencyPairs = payouts
+			.Select(payment => new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT })
+			.Distinct()
+			.ToList();
 
-        return statisticsDto;
-    }
+		var currencyRates = await _marketDataService.GetLatestMarketDataForCurrenciesAsync(uniqueCurrencyPairs);
 
-    private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
-        List<ShareablePayment> payouts, decimal usdToRubRate)
-    {
-        var uniqueCurrencyPairs = payouts
-            .Select(payment => new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT })
-            .Distinct()
-            .ToList();
+		var priceBars = new List<MonthlyPriceBar>();
+		for (var processingDate = _projectStartDate;
+		     processingDate <= _currentDate;
+		     processingDate = processingDate.AddMonths(1))
+		{
+			var incomeByCurrencies = GetIncomeByDate(payouts, processingDate.Year, processingDate.Month);
+			var usdIncome = CalculateTotalIncome(incomeByCurrencies, currencyRates);
 
-        var currencyRates = await _marketDataService.GetLatestMarketDataForCurrenciesAsync(uniqueCurrencyPairs);
+			var rubIncome = usdIncome * usdToRubRate;
+			if (rubIncome != 0)
+				priceBars.Add(
+					new MonthlyPriceBar(rubIncome, new DateOnly(processingDate.Year, processingDate.Month, 1)));
+		}
 
-        var priceBars = new List<MonthlyPriceBar>();
-        for (var processingDate = _projectStartDate;
-             processingDate <= _currentDate;
-             processingDate = processingDate.AddMonths(1))
-        {
-            var incomeByCurrencies = GetIncomeByDate(payouts, processingDate.Year, processingDate.Month);
-            var usdIncome = CalculateTotalIncome(incomeByCurrencies, currencyRates);
+		return priceBars;
+	}
 
-            var rubIncome = usdIncome * usdToRubRate;
-            if (rubIncome != 0)
-                priceBars.Add(
-                    new MonthlyPriceBar(rubIncome, new DateOnly(processingDate.Year, processingDate.Month, 1)));
-        }
+	private static Dictionary<CurrencyCode, decimal> GetIncomeByDate(IEnumerable<ShareablePayment> payouts, int year,
+		int month)
+	{
+		var payoutsForDate = payouts
+			.Where(payment => payment.Date.Year == year && payment.Date.Month == month)
+			.GroupBy(payment => payment.Currency.Code);
 
-        return priceBars;
-    }
+		var incomeByCurrency = new Dictionary<CurrencyCode, decimal>();
+		foreach (var group in payoutsForDate)
+		{
+			var currencyCode = group.Key;
+			var totalAmount = group.Sum(payment => payment.Amount);
+			incomeByCurrency[currencyCode] = totalAmount;
+		}
 
-    private static Dictionary<CurrencyCode, decimal> GetIncomeByDate(IEnumerable<ShareablePayment> payouts, int year,
-        int month)
-    {
-        var payoutsForDate = payouts
-            .Where(payment => payment.Date.Year == year && payment.Date.Month == month)
-            .GroupBy(payment => payment.Currency.Code);
+		return incomeByCurrency;
+	}
 
-        var incomeByCurrency = new Dictionary<CurrencyCode, decimal>();
-        foreach (var group in payoutsForDate)
-        {
-            var currencyCode = group.Key;
-            var totalAmount = group.Sum(payment => payment.Amount);
-            incomeByCurrency[currencyCode] = totalAmount;
-        }
+	private static decimal CalculateTotalIncome(IReadOnlyDictionary<CurrencyCode, decimal> incomeByCurrencies,
+		Dictionary<CurrencyPair, MarketData?> currencyRates, CurrencyCode toCurrency = CurrencyCode.USDT)
+	{
+		var totalIncome = 0m;
+		foreach (var (currencyCode, incomeAmount) in incomeByCurrencies)
+		{
+			var requiredCurrencyPair = new CurrencyPair { From = currencyCode, To = toCurrency };
 
-        return incomeByCurrency;
-    }
+			if (currencyRates.TryGetValue(requiredCurrencyPair, out var marketData) && marketData != null)
+				totalIncome += incomeAmount * marketData.Price;
+		}
 
-    private static decimal CalculateTotalIncome(IReadOnlyDictionary<CurrencyCode, decimal> incomeByCurrencies,
-        Dictionary<CurrencyPair, MarketData?> currencyRates, CurrencyCode toCurrency = CurrencyCode.USDT)
-    {
-        var totalIncome = 0m;
-        foreach (var (currencyCode, incomeAmount) in incomeByCurrencies)
-        {
-            var requiredCurrencyPair = new CurrencyPair { From = currencyCode, To = toCurrency };
+		return totalIncome;
+	}
 
-            if (currencyRates.TryGetValue(requiredCurrencyPair, out var marketData) && marketData != null)
-                totalIncome += incomeAmount * marketData.Price;
-        }
+	private List<Expense> GetExpenses(List<ShareablePayment> payments)
+	{
+		var expenseList = new List<Expense>();
+		var electricityPayments = payments.Where(payment => payment.Type == PaymentType.Electricity);
+		var purchases = payments.Where(payment => payment.Type == PaymentType.Purchase);
 
-        return totalIncome;
-    }
+		var electricityMonthlyPriceBars = CalculateMonthlyExpenses(electricityPayments);
+		var purchasesMonthlyPriceBars = CalculateMonthlyExpenses(purchases);
 
-    private List<Expense> GetExpenses(List<ShareablePayment> payments)
-    {
-        var expenseList = new List<Expense>();
-        var electricityPayments = payments.Where(payment => payment.Type == PaymentType.Electricity);
-        var purchases = payments.Where(payment => payment.Type == PaymentType.Purchase);
+		var totalMonthlyPriceBars = electricityMonthlyPriceBars.Concat(purchasesMonthlyPriceBars);
+		var generalExpensePriceBars = CalculateGeneralMonthlyExpenses(totalMonthlyPriceBars);
 
-        var electricityMonthlyPriceBars = CalculateMonthlyExpenses(electricityPayments);
-        var purchasesMonthlyPriceBars = CalculateMonthlyExpenses(purchases);
+		expenseList.Add(new Expense(ExpenseType.OnlyElectricity, electricityMonthlyPriceBars));
+		expenseList.Add(new Expense(ExpenseType.OnlyPurchases, purchasesMonthlyPriceBars));
+		expenseList.Add(new Expense(ExpenseType.Total, generalExpensePriceBars));
 
-        var totalMonthlyPriceBars = electricityMonthlyPriceBars.Concat(purchasesMonthlyPriceBars);
-        var generalExpensePriceBars = CalculateGeneralMonthlyExpenses(totalMonthlyPriceBars);
+		return expenseList;
+	}
 
-        expenseList.Add(new Expense(ExpenseType.OnlyElectricity, electricityMonthlyPriceBars));
-        expenseList.Add(new Expense(ExpenseType.OnlyPurchases, purchasesMonthlyPriceBars));
-        expenseList.Add(new Expense(ExpenseType.Total, generalExpensePriceBars));
+	private List<MonthlyPriceBar> CalculateMonthlyExpenses(IEnumerable<ShareablePayment> payments)
+	{
+		var monthlyExpenses = payments
+			.GroupBy(payment => (payment.Date.Year, payment.Date.Month))
+			.ToList();
 
-        return expenseList;
-    }
+		var priceBars = new List<MonthlyPriceBar>();
+		var processingDate = _projectStartDate;
 
-    private List<MonthlyPriceBar> CalculateMonthlyExpenses(IEnumerable<ShareablePayment> payments)
-    {
-        var monthlyExpenses = payments
-            .GroupBy(payment => (payment.Date.Year, payment.Date.Month))
-            .ToList();
+		while (processingDate <= _currentDate)
+		{
+			var totalAmount = monthlyExpenses
+				.Where(expense =>
+					expense.Key.Year == processingDate.Year &&
+					expense.Key.Month == processingDate.Month)
+				.Sum(expense => expense.Sum(payment => payment.Amount));
 
-        var priceBars = new List<MonthlyPriceBar>();
-        var processingDate = _projectStartDate;
+			if (totalAmount != 0)
+				priceBars.Add(new MonthlyPriceBar(totalAmount,
+					new DateOnly(processingDate.Year, processingDate.Month, 1)));
 
-        while (processingDate <= _currentDate)
-        {
-            var totalAmount = monthlyExpenses
-                .Where(expense =>
-                    expense.Key.Year == processingDate.Year &&
-                    expense.Key.Month == processingDate.Month)
-                .Sum(expense => expense.Sum(payment => payment.Amount));
+			processingDate = processingDate.AddMonths(1);
+		}
 
-            if (totalAmount != 0)
-            {
-                priceBars.Add(new MonthlyPriceBar(totalAmount,
-                    new DateOnly(processingDate.Year, processingDate.Month, 1)));
-            }
+		return priceBars;
+	}
 
-            processingDate = processingDate.AddMonths(1);
-        }
+	private static List<MonthlyPriceBar> CalculateGeneralMonthlyExpenses(IEnumerable<MonthlyPriceBar> monthlyPriceBars)
+	{
+		var generalExpensePriceBars = monthlyPriceBars
+			.GroupBy(priceBar => priceBar.Date)
+			.Select(group => new MonthlyPriceBar(
+				group.Sum(priceBar => priceBar.Value),
+				group.Key
+			))
+			.ToList();
 
-        return priceBars;
-    }
+		return generalExpensePriceBars;
+	}
 
-    private static List<MonthlyPriceBar> CalculateGeneralMonthlyExpenses(IEnumerable<MonthlyPriceBar> monthlyPriceBars)
-    {
-        var generalExpensePriceBars = monthlyPriceBars
-            .GroupBy(priceBar => priceBar.Date)
-            .Select(group => new MonthlyPriceBar(
-                Value: group.Sum(priceBar => priceBar.Value),
-                Date: group.Key
-            ))
-            .ToList();
+	private static List<MonthlyPriceBar> GetProfitsList(List<MonthlyPriceBar> incomes, IEnumerable<Expense> expenses)
+	{
+		var generalExpenses = expenses
+			.Where(expense => expense.Type == ExpenseType.Total)
+			.SelectMany(expense => expense.PriceBars)
+			.ToList();
 
-        return generalExpensePriceBars;
-    }
+		if (generalExpenses.Count == 0)
+			return incomes;
 
-    private static List<MonthlyPriceBar> GetProfitsList(List<MonthlyPriceBar> incomes, IEnumerable<Expense> expenses)
-    {
-        var generalExpenses = expenses
-            .Where(expense => expense.Type == ExpenseType.Total)
-            .SelectMany(expense => expense.PriceBars)
-            .ToList();
+		var profits = incomes
+			.Concat(generalExpenses.Select(expense => expense with { Value = -expense.Value }))
+			.GroupBy(priceBar => priceBar.Date)
+			.Select(group => new MonthlyPriceBar(
+				group.Sum(priceBar => priceBar.Value),
+				group.Key))
+			.ToList();
 
-        if (generalExpenses.Count == 0)
-            return incomes;
-
-        var profits = incomes
-            .Concat(generalExpenses.Select(expense => expense with { Value = -expense.Value }))
-            .GroupBy(priceBar => priceBar.Date)
-            .Select(group => new MonthlyPriceBar(
-                group.Sum(priceBar => priceBar.Value),
-                group.Key))
-            .ToList();
-
-        return profits;
-    }
+		return profits;
+	}
 }
