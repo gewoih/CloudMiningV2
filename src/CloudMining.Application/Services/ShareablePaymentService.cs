@@ -142,14 +142,14 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 
 		if (includePaymentShares)
 		{
+			paymentsQuery = paymentsQuery.Include(payment => payment.PaymentShares);
+			
 			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
 			if (!isCurrentUserAdmin)
-				paymentsQuery = paymentsQuery
-					.Include(payment => payment.PaymentShares)
-					.Where(payment =>
-						payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
-			else
-				paymentsQuery = paymentsQuery.Include(payment => payment.PaymentShares);
+			{
+				paymentsQuery = paymentsQuery.Where(payment => 
+					payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
+			}
 		}
 
 		var payments = await paymentsQuery
