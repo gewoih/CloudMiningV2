@@ -3,11 +3,11 @@ using CloudMining.Interfaces.DTO.Payments;
 
 namespace CloudMining.Application.Mappings;
 
-public class ShareablePaymentMapper: IMapper<ShareablePayment, CreatePaymentDto>
+public class ShareablePaymentMapper : IMapper<ShareablePayment, CreatePaymentDto>
 {
     public CreatePaymentDto ToDto(ShareablePayment model)
     {
-        throw new NotImplementedException();
+        return new CreatePaymentDto(model.Caption, model.Currency.Code, model.Type, model.Date, model.Amount);
     }
 
     public ShareablePayment ToDomain(CreatePaymentDto dto)
