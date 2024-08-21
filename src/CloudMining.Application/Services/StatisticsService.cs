@@ -7,19 +7,16 @@ namespace CloudMining.Application.Services;
 
 public class StatisticsService : IStatisticsService
 {
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IStatisticsCalculationStrategyFactory _statisticsCalculationStrategyFactory;
 
-    public StatisticsService(IServiceScopeFactory scopeFactory)
+    public StatisticsService(IStatisticsCalculationStrategyFactory statisticsCalculationStrategyFactory)
     {
-        _scopeFactory = scopeFactory;
+        _statisticsCalculationStrategyFactory = statisticsCalculationStrategyFactory;
     }
 
     public async Task<StatisticsDto> GetStatisticsAsync(StatisticsCalculationStrategy strategy)
     {
-        await using var scope = _scopeFactory.CreateAsyncScope();
-        var statisticsCalculationStrategyFactory =
-            scope.ServiceProvider.GetRequiredService<IStatisticsCalculationStrategyFactory>();
-        var statisticsCalculationStrategy = statisticsCalculationStrategyFactory.Create(strategy);
+        var statisticsCalculationStrategy = _statisticsCalculationStrategyFactory.Create(strategy);
         var statisticsDto = await statisticsCalculationStrategy.GetStatisticsAsync();
         return statisticsDto;
     }
