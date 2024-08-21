@@ -12,15 +12,16 @@ public sealed class MarketDataLoaderService : BackgroundService
 {
     private readonly TimeSpan _loadingDelay;
 
-    //TODO: Вынести параметры с датами в appsettings
-    private readonly DateTime _loadHistoricalDataFrom = new(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     private readonly DateTime _loadHistoricalDataTo = DateTime.UtcNow;
+    private readonly DateTime _loadHistoricalDataFrom;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly List<CurrencyPair> _currencyPairs;
 
     public MarketDataLoaderService(IOptions<MarketDataLoaderSettings> settings,
+        IOptions<ProjectInformationSettings> projectInformation,
         IServiceScopeFactory scopeFactory)
     {
+        _loadHistoricalDataFrom = DateTime.SpecifyKind(projectInformation.Value.ProjectStartDate, DateTimeKind.Utc);
         _scopeFactory = scopeFactory;
         _loadingDelay = settings.Value.Delay;
         _currencyPairs = settings.Value.CurrencyPairs;

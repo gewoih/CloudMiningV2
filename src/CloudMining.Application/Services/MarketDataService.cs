@@ -63,4 +63,16 @@ public sealed class MarketDataService : IMarketDataService
 
         return result;
     }
+
+    public async Task<decimal> GetLastUsdToRubRateAsync(
+        CurrencyCode from = CurrencyCode.USD,
+        CurrencyCode to = CurrencyCode.RUB)
+    {
+        var usdToRubRate = await _context.MarketData
+            .Where(marketData => marketData.From == from && marketData.To == to)
+            .OrderByDescending(marketData => marketData.Date)
+            .Select(marketData => marketData.Price)
+            .FirstOrDefaultAsync();
+        return usdToRubRate;
+    }
 }

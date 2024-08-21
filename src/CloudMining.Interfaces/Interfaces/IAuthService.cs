@@ -5,7 +5,7 @@ namespace CloudMining.Interfaces.Interfaces;
 
 public interface IAuthService
 {
-	Task<IdentityResult> RegisterAsync(RegisterDto dto);
+	Task<IdentityResult> RegisterAsync(RegisterDto credentials);
 	Task<string> LoginAsync(LoginDto credentials);
 	Task<bool> ChangeEmailAsync(ChangeEmailDto dto);
 	Task<bool> ChangePasswordAsync(ChangePasswordDto dto);

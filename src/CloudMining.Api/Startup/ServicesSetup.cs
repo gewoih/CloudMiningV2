@@ -10,8 +10,10 @@ using CloudMining.Infrastructure.Emcd;
 using CloudMining.Infrastructure.Telegram;
 using CloudMining.Interfaces.DTO.Members;
 using CloudMining.Interfaces.DTO.NotificationSettings;
+using CloudMining.Interfaces.DTO.Payments;
 using CloudMining.Interfaces.DTO.Payments.Admin;
 using CloudMining.Interfaces.DTO.Payments.User;
+using CloudMining.Interfaces.DTO.Users;
 using CloudMining.Interfaces.Interfaces;
 using Telegram.Bot;
 using DepositDto = CloudMining.Interfaces.DTO.Payments.Deposits.DepositDto;
@@ -39,10 +41,13 @@ public static class ServicesSetup
 		services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
 		services.AddScoped<INotificationService, TelegramNotificationService>();
 		services.AddScoped<IMarketDataService, MarketDataService>();
-		services.AddScoped<IStatisticsService, StatisticsService>();
 		services.AddScoped<CryptoMarketDataLoaderStrategy>();
 		services.AddScoped<FiatMarketDataLoaderStrategy>();
+		services.AddScoped<HoldCalculationStrategy>();
+		services.AddScoped<ReceiveAndSellCalculationStrategy>();
 		services.AddScoped<IMarketDataLoaderStrategyFactory, MarketDataLoaderStrategyFactory>();
+		services.AddScoped<IStatisticsCalculationStrategyFactory, StatisticsCalculationStrategyFactory>();
+		services.AddScoped<IStatisticsService, StatisticsService>();
 
 		services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
 		services.AddScoped<IMapper<NotificationSettings, NotificationSettingsDto>, NotificationSettingsMapper>();
@@ -50,6 +55,8 @@ public static class ServicesSetup
 		services.AddSingleton<IMapper<ShareablePayment, AdminPaymentDto>, AdminPaymentMapper>();
 		services.AddSingleton<IMapper<PaymentShare, PaymentShareDto>, PaymentShareMapper>();
 		services.AddSingleton<IMapper<Deposit, DepositDto>, DepositMapper>();
+		services.AddSingleton<IMapper<ShareablePayment, CreatePaymentDto>, ShareablePaymentMapper>();
+		services.AddSingleton<IMapper<User, RegisterDto>, UserRegistrationMapper>();
 
 		services.AddHttpClient<EmcdApiClient>();
 		services.AddHostedService<PayoutsLoaderService>();

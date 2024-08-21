@@ -1,4 +1,5 @@
-﻿using CloudMining.Application.Services.MassTransit.Events;
+﻿using CloudMining.Application.Mappings;
+using CloudMining.Application.Services.MassTransit.Events;
 using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Database;
@@ -16,18 +17,21 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 	private readonly ICurrentUserService _currentUserService;
 	private readonly IPublishEndpoint _publishEndpoint;
 	private readonly IShareService _shareService;
+	private readonly IMapper<ShareablePayment, CreatePaymentDto> _shareablePaymentMapper;
 
 	public ShareablePaymentService(CloudMiningContext context,
 		ICurrencyService currencyService,
 		IShareService shareService,
 		ICurrentUserService currentUserService,
-		IPublishEndpoint publishEndpoint)
+		IPublishEndpoint publishEndpoint,
+		IMapper<ShareablePayment, CreatePaymentDto> shareablePaymentMapper)
 	{
 		_context = context;
 		_currencyService = currencyService;
 		_shareService = shareService;
 		_currentUserService = currentUserService;
 		_publishEndpoint = publishEndpoint;
+		_shareablePaymentMapper = shareablePaymentMapper;
 	}
 
 	public async Task<int> GetUserPaymentsCount(PaymentType? paymentType = null)
@@ -57,16 +61,9 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 		var usersPaymentShares =
 			await _shareService.CreatePaymentShares(createPaymentDto.Amount, foundCurrency);
 
-		//TODO: Mapper?
-		var newPayment = new ShareablePayment
-		{
-			Amount = createPaymentDto.Amount,
-			Caption = createPaymentDto.Caption,
-			CurrencyId = foundCurrency.Id,
-			Type = createPaymentDto.PaymentType,
-			PaymentShares = usersPaymentShares,
-			Date = createPaymentDto.Date.ToUniversalTime()
-		};
+		var newPayment = _shareablePaymentMapper.ToDomain(createPaymentDto);
+		newPayment.CurrencyId = foundCurrency.Id;
+		newPayment.PaymentShares = usersPaymentShares;
 
 		await _context.ShareablePayments.AddAsync(newPayment).ConfigureAwait(false);
 		await _publishEndpoint.Publish(new PaymentCreated { Payment = newPayment });
@@ -92,7 +89,6 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 		var currentUserId = _currentUserService.GetCurrentUserId();
 		var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
 
-		//TODO: Получать User (ФИО) не из БД, а из UserService
 		var userPaymentSharesQuery = _context.PaymentShares
 			.Include(paymentShare => paymentShare.User)
 			.Where(paymentShare => paymentShare.ShareablePaymentId == paymentId);
@@ -118,9 +114,9 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 	}
 
 	public async Task<List<ShareablePayment>> GetAsync(
-		int skip = 0, 
-		int take = int.MaxValue, 
-		PaymentType? paymentType = null,
+		int skip = 0,
+		int take = int.MaxValue,
+		List<PaymentType>? paymentTypes = null,
 		bool includePaymentShares = true)
 	{
 		var currentUserId = _currentUserService.GetCurrentUserId();
@@ -131,17 +127,19 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 			.Include(payment => payment.Currency)
 			.AsQueryable();
 
-		if (paymentType != null)
-			paymentsQuery = paymentsQuery.Where(payment => payment.Type == paymentType);
+		if (paymentTypes != null)
+			paymentsQuery = paymentsQuery.Where(payment => paymentTypes.Contains(payment.Type));
 
 		if (includePaymentShares)
 		{
+			paymentsQuery = paymentsQuery.Include(payment => payment.PaymentShares);
+			
 			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
 			if (!isCurrentUserAdmin)
-				paymentsQuery = paymentsQuery
-					.Include(payment => payment.PaymentShares)
-					.Where(payment => 
-						payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
+			{
+				paymentsQuery = paymentsQuery.Where(payment => 
+					payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
+			}
 		}
 
 		var payments = await paymentsQuery

@@ -7,7 +7,7 @@ namespace CloudMining.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-//[Authorize] //TODO: На время тестирования
+[Authorize]
 public class StatisticsController : ControllerBase
 {
     private readonly IStatisticsService _statisticsService;
