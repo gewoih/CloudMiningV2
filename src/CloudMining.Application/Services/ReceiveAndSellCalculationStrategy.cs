@@ -95,10 +95,16 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 		var priceBars = new List<MonthlyPriceBar>();
 
-		foreach (var (date, incomeValue) in rubIncomeByDate)
+		var monthlyIncomeByDate = rubIncomeByDate
+			.GroupBy(entry => new DateOnly(entry.Key.Year, entry.Key.Month, 1))
+			.ToDictionary(
+				group => group.Key,
+				group => group.Sum(entry => entry.Value));
+
+		foreach (var (date, incomeValue) in monthlyIncomeByDate)
 		{
 			priceBars.Add(
-				new MonthlyPriceBar(incomeValue, new DateOnly(date.Year, date.Month, 1)));
+				new MonthlyPriceBar(incomeValue, date));
 		}
 
 		return priceBars;
@@ -117,14 +123,14 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 			foreach (var (currencyPair, marketDataList) in currencyRates)
 			{
 				if (payout.Currency.Code != currencyPair.From || currencyPair.To != toCurrency) continue;
-				
+
 				var matchingMarketData = marketDataList
 					.Find(marketData =>
 						marketData != null &&
 						payout.Date.Date.AddHours(payout.Date.Hour) == marketData.Date);
 
 				if (matchingMarketData == null) continue;
-				
+
 				var incomeInUsd = payout.Amount * matchingMarketData.Price;
 
 				usdIncomeByDate[payout.Date] = incomeInUsd;
@@ -144,7 +150,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 			var date = dateTime.Date;
 
 			if (!usdToRubRate.TryGetValue(date, out var rate)) continue;
-			
+
 			if (rubIncome.ContainsKey(date))
 			{
 				rubIncome[date] += incomeValue * rate;
