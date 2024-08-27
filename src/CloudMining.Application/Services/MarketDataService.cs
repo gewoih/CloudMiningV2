@@ -116,6 +116,7 @@ public sealed class MarketDataService : IMarketDataService
 	{
 		var usdToRubRatesByDate = new Dictionary<DateTime, decimal>();
 
+		//TODO: Использовать DateOnly везде, где не нужно использовать время
 		var marketDataList = await _context.MarketData
 			.Where(marketData =>
 				marketData.From == from &&

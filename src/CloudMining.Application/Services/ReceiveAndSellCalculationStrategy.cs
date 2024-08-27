@@ -11,13 +11,14 @@ namespace CloudMining.Application.Services;
 
 public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 {
+	//TODO: Удалить
 	private readonly DateTime _currentDate = DateTime.UtcNow;
 	private readonly IMarketDataService _marketDataService;
 	private readonly int _monthsSinceProjectStartDate;
+	//TODO: Сделать DateOnly
 	private readonly DateTime _projectStartDate;
 	private readonly IShareablePaymentService _shareablePaymentService;
-
-
+	
 	public ReceiveAndSellCalculationStrategy(IShareablePaymentService shareablePaymentService,
 		IOptions<ProjectInformationSettings> projectInformation,
 		IMarketDataService marketDataService)
@@ -30,20 +31,15 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 	public async Task<StatisticsDto> GetStatisticsAsync()
 	{
-		var payoutsList =
-			await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
+		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
 		var payoutsDates = GetPayoutsDates(payoutsList);
 		var usdToRubRatesByDate = await _marketDataService.GetUsdToRubRatesByDateAsync(payoutsDates);
 		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRatesByDate, payoutsDates);
 		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
 		var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
-		var expenses = await _shareablePaymentService.GetAsync(
-			paymentTypes: [PaymentType.Electricity, PaymentType.Purchase],
-			includePaymentShares: false);
-		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
-			.Sum(payment => payment.Amount);
-		var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase)
-			.Sum(payment => payment.Amount);
+		var expenses = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Electricity, PaymentType.Purchase], includePaymentShares: false);
+		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity).Sum(payment => payment.Amount);
+		var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase).Sum(payment => payment.Amount);
 		var totalExpense = spentOnElectricity + spentOnPurchases;
 		var totalProfit = totalIncome - totalExpense;
 		var monthlyProfit = totalProfit / _monthsSinceProjectStartDate;
@@ -67,6 +63,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		return statisticsDto;
 	}
 
+	//TODO: Вынести в отдельный статический сервис или типа того в обеих стратегиях
 	private int CalculateMonthsSinceProjectStart()
 	{
 		var totalMonths = (_currentDate.Year - _projectStartDate.Year) * 12 + _currentDate.Month -
@@ -82,6 +79,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		Dictionary<DateTime, decimal> usdToRubRate,
 		List<DateTime> payoutsDates)
 	{
+		//TODO: Вынести uniqueCurrencyPairs в отдельное место из обеих стратегий
 		var uniqueCurrencyPairs = payouts
 			.Select(payment => new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT })
 			.Distinct()
@@ -90,8 +88,8 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		var currencyRates =
 			await _marketDataService.GetMarketDataForCurrenciesByDateAsync(uniqueCurrencyPairs, payoutsDates);
 
-		var usdIncomeByDate = GetUsdIncomeByDate(payouts, currencyRates);
-		var rubIncomeByDate = GetRubIncomeByDate(usdIncomeByDate, usdToRubRate);
+		var usdIncomeByDate = CalculateIncome(payouts, currencyRates, CurrencyCode.USDT);
+		var rubIncomeByDate = CalculateCurrencyIncomeByDate(usdIncomeByDate, usdToRubRate);
 
 		var priceBars = new List<MonthlyPriceBar>();
 
@@ -103,68 +101,60 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 		foreach (var (date, incomeValue) in monthlyIncomeByDate)
 		{
-			priceBars.Add(
-				new MonthlyPriceBar(incomeValue, date));
+			priceBars.Add(new MonthlyPriceBar(incomeValue, date));
 		}
 
 		return priceBars;
 	}
 
 
-	private static Dictionary<DateTime, decimal> GetUsdIncomeByDate(
-		List<ShareablePayment> payouts,
-		Dictionary<CurrencyPair, List<MarketData?>> currencyRates,
-		CurrencyCode toCurrency = CurrencyCode.USDT)
+	private static Dictionary<DateTime, decimal> CalculateIncome(List<ShareablePayment> payouts, Dictionary<CurrencyPair, List<MarketData?>> currencyRates, CurrencyCode currency)
 	{
-		var usdIncomeByDate = new Dictionary<DateTime, decimal>();
+		var incomes = new Dictionary<DateTime, decimal>();
 
 		foreach (var payout in payouts)
 		{
 			foreach (var (currencyPair, marketDataList) in currencyRates)
 			{
-				if (payout.Currency.Code != currencyPair.From || currencyPair.To != toCurrency) continue;
+				if (payout.Currency.Code != currencyPair.From || currencyPair.To != currency) 
+					continue;
 
-				var matchingMarketData = marketDataList
-					.Find(marketData =>
-						marketData != null &&
-						payout.Date.Date.AddHours(payout.Date.Hour) == marketData.Date);
+				//TODO: Что за хуйня?
+				var matchingMarketData = marketDataList.Find(marketData => marketData != null &&
+				                                                           payout.Date.Date.AddHours(payout.Date.Hour) == marketData.Date);
 
-				if (matchingMarketData == null) continue;
+				if (matchingMarketData == null) 
+					continue;
 
-				var incomeInUsd = payout.Amount * matchingMarketData.Price;
-
-				usdIncomeByDate[payout.Date] = incomeInUsd;
+				var income = payout.Amount * matchingMarketData.Price;
+				incomes[payout.Date] = income;
 			}
 		}
 
-		return usdIncomeByDate;
+		return incomes;
 	}
 
-	private static Dictionary<DateTime, decimal> GetRubIncomeByDate(Dictionary<DateTime, decimal> usdIncome,
-		IReadOnlyDictionary<DateTime, decimal> usdToRubRate)
+	private static Dictionary<DateTime, decimal> CalculateCurrencyIncomeByDate(Dictionary<DateTime, decimal> incomes, Dictionary<DateTime, decimal> rates)
 	{
 		var rubIncome = new Dictionary<DateTime, decimal>();
 
-		foreach (var (dateTime, incomeValue) in usdIncome)
+		foreach (var (dateTime, incomeValue) in incomes)
 		{
 			var date = dateTime.Date;
 
-			if (!usdToRubRate.TryGetValue(date, out var rate)) continue;
+			if (!rates.TryGetValue(date, out var rate)) 
+				continue;
 
 			if (rubIncome.ContainsKey(date))
-			{
 				rubIncome[date] += incomeValue * rate;
-			}
 			else
-			{
 				rubIncome[date] = incomeValue * rate;
-			}
 		}
 
 		return rubIncome;
 	}
 
-
+	//TODO: Вынести из обеих стратегий
 	private List<Expense> GetExpenses(List<ShareablePayment> payments)
 	{
 		var expenseList = new List<Expense>();
@@ -184,6 +174,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		return expenseList;
 	}
 
+	//TODO: Вынести из обеих стратегий
 	private List<MonthlyPriceBar> CalculateMonthlyExpenses(IEnumerable<ShareablePayment> payments)
 	{
 		var monthlyExpenses = payments
@@ -211,6 +202,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		return priceBars;
 	}
 
+	//TODO: Вынести из обеих стратегий в другое место
 	private static List<MonthlyPriceBar> CalculateGeneralMonthlyExpenses(IEnumerable<MonthlyPriceBar> monthlyPriceBars)
 	{
 		var generalExpensePriceBars = monthlyPriceBars
@@ -224,6 +216,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		return generalExpensePriceBars;
 	}
 
+	//TODO: Вынести из обеих стратегий
 	private static List<MonthlyPriceBar> GetProfitsList(List<MonthlyPriceBar> incomes, IEnumerable<Expense> expenses)
 	{
 		var generalExpenses = expenses
@@ -248,7 +241,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 	private static List<DateTime> GetPayoutsDates(IEnumerable<ShareablePayment> payouts)
 	{
 		var payoutsDates = payouts
-			.Select(payment => payment.Date)
+			.Select(payment => payment.Date) //TODO: DateOnly
 			.Distinct()
 			.ToList();
 		return payoutsDates;

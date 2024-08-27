@@ -75,7 +75,8 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 	}
 
 	private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
-		List<ShareablePayment> payouts, decimal usdToRubRate)
+		List<ShareablePayment> payouts, 
+		decimal usdToRubRate)
 	{
 		var uniqueCurrencyPairs = payouts
 			.Select(payment => new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT })
