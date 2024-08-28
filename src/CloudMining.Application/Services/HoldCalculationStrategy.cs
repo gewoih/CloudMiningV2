@@ -1,42 +1,34 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
-using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
-using Microsoft.Extensions.Options;
 
 namespace CloudMining.Application.Services;
 
 public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 {
-	private readonly DateTime _currentDate = DateTime.UtcNow;
 	private readonly IMarketDataService _marketDataService;
 	private readonly int _monthsSinceProjectStartDate;
-	private readonly DateTime _projectStartDate;
 	private readonly IShareablePaymentService _shareablePaymentService;
 
 	public HoldCalculationStrategy(IShareablePaymentService shareablePaymentService,
-		IOptions<ProjectInformationSettings> projectInformation,
 		IMarketDataService marketDataService)
 	{
 		_shareablePaymentService = shareablePaymentService;
 		_marketDataService = marketDataService;
-		_projectStartDate = DateTime.SpecifyKind(projectInformation.Value.ProjectStartDate, DateTimeKind.Utc);
 		_monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
 	}
 
 	public async Task<StatisticsDto> GetStatisticsAsync()
 	{
 		var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
-		var payoutsList =
-			await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Crypto ], includePaymentShares: false);
+		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Crypto ], includePaymentShares: false);
 		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate);
 		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
 		var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
-		var expenses = await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Electricity, PaymentType.Purchase ], 
-			includePaymentShares: false);
+		var expenses = await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Electricity, PaymentType.Purchase ], includePaymentShares: false);
 		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
 			.Sum(payment => payment.Amount);
 		var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase)

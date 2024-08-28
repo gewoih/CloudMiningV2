@@ -3,5 +3,5 @@
 public class ProjectInformationSettings
 {
     public static readonly string SectionName = "ProjectInformation";
-    public DateTime ProjectStartDate { get; set; }
+    public DateOnly ProjectStartDate { get; set; }
 }

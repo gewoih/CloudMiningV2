@@ -1,31 +1,24 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
-using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
-using Microsoft.Extensions.Options;
 
 namespace CloudMining.Application.Services;
 
 public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 {
-	//TODO: Удалить
-	private readonly DateTime _currentDate = DateTime.UtcNow;
 	private readonly IMarketDataService _marketDataService;
 	private readonly int _monthsSinceProjectStartDate;
-	//TODO: Сделать DateOnly
-	private readonly DateTime _projectStartDate;
+
 	private readonly IShareablePaymentService _shareablePaymentService;
 	
 	public ReceiveAndSellCalculationStrategy(IShareablePaymentService shareablePaymentService,
-		IOptions<ProjectInformationSettings> projectInformation,
 		IMarketDataService marketDataService)
 	{
 		_shareablePaymentService = shareablePaymentService;
 		_marketDataService = marketDataService;
-		_projectStartDate = DateTime.SpecifyKind(projectInformation.Value.ProjectStartDate, DateTimeKind.Utc);
 		_monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
 	}
 
