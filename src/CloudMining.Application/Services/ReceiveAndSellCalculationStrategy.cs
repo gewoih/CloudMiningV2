@@ -5,6 +5,7 @@ using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
 
+
 namespace CloudMining.Application.Services;
 
 public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
@@ -15,11 +16,12 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 	private readonly IShareablePaymentService _shareablePaymentService;
 	
 	public ReceiveAndSellCalculationStrategy(IShareablePaymentService shareablePaymentService,
+		IMonthsCalculationService monthsCalculationService,
 		IMarketDataService marketDataService)
 	{
 		_shareablePaymentService = shareablePaymentService;
 		_marketDataService = marketDataService;
-		_monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
+		_monthsSinceProjectStartDate = monthsCalculationService.CalculateSinceProjectStart();
 	}
 
 	public async Task<StatisticsDto> GetStatisticsAsync()
@@ -27,7 +29,8 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
 		var payoutsDates = GetPayoutsDates(payoutsList);
 		var usdToRubRatesByDate = await _marketDataService.GetUsdToRubRatesByDateAsync(payoutsDates);
-		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRatesByDate, payoutsDates);
+		var uniqueCurrencyPairs = GetUniqueCurrencyPairs(payoutsList);
+		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRatesByDate, payoutsDates, uniqueCurrencyPairs);
 		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
 		var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
 		var expenses = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Electricity, PaymentType.Purchase], includePaymentShares: false);
@@ -55,29 +58,14 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 		return statisticsDto;
 	}
-
-	//TODO: Вынести в отдельный статический сервис или типа того в обеих стратегиях
-	private int CalculateMonthsSinceProjectStart()
-	{
-		var totalMonths = (_currentDate.Year - _projectStartDate.Year) * 12 + _currentDate.Month -
-		                  _projectStartDate.Month;
-		if (_currentDate.Day < _projectStartDate.Day)
-			totalMonths--;
-
-		return totalMonths;
-	}
+	
 
 	private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
 		List<ShareablePayment> payouts,
 		Dictionary<DateTime, decimal> usdToRubRate,
-		List<DateTime> payoutsDates)
+		List<DateTime> payoutsDates,
+		IEnumerable<CurrencyPair> uniqueCurrencyPairs)
 	{
-		//TODO: Вынести uniqueCurrencyPairs в отдельное место из обеих стратегий
-		var uniqueCurrencyPairs = payouts
-			.Select(payment => new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT })
-			.Distinct()
-			.ToList();
-
 		var currencyRates =
 			await _marketDataService.GetMarketDataForCurrenciesByDateAsync(uniqueCurrencyPairs, payoutsDates);
 
@@ -98,6 +86,16 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		}
 
 		return priceBars;
+	}
+
+	//TODO: Вынести из обеих стратегий
+	private static List<CurrencyPair> GetUniqueCurrencyPairs(IEnumerable<ShareablePayment> payouts)
+	{
+		var uniqueCurrencyPairs = payouts
+			.Select(payment => new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT })
+			.Distinct()
+			.ToList();
+		return uniqueCurrencyPairs;
 	}
 
 
@@ -175,9 +173,10 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 			.ToList();
 
 		var priceBars = new List<MonthlyPriceBar>();
+		var currentDate = DateOnly.FromDateTime(DateTime.Now);
 		var processingDate = _projectStartDate;
 
-		while (processingDate <= _currentDate)
+		while (processingDate <= currentDate)
 		{
 			var totalAmount = monthlyExpenses
 				.Where(expense =>

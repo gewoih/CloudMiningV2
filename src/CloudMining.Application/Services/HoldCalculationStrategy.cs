@@ -14,18 +14,20 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 	private readonly IShareablePaymentService _shareablePaymentService;
 
 	public HoldCalculationStrategy(IShareablePaymentService shareablePaymentService,
+		IMonthsCalculationService monthsCalculationService,
 		IMarketDataService marketDataService)
 	{
 		_shareablePaymentService = shareablePaymentService;
 		_marketDataService = marketDataService;
-		_monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
+		_monthsSinceProjectStartDate = monthsCalculationService.CalculateSinceProjectStart();
 	}
 
 	public async Task<StatisticsDto> GetStatisticsAsync()
 	{
 		var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
 		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Crypto ], includePaymentShares: false);
-		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate);
+		var uniqueCurrencyPairs = GetUniqueCurrencyPairs(payoutsList);
+		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate, uniqueCurrencyPairs);
 		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
 		var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
 		var expenses = await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Electricity, PaymentType.Purchase ], includePaymentShares: false);
@@ -55,31 +57,23 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 
 		return statisticsDto;
 	}
-
-	private int CalculateMonthsSinceProjectStart()
-	{
-		var totalMonths = (_currentDate.Year - _projectStartDate.Year) * 12 + _currentDate.Month -
-		                  _projectStartDate.Month;
-		if (_currentDate.Day < _projectStartDate.Day)
-			totalMonths--;
-
-		return totalMonths;
-	}
+	
 
 	private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
 		List<ShareablePayment> payouts, 
-		decimal usdToRubRate)
+		decimal usdToRubRate,
+		IEnumerable<CurrencyPair> uniqueCurrencyPairs)
 	{
-		var uniqueCurrencyPairs = payouts
-			.Select(payment => new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT })
-			.Distinct()
-			.ToList();
+		var currentDate = DateTime.UtcNow;
+		var firstPayoutDate = payouts
+			.Select(payout => payout.Date)
+			.MinBy(date => date);
 
 		var currencyRates = await _marketDataService.GetLatestMarketDataForCurrenciesAsync(uniqueCurrencyPairs);
 
 		var priceBars = new List<MonthlyPriceBar>();
-		for (var processingDate = _projectStartDate;
-		     processingDate <= _currentDate;
+		for (var processingDate = firstPayoutDate;
+		     processingDate <= currentDate;
 		     processingDate = processingDate.AddMonths(1))
 		{
 			var incomeByCurrencies = GetIncomeByDate(payouts, processingDate.Year, processingDate.Month);
@@ -94,6 +88,15 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 		return priceBars;
 	}
 
+	private static List<CurrencyPair> GetUniqueCurrencyPairs(IEnumerable<ShareablePayment> payouts)
+	{
+		var uniqueCurrencyPairs = payouts
+			.Select(payment => new CurrencyPair { From = payment.Currency.Code, To = CurrencyCode.USDT })
+			.Distinct()
+			.ToList();
+		return uniqueCurrencyPairs;
+	}
+	
 	private static Dictionary<CurrencyCode, decimal> GetIncomeByDate(IEnumerable<ShareablePayment> payouts, int year,
 		int month)
 	{
@@ -154,8 +157,9 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 
 		var priceBars = new List<MonthlyPriceBar>();
 		var processingDate = _projectStartDate;
+		var currentDate = DateTime.UtcNow;
 
-		while (processingDate <= _currentDate)
+		while (processingDate <= currentDate)
 		{
 			var totalAmount = monthlyExpenses
 				.Where(expense =>
