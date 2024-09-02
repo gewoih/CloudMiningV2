@@ -15,7 +15,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 	private readonly int _monthsSinceProjectStartDate;
 
 	private readonly IShareablePaymentService _shareablePaymentService;
-	
+
 	public ReceiveAndSellCalculationStrategy(IShareablePaymentService shareablePaymentService,
 		IMonthsCalculationService monthsCalculationService,
 		IMarketDataService marketDataService,
@@ -29,16 +29,21 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 	public async Task<StatisticsDto> GetStatisticsAsync()
 	{
-		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
+		var payoutsList =
+			await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
 		var payoutsDates = GetPayoutsDates(payoutsList);
 		var usdToRubRatesByDate = await _marketDataService.GetUsdToRubRatesByDateAsync(payoutsDates);
 		var uniqueCurrencyPairs = _statisticsCalculationHelperService.GetUniqueCurrencyPairs(payoutsList);
 		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRatesByDate, payoutsDates, uniqueCurrencyPairs);
 		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
 		var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
-		var expenses = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Electricity, PaymentType.Purchase], includePaymentShares: false);
-		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity).Sum(payment => payment.Amount);
-		var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase).Sum(payment => payment.Amount);
+		var expenses =
+			await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Electricity, PaymentType.Purchase],
+				includePaymentShares: false);
+		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
+			.Sum(payment => payment.Amount);
+		var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase)
+			.Sum(payment => payment.Amount);
 		var totalExpense = spentOnElectricity + spentOnPurchases;
 		var totalProfit = totalIncome - totalExpense;
 		var monthlyProfit = totalProfit / _monthsSinceProjectStartDate;
@@ -61,7 +66,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 		return statisticsDto;
 	}
-	
+
 
 	private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
 		List<ShareablePayment> payouts,
@@ -91,7 +96,8 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		return priceBars;
 	}
 
-	private static Dictionary<DateTime, decimal> CalculateIncome(List<ShareablePayment> payouts, Dictionary<CurrencyPair, List<MarketData?>> currencyRates, CurrencyCode currency)
+	private static Dictionary<DateTime, decimal> CalculateIncome(List<ShareablePayment> payouts,
+		Dictionary<CurrencyPair, List<MarketData?>> currencyRates, CurrencyCode currency)
 	{
 		var incomes = new Dictionary<DateTime, decimal>();
 
@@ -99,14 +105,15 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		{
 			foreach (var (currencyPair, marketDataList) in currencyRates)
 			{
-				if (payout.Currency.Code != currencyPair.From || currencyPair.To != currency) 
+				if (payout.Currency.Code != currencyPair.From || currencyPair.To != currency)
 					continue;
 
 				//TODO: Что за хуйня?
-				var matchingMarketData = marketDataList.Find(marketData => marketData != null &&
-				                                                           payout.Date.Date.AddHours(payout.Date.Hour) == marketData.Date);
+				var matchingMarketData = marketDataList
+					.Find(marketData => marketData != null && payout.Date.Date.AddHours(payout.Date.Hour) ==
+						marketData.Date);
 
-				if (matchingMarketData == null) 
+				if (matchingMarketData == null)
 					continue;
 
 				var income = payout.Amount * matchingMarketData.Price;
@@ -117,7 +124,8 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		return incomes;
 	}
 
-	private static Dictionary<DateTime, decimal> CalculateCurrencyIncomeByDate(Dictionary<DateTime, decimal> incomes, Dictionary<DateTime, decimal> rates)
+	private static Dictionary<DateTime, decimal> CalculateCurrencyIncomeByDate(Dictionary<DateTime, decimal> incomes,
+		Dictionary<DateTime, decimal> rates)
 	{
 		var rubIncome = new Dictionary<DateTime, decimal>();
 
@@ -125,7 +133,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		{
 			var date = dateTime.Date;
 
-			if (!rates.TryGetValue(date, out var rate)) 
+			if (!rates.TryGetValue(date, out var rate))
 				continue;
 
 			if (rubIncome.ContainsKey(date))

@@ -16,7 +16,7 @@ public class StatisticsCalculationHelperService : IStatisticsCalculationHelperSe
 			.ToList();
 		return uniqueCurrencyPairs;
 	}
-	
+
 	public List<Expense> GetExpenses(List<ShareablePayment> payments)
 	{
 		var expenseList = new List<Expense>();
@@ -35,7 +35,7 @@ public class StatisticsCalculationHelperService : IStatisticsCalculationHelperSe
 
 		return expenseList;
 	}
-	
+
 	public List<MonthlyPriceBar> GetProfitsList(List<MonthlyPriceBar> incomes, IEnumerable<Expense> expenses)
 	{
 		var generalExpenses = expenses
@@ -62,11 +62,11 @@ public class StatisticsCalculationHelperService : IStatisticsCalculationHelperSe
 		var priceBars = new List<MonthlyPriceBar>();
 		if (payments.Count == 0)
 			return priceBars;
-		
+
 		var monthlyExpenses = payments
 			.GroupBy(payment => (payment.Date.Year, payment.Date.Month))
 			.ToList();
-		
+
 		var firstPaymentDate = payments
 			.Select(payout => payout.Date)
 			.MinBy(date => date);
@@ -91,7 +91,7 @@ public class StatisticsCalculationHelperService : IStatisticsCalculationHelperSe
 
 		return priceBars;
 	}
-	
+
 	private static List<MonthlyPriceBar> CalculateGeneralMonthlyExpenses(IEnumerable<MonthlyPriceBar> monthlyPriceBars)
 	{
 		var generalExpensePriceBars = monthlyPriceBars
