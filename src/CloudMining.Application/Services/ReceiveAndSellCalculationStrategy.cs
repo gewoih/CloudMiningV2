@@ -79,10 +79,9 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 		var usdIncomeByDate = CalculateIncome(payouts, currencyRates, CurrencyCode.USDT);
 		var rubIncomeByDate = CalculateCurrencyIncomeByDate(usdIncomeByDate, usdToRubRate);
+		var monthlyIncomeByDate = GroupIncomeByMonths(rubIncomeByDate);
 
 		var priceBars = new List<MonthlyPriceBar>();
-
-		var monthlyIncomeByDate = GroupIncomeByMonths(rubIncomeByDate);
 
 		foreach (var (date, incomeValue) in monthlyIncomeByDate)
 		{
