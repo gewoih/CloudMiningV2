@@ -82,11 +82,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 		var priceBars = new List<MonthlyPriceBar>();
 
-		var monthlyIncomeByDate = rubIncomeByDate
-			.GroupBy(entry => new DateOnly(entry.Key.Year, entry.Key.Month, 1))
-			.ToDictionary(
-				group => group.Key,
-				group => group.Sum(entry => entry.Value));
+		var monthlyIncomeByDate = GroupIncomeByMonths(rubIncomeByDate);
 
 		foreach (var (date, incomeValue) in monthlyIncomeByDate)
 		{
@@ -142,6 +138,21 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		}
 
 		return rubIncome;
+	}
+
+	private static Dictionary<DateOnly, decimal> GroupIncomeByMonths(Dictionary<DateOnly, decimal> incomes)
+	{
+		var monthlyIncome = new Dictionary<DateOnly, decimal>();
+		
+		foreach (var (date, value) in incomes)
+		{
+			var firstDayOfMonth = new DateOnly(date.Year, date.Month, 1);
+			
+			if (!monthlyIncome.TryAdd(firstDayOfMonth, value))
+				monthlyIncome[firstDayOfMonth] += value;
+		}
+
+		return monthlyIncome;
 	}
 
 	private static List<DateTime> GetPayoutsDates(IEnumerable<ShareablePayment> payouts)
