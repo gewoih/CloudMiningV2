@@ -17,6 +17,6 @@ public interface IMarketDataService
 
 	Task<decimal> GetLastUsdToRubRateAsync(CurrencyCode from = CurrencyCode.USD, CurrencyCode to = CurrencyCode.RUB);
 
-	Task<Dictionary<DateTime, decimal>> GetUsdToRubRatesByDateAsync(List<DateTime> payoutsDates,
+	Task<Dictionary<DateOnly, decimal>> GetUsdToRubRatesByDateAsync(List<DateTime> payoutsDates,
 		CurrencyCode from = CurrencyCode.USD, CurrencyCode to = CurrencyCode.RUB);
 }

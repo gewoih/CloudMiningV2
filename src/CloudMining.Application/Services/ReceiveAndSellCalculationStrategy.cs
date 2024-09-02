@@ -70,7 +70,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 	private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
 		List<ShareablePayment> payouts,
-		Dictionary<DateTime, decimal> usdToRubRate,
+		Dictionary<DateOnly, decimal> usdToRubRate,
 		List<DateTime> payoutsDates,
 		IEnumerable<CurrencyPair> uniqueCurrencyPairs)
 	{
@@ -96,43 +96,44 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		return priceBars;
 	}
 
-	private static Dictionary<DateTime, decimal> CalculateIncome(List<ShareablePayment> payouts,
+	private static Dictionary<DateOnly, decimal> CalculateIncome(List<ShareablePayment> payouts,
 		Dictionary<CurrencyPair, List<MarketData?>> currencyRates, CurrencyCode currency)
 	{
-		var incomes = new Dictionary<DateTime, decimal>();
+		var incomes = new Dictionary<DateOnly, decimal>();
 
 		foreach (var payout in payouts)
 		{
-			foreach (var (currencyPair, marketDataList) in currencyRates)
+			var currencyPair = new CurrencyPair
 			{
-				if (payout.Currency.Code != currencyPair.From || currencyPair.To != currency)
-					continue;
-
-				//TODO: Что за хуйня?
-				var matchingMarketData = marketDataList
-					.Find(marketData => marketData != null && payout.Date.Date.AddHours(payout.Date.Hour) ==
-						marketData.Date);
-
-				if (matchingMarketData == null)
-					continue;
-
-				var income = payout.Amount * matchingMarketData.Price;
-				incomes[payout.Date] = income;
+				From = payout.Currency.Code,
+				To = currency
+			};
+			
+			if (currencyRates.TryGetValue(currencyPair, out var marketDataList))
+			{
+				var payoutDate = DateOnly.FromDateTime(payout.Date);
+				var currencyRate = marketDataList
+					.Where(marketData => DateOnly.FromDateTime(marketData!.Date) == payoutDate)
+					.Select(marketData => marketData!.Price)
+					.First();
+				
+				if(incomes.ContainsKey(payoutDate)) 
+					incomes[payoutDate] += currencyRate * payout.Amount;
+				else
+					incomes[payoutDate] = currencyRate * payout.Amount;
 			}
 		}
-
+		
 		return incomes;
 	}
 
-	private static Dictionary<DateTime, decimal> CalculateCurrencyIncomeByDate(Dictionary<DateTime, decimal> incomes,
-		Dictionary<DateTime, decimal> rates)
+	private static Dictionary<DateOnly, decimal> CalculateCurrencyIncomeByDate(Dictionary<DateOnly, decimal> incomes,
+		Dictionary<DateOnly, decimal> rates)
 	{
-		var rubIncome = new Dictionary<DateTime, decimal>();
+		var rubIncome = new Dictionary<DateOnly, decimal>();
 
-		foreach (var (dateTime, incomeValue) in incomes)
+		foreach (var (date, incomeValue) in incomes)
 		{
-			var date = dateTime.Date;
-
 			if (!rates.TryGetValue(date, out var rate))
 				continue;
 
@@ -148,9 +149,10 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 	private static List<DateTime> GetPayoutsDates(IEnumerable<ShareablePayment> payouts)
 	{
 		var payoutsDates = payouts
-			.Select(payment => payment.Date) //TODO: DateOnly
+			.Select(payment => payment.Date)
 			.Distinct()
 			.ToList();
+		
 		return payoutsDates;
 	}
 }

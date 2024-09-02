@@ -109,14 +109,13 @@ public sealed class MarketDataService : IMarketDataService
 		return usdToRubRate;
 	}
 
-	public async Task<Dictionary<DateTime, decimal>> GetUsdToRubRatesByDateAsync(
+	public async Task<Dictionary<DateOnly, decimal>> GetUsdToRubRatesByDateAsync(
 		List<DateTime> payoutsDates,
 		CurrencyCode from = CurrencyCode.USD,
 		CurrencyCode to = CurrencyCode.RUB)
 	{
-		var usdToRubRatesByDate = new Dictionary<DateTime, decimal>();
-
-		//TODO: Использовать DateOnly везде, где не нужно использовать время
+		var usdToRubRatesByDate = new Dictionary<DateOnly, decimal>();
+		
 		var marketDataList = await _context.MarketData
 			.Where(marketData =>
 				marketData.From == from &&
@@ -134,7 +133,7 @@ public sealed class MarketDataService : IMarketDataService
 				.Select(marketData => marketData.Price)
 				.FirstOrDefault();
 
-			usdToRubRatesByDate[date.Date] = usdToRubRate;
+			usdToRubRatesByDate[DateOnly.FromDateTime(date.Date)] = usdToRubRate;
 		}
 
 		return usdToRubRatesByDate;
