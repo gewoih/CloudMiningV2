@@ -108,20 +108,18 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 				From = payout.Currency.Code,
 				To = currency
 			};
-			
-			if (currencyRates.TryGetValue(currencyPair, out var marketDataList))
-			{
-				var payoutDate = DateOnly.FromDateTime(payout.Date);
-				var currencyRate = marketDataList
-					.Where(marketData => DateOnly.FromDateTime(marketData!.Date) == payoutDate)
-					.Select(marketData => marketData!.Price)
-					.First();
+
+			if (!currencyRates.TryGetValue(currencyPair, out var marketDataList)) continue;
+			var payoutDate = DateOnly.FromDateTime(payout.Date);
+			var currencyRate = marketDataList
+				.Where(marketData => DateOnly.FromDateTime(marketData!.Date) == payoutDate)
+				.Select(marketData => marketData!.Price)
+				.First();
 				
-				if(incomes.ContainsKey(payoutDate)) 
-					incomes[payoutDate] += currencyRate * payout.Amount;
-				else
-					incomes[payoutDate] = currencyRate * payout.Amount;
-			}
+			if(incomes.ContainsKey(payoutDate)) 
+				incomes[payoutDate] += currencyRate * payout.Amount;
+			else
+				incomes[payoutDate] = currencyRate * payout.Amount;
 		}
 		
 		return incomes;
