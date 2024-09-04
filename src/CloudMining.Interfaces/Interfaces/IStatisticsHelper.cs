@@ -4,9 +4,10 @@ using CloudMining.Interfaces.DTO.Statistics;
 
 namespace CloudMining.Interfaces.Interfaces;
 
-public interface IStatisticsCalculationHelperService
+public interface IStatisticsHelper
 {
 	List<CurrencyPair> GetUniqueCurrencyPairs(IEnumerable<ShareablePayment> payouts);
 	List<Expense> GetExpenses(List<ShareablePayment> payments);
 	List<MonthlyPriceBar> GetProfitsList(List<MonthlyPriceBar> incomes, IEnumerable<Expense> expenses);
+	int CalculateMonthsSinceProjectStart();
 }

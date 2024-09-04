@@ -48,7 +48,7 @@ public static class ServicesSetup
 		services.AddScoped<IMarketDataLoaderStrategyFactory, MarketDataLoaderStrategyFactory>();
 		services.AddScoped<IStatisticsCalculationStrategyFactory, StatisticsCalculationStrategyFactory>();
 		services.AddScoped<IStatisticsService, StatisticsService>();
-		services.AddScoped<IStatisticsCalculationHelperService, StatisticsCalculationHelperService>();
+		services.AddScoped<IStatisticsHelper, StatisticsHelper>();
 
 		services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
 		services.AddScoped<IMapper<NotificationSettings, NotificationSettingsDto>, NotificationSettingsMapper>();
@@ -58,8 +58,6 @@ public static class ServicesSetup
 		services.AddSingleton<IMapper<Deposit, DepositDto>, DepositMapper>();
 		services.AddSingleton<IMapper<ShareablePayment, CreatePaymentDto>, ShareablePaymentMapper>();
 		services.AddSingleton<IMapper<User, RegisterDto>, UserRegistrationMapper>();
-		
-		services.AddSingleton<IMonthsCalculationService, MonthsCalculationService>();
 
 		services.AddHttpClient<EmcdApiClient>();
 		services.AddHostedService<PayoutsLoaderService>();

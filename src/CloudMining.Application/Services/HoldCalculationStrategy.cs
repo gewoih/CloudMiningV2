@@ -10,29 +10,27 @@ namespace CloudMining.Application.Services;
 public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 {
 	private readonly IMarketDataService _marketDataService;
-	private readonly int _monthsSinceProjectStartDate;
-	private readonly IStatisticsCalculationHelperService _statisticsCalculationHelperService;
+	private readonly IStatisticsHelper _statisticsHelper;
 	private readonly IShareablePaymentService _shareablePaymentService;
 
 	public HoldCalculationStrategy(IShareablePaymentService shareablePaymentService,
-		IMonthsCalculationService monthsCalculationService,
 		IMarketDataService marketDataService,
-		IStatisticsCalculationHelperService statisticsCalculationHelperService)
+		IStatisticsHelper statisticsHelper)
 	{
 		_shareablePaymentService = shareablePaymentService;
 		_marketDataService = marketDataService;
-		_statisticsCalculationHelperService = statisticsCalculationHelperService;
-		_monthsSinceProjectStartDate = monthsCalculationService.CalculateSinceProjectStart();
+		_statisticsHelper = statisticsHelper;
 	}
 
 	public async Task<StatisticsDto> GetStatisticsAsync()
 	{
+		var monthsSinceProjectStartDate = _statisticsHelper.CalculateMonthsSinceProjectStart();
 		var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
 		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Crypto ], includePaymentShares: false);
-		var uniqueCurrencyPairs = _statisticsCalculationHelperService.GetUniqueCurrencyPairs(payoutsList);
+		var uniqueCurrencyPairs = _statisticsHelper.GetUniqueCurrencyPairs(payoutsList);
 		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRate, uniqueCurrencyPairs);
 		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
-		var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
+		var monthlyIncome = totalIncome / monthsSinceProjectStartDate;
 		var expenses = await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Electricity, PaymentType.Purchase ], includePaymentShares: false);
 		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
 			.Sum(payment => payment.Amount);
@@ -40,10 +38,10 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 			.Sum(payment => payment.Amount);
 		var totalExpense = spentOnElectricity + spentOnPurchases;
 		var totalProfit = totalIncome - totalExpense;
-		var monthlyProfit = totalProfit / _monthsSinceProjectStartDate;
+		var monthlyProfit = totalProfit / monthsSinceProjectStartDate;
 		var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
-		var expensesList = _statisticsCalculationHelperService.GetExpenses(expenses);
-		var profits = _statisticsCalculationHelperService.GetProfitsList(incomes, expensesList);
+		var expensesList = _statisticsHelper.GetExpenses(expenses);
+		var profits = _statisticsHelper.GetProfitsList(incomes, expensesList);
 
 		var statisticsDto = new StatisticsDto(
 			totalIncome,

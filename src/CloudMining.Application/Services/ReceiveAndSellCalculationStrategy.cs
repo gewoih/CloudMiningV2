@@ -10,28 +10,25 @@ namespace CloudMining.Application.Services;
 public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 {
 	private readonly IMarketDataService _marketDataService;
-	private readonly IStatisticsCalculationHelperService _statisticsCalculationHelperService;
-	private readonly IMonthsCalculationService _monthsCalculationService;
+	private readonly IStatisticsHelper _statisticsHelper;
 	private readonly IShareablePaymentService _shareablePaymentService;
 
 	public ReceiveAndSellCalculationStrategy(IShareablePaymentService shareablePaymentService,
-		IMonthsCalculationService monthsCalculationService,
 		IMarketDataService marketDataService,
-		IStatisticsCalculationHelperService statisticsCalculationHelperService)
+		IStatisticsHelper statisticsHelper)
 	{
 		_shareablePaymentService = shareablePaymentService;
-		_monthsCalculationService = monthsCalculationService;
 		_marketDataService = marketDataService;
-		_statisticsCalculationHelperService = statisticsCalculationHelperService;
+		_statisticsHelper = statisticsHelper;
 	}
 
 	public async Task<StatisticsDto> GetStatisticsAsync()
 	{
-		var monthsSinceProjectStartDate = _monthsCalculationService.CalculateSinceProjectStart();
+		var monthsSinceProjectStartDate = _statisticsHelper.CalculateMonthsSinceProjectStart();
 		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
 		var payoutsDates = GetPayoutsDates(payoutsList);
 		var usdToRubRatesByDate = await _marketDataService.GetUsdToRubRatesByDateAsync(payoutsDates);
-		var uniqueCurrencyPairs = _statisticsCalculationHelperService.GetUniqueCurrencyPairs(payoutsList);
+		var uniqueCurrencyPairs = _statisticsHelper.GetUniqueCurrencyPairs(payoutsList);
 		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRatesByDate, payoutsDates, uniqueCurrencyPairs);
 		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
 		var monthlyIncome = totalIncome / monthsSinceProjectStartDate;
@@ -46,8 +43,8 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		var totalProfit = totalIncome - totalExpense;
 		var monthlyProfit = totalProfit / monthsSinceProjectStartDate;
 		var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
-		var expensesList = _statisticsCalculationHelperService.GetExpenses(expenses);
-		var profits = _statisticsCalculationHelperService.GetProfitsList(incomes, expensesList);
+		var expensesList = _statisticsHelper.GetExpenses(expenses);
+		var profits = _statisticsHelper.GetProfitsList(incomes, expensesList);
 
 		var statisticsDto = new StatisticsDto(
 			totalIncome,
