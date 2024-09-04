@@ -48,6 +48,7 @@ public static class ServicesSetup
 		services.AddScoped<IMarketDataLoaderStrategyFactory, MarketDataLoaderStrategyFactory>();
 		services.AddScoped<IStatisticsCalculationStrategyFactory, StatisticsCalculationStrategyFactory>();
 		services.AddScoped<IStatisticsService, StatisticsService>();
+		services.AddScoped<IStatisticsHelper, StatisticsHelper>();
 
 		services.AddScoped<IMapper<ShareablePayment, UserPaymentDto>, UserPaymentMapper>();
 		services.AddScoped<IMapper<NotificationSettings, NotificationSettingsDto>, NotificationSettingsMapper>();
