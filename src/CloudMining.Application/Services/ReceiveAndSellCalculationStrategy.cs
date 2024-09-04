@@ -5,15 +5,13 @@ using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
 
-
 namespace CloudMining.Application.Services;
 
 public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 {
 	private readonly IMarketDataService _marketDataService;
 	private readonly IStatisticsCalculationHelperService _statisticsCalculationHelperService;
-	private readonly int _monthsSinceProjectStartDate;
-
+	private readonly IMonthsCalculationService _monthsCalculationService;
 	private readonly IShareablePaymentService _shareablePaymentService;
 
 	public ReceiveAndSellCalculationStrategy(IShareablePaymentService shareablePaymentService,
@@ -22,21 +20,21 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		IStatisticsCalculationHelperService statisticsCalculationHelperService)
 	{
 		_shareablePaymentService = shareablePaymentService;
+		_monthsCalculationService = monthsCalculationService;
 		_marketDataService = marketDataService;
 		_statisticsCalculationHelperService = statisticsCalculationHelperService;
-		_monthsSinceProjectStartDate = monthsCalculationService.CalculateSinceProjectStart();
 	}
 
 	public async Task<StatisticsDto> GetStatisticsAsync()
 	{
-		var payoutsList =
-			await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
+		var monthsSinceProjectStartDate = _monthsCalculationService.CalculateSinceProjectStart();
+		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
 		var payoutsDates = GetPayoutsDates(payoutsList);
 		var usdToRubRatesByDate = await _marketDataService.GetUsdToRubRatesByDateAsync(payoutsDates);
 		var uniqueCurrencyPairs = _statisticsCalculationHelperService.GetUniqueCurrencyPairs(payoutsList);
 		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRatesByDate, payoutsDates, uniqueCurrencyPairs);
 		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
-		var monthlyIncome = totalIncome / _monthsSinceProjectStartDate;
+		var monthlyIncome = totalIncome / monthsSinceProjectStartDate;
 		var expenses =
 			await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Electricity, PaymentType.Purchase],
 				includePaymentShares: false);
@@ -46,7 +44,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 			.Sum(payment => payment.Amount);
 		var totalExpense = spentOnElectricity + spentOnPurchases;
 		var totalProfit = totalIncome - totalExpense;
-		var monthlyProfit = totalProfit / _monthsSinceProjectStartDate;
+		var monthlyProfit = totalProfit / monthsSinceProjectStartDate;
 		var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
 		var expensesList = _statisticsCalculationHelperService.GetExpenses(expenses);
 		var profits = _statisticsCalculationHelperService.GetProfitsList(incomes, expensesList);
