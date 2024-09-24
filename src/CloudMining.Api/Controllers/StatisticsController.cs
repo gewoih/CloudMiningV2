@@ -19,9 +19,9 @@ public class StatisticsController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<StatisticsDto> Get([FromQuery] StatisticsCalculationStrategy statisticsCalculationStrategy)
+    public async Task<List<StatisticsDto>> Get([FromQuery] StatisticsCalculationStrategy statisticsCalculationStrategy)
     {
-        var statisticsDto = await _statisticsService.GetStatisticsAsync(statisticsCalculationStrategy);
-        return statisticsDto;
+        var statisticsDtoList = await _statisticsService.GetStatisticsAsync(statisticsCalculationStrategy);
+        return statisticsDtoList;
     }
 }

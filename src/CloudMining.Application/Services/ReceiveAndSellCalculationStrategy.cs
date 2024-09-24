@@ -22,7 +22,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		_statisticsHelper = statisticsHelper;
 	}
 
-	public async Task<StatisticsDto> GetStatisticsAsync()
+	public async Task<List<StatisticsDto>> GetStatisticsAsync()
 	{
 		var monthsSinceProjectStartDate = _statisticsHelper.CalculateMonthsSinceProjectStart();
 		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);

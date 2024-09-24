@@ -12,18 +12,23 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 	private readonly IMarketDataService _marketDataService;
 	private readonly IStatisticsHelper _statisticsHelper;
 	private readonly IShareablePaymentService _shareablePaymentService;
+	private readonly ICurrentUserService _currentUserService;
 
 	public HoldCalculationStrategy(IShareablePaymentService shareablePaymentService,
 		IMarketDataService marketDataService,
-		IStatisticsHelper statisticsHelper)
+		IStatisticsHelper statisticsHelper,
+		ICurrentUserService currentUserService)
 	{
 		_shareablePaymentService = shareablePaymentService;
 		_marketDataService = marketDataService;
 		_statisticsHelper = statisticsHelper;
+		_currentUserService = currentUserService;
 	}
 
-	public async Task<StatisticsDto> GetStatisticsAsync()
+	public async Task<List<StatisticsDto>> GetStatisticsAsync()
 	{
+		var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
+		
 		var monthsSinceProjectStartDate = _statisticsHelper.CalculateMonthsSinceProjectStart();
 		var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
 		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [ PaymentType.Crypto ], includePaymentShares: false);
