@@ -14,7 +14,7 @@ public class StatisticsService : IStatisticsService
         _statisticsCalculationStrategyFactory = statisticsCalculationStrategyFactory;
     }
 
-    public async Task<StatisticsDto> GetStatisticsAsync(StatisticsCalculationStrategy strategy)
+    public async Task<List<StatisticsDto>> GetStatisticsAsync(StatisticsCalculationStrategy strategy)
     {
         var statisticsCalculationStrategy = _statisticsCalculationStrategyFactory.Create(strategy);
         var statisticsDto = await statisticsCalculationStrategy.GetStatisticsAsync();
