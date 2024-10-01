@@ -24,8 +24,10 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 
 	public async Task<List<StatisticsDto>> GetStatisticsAsync()
 	{
+		var statisticsDtoList = new List<StatisticsDto>();
+		
 		var monthsSinceProjectStartDate = _statisticsHelper.CalculateMonthsSinceProjectStart();
-		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
+		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], adminCheck: false);
 		var payoutsDates = GetPayoutsDates(payoutsList);
 		var usdToRubRatesByDate = await _marketDataService.GetUsdToRubRatesByDateAsync(payoutsDates);
 		var uniqueCurrencyPairs = _statisticsHelper.GetUniqueCurrencyPairs(payoutsList);
@@ -34,7 +36,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		var monthlyIncome = totalIncome / monthsSinceProjectStartDate;
 		var expenses =
 			await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Electricity, PaymentType.Purchase],
-				includePaymentShares: false);
+				adminCheck: false);
 		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
 			.Sum(payment => payment.Amount);
 		var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase)
@@ -59,7 +61,9 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 			profits,
 			expensesList);
 
-		return statisticsDto;
+		statisticsDtoList.Add(statisticsDto);
+		
+		return statisticsDtoList;
 	}
 
 

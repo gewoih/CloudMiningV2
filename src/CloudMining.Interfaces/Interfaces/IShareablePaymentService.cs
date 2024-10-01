@@ -7,7 +7,7 @@ namespace CloudMining.Interfaces.Interfaces;
 public interface IShareablePaymentService
 {
 	Task<List<ShareablePayment>> GetAsync(int skip = 0, int take = int.MaxValue, List<PaymentType>? paymentTypes = null,
-		bool includePaymentShares = true);
+		bool adminCheck = true);
 
 	Task<int> GetUserPaymentsCount(PaymentType? paymentType = null);
 	Task<ShareablePayment?> CreateAsync(CreatePaymentDto createPaymentDto);

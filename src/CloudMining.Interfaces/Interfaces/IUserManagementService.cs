@@ -6,6 +6,7 @@ namespace CloudMining.Interfaces.Interfaces;
 public interface IUserManagementService
 {
 	Task<List<User>> GetUsersAsync(bool withDeposits = false, bool withShareChanges = false);
+	Task<List<UserDto>> GetUserDtosAsync();
 	Task<User?> GetAsync(Guid userId);
 	Task<bool> UpdateAsync(User user);
 	Task<User?> GetByTelegramUsernameAsync(string telegramUsername);
