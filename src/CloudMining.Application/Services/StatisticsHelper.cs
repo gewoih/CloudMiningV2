@@ -3,6 +3,7 @@ using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Statistics;
+using CloudMining.Interfaces.DTO.Users;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.Extensions.Options;
 
@@ -11,9 +12,15 @@ namespace CloudMining.Application.Services;
 public class StatisticsHelper : IStatisticsHelper
 {
 	private readonly DateOnly _projectStartDate;
+	private readonly IUserManagementService _userManagementService;
+	private readonly ICurrentUserService _currentUserService;
 
-	public StatisticsHelper(IOptions<ProjectInformationSettings> projectInformation)
+	public StatisticsHelper(IOptions<ProjectInformationSettings> projectInformation,
+		IUserManagementService userManagementService,
+		ICurrentUserService currentUserService)
 	{
+		_userManagementService = userManagementService;
+		_currentUserService = currentUserService;
 		_projectStartDate = projectInformation.Value.ProjectStartDate;
 	}
 
@@ -26,7 +33,7 @@ public class StatisticsHelper : IStatisticsHelper
 		return uniqueCurrencyPairs;
 	}
 
-	public List<Expense> GetExpenses(List<ShareablePayment> payments, Guid? userId = null)
+	private static List<Expense> GetExpenses(List<ShareablePayment> payments, Guid? userId = null)
 	{
 		var expenseList = new List<Expense>();
 		var electricityPayments = payments.Where(payment => payment.Type == PaymentType.Electricity).ToList();
@@ -57,7 +64,7 @@ public class StatisticsHelper : IStatisticsHelper
 		return expenseList;
 	}
 
-	public List<MonthlyPriceBar> GetProfitsList(List<MonthlyPriceBar> incomes, IEnumerable<Expense> expenses)
+	private static List<MonthlyPriceBar> GetProfitsList(List<MonthlyPriceBar> incomes, IEnumerable<Expense> expenses)
 	{
 		var generalExpenses = expenses
 			.Where(expense => expense.Type == ExpenseType.Total)
@@ -78,7 +85,8 @@ public class StatisticsHelper : IStatisticsHelper
 		return profits;
 	}
 
-	private static List<MonthlyPriceBar> CalculateMonthlyExpenses(IReadOnlyCollection<ShareablePayment> payments, Guid? userId = null)
+	private static List<MonthlyPriceBar> CalculateMonthlyExpenses(IReadOnlyCollection<ShareablePayment> payments,
+		Guid? userId = null)
 	{
 		var priceBars = new List<MonthlyPriceBar>();
 		if (payments.Count == 0)
@@ -137,7 +145,7 @@ public class StatisticsHelper : IStatisticsHelper
 		return generalExpensePriceBars;
 	}
 
-	public int CalculateMonthsSinceProjectStart()
+	private int CalculateMonthsSinceProjectStart()
 	{
 		var currentDate = DateTime.UtcNow;
 
@@ -149,7 +157,90 @@ public class StatisticsHelper : IStatisticsHelper
 		return totalMonths;
 	}
 
-	public StatisticsDto GetGeneralStatisticsDto(List<StatisticsDto> statisticsDtoList)
+	public async Task<List<UserDto>> GetUserDtosAsync(bool withAdminCheck = false)
+	{
+		var users = await _userManagementService.GetUsersAsync();
+
+		var userDtosList = new List<UserDto>();
+
+		foreach (var user in users)
+		{
+			var userDto = new UserDto(user.Id, user.FirstName, user.LastName, user.Patronymic);
+			userDtosList.Add(userDto);
+		}
+
+		if (withAdminCheck)
+		{
+			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
+			if (!isCurrentUserAdmin)
+			{
+				var currentUserId = _currentUserService.GetCurrentUserId();
+				userDtosList = userDtosList.Where(user => user.Id == currentUserId).ToList();
+			}
+		}
+		
+		return userDtosList;
+	}
+
+	public List<StatisticsDto> GetStatisticsDtoList(
+		Dictionary<UserDto, List<MonthlyPriceBar>> incomesPerUser,
+		List<ShareablePayment> expenseList)
+	{
+		var monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
+		var statisticsDtoList = new List<StatisticsDto>();
+		var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
+		
+		foreach (var (user, priceBars) in incomesPerUser)
+		{
+			var totalIncome = priceBars.Sum(priceBar => priceBar.Value);
+			var monthlyIncome = totalIncome / monthsSinceProjectStartDate;
+			var spentOnElectricity = expenseList
+				.Where(payment => payment.Type == PaymentType.Electricity &&
+				                  payment.PaymentShares.Exists(share => share.UserId == user.Id))
+				.Sum(payment => payment.PaymentShares
+					.Where(share => share.UserId == user.Id)
+					.Sum(share => share.Amount));
+
+			var spentOnPurchases = expenseList
+				.Where(payment => payment.Type == PaymentType.Purchase &&
+				                  payment.PaymentShares.Exists(share => share.UserId == user.Id))
+				.Sum(payment => payment.PaymentShares
+					.Where(share => share.UserId == user.Id)
+					.Sum(share => share.Amount));
+			
+			var totalExpense = spentOnElectricity + spentOnPurchases;
+			var totalProfit = totalIncome - totalExpense;
+			var monthlyProfit = totalProfit / monthsSinceProjectStartDate;
+			var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
+			var expensesList = GetExpenses(expenseList, user.Id);
+			var profits = GetProfitsList(priceBars, expensesList);
+
+			var statisticsDto = new UserStatisticsDto(
+				user,
+				totalIncome,
+				monthlyIncome,
+				totalExpense,
+				spentOnElectricity,
+				spentOnPurchases,
+				totalProfit,
+				monthlyProfit,
+				paybackPercent,
+				priceBars,
+				profits,
+				expensesList);
+
+			statisticsDtoList.Add(statisticsDto);
+		}
+		
+		if (!isCurrentUserAdmin) return statisticsDtoList;
+		
+		var generalStatisticsDto = GetGeneralStatisticsDto(statisticsDtoList);
+		statisticsDtoList.Insert(0, generalStatisticsDto);
+		
+		return statisticsDtoList;
+	}
+
+	private static StatisticsDto GetGeneralStatisticsDto(List<StatisticsDto> statisticsDtoList)
 	{
 		var totalIncome = 0m;
 		var monthlyIncome = 0m;

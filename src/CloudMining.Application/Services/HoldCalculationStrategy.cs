@@ -12,87 +12,25 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 {
 	private readonly IMarketDataService _marketDataService;
 	private readonly IStatisticsHelper _statisticsHelper;
-	private readonly IShareablePaymentService _shareablePaymentService;
-	private readonly ICurrentUserService _currentUserService;
-	private readonly IUserManagementService _userManagementService;
 
-	public HoldCalculationStrategy(IShareablePaymentService shareablePaymentService,
+	public HoldCalculationStrategy(
 		IMarketDataService marketDataService,
-		IStatisticsHelper statisticsHelper,
-		ICurrentUserService currentUserService,
-		IUserManagementService userManagementService)
+		IStatisticsHelper statisticsHelper)
 	{
-		_shareablePaymentService = shareablePaymentService;
 		_marketDataService = marketDataService;
 		_statisticsHelper = statisticsHelper;
-		_currentUserService = currentUserService;
-		_userManagementService = userManagementService;
 	}
 
-	public async Task<List<StatisticsDto>> GetStatisticsAsync()
+	public async Task<List<StatisticsDto>> GetStatisticsAsync(
+		List<ShareablePayment> payoutsList,
+		List<ShareablePayment> expenseList,
+		IEnumerable<CurrencyPair> uniqueCurrencyPairs,
+		List<UserDto> userDtosList)
 	{
-		var statisticsDtoList = new List<StatisticsDto>();
-
-		var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
-
-		var payoutsList =
-			await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], adminCheck: false);
-		var expenseList =
-			await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Electricity, PaymentType.Purchase],
-				adminCheck: false);
-
-		var monthsSinceProjectStartDate = _statisticsHelper.CalculateMonthsSinceProjectStart();
 		var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
-		var uniqueCurrencyPairs = _statisticsHelper.GetUniqueCurrencyPairs(payoutsList);
-		var incomesPerUser = await GetPriceBarsAsync(payoutsList, usdToRubRate, uniqueCurrencyPairs);
-
-		foreach (var (user, priceBars) in incomesPerUser)
-		{
-			var totalIncome = priceBars.Sum(priceBar => priceBar.Value);
-			var monthlyIncome = totalIncome / monthsSinceProjectStartDate;
-			var spentOnElectricity = expenseList
-				.Where(payment => payment.Type == PaymentType.Electricity &&
-				                  payment.PaymentShares.Exists(share => share.UserId == user.Id))
-				.Sum(payment => payment.PaymentShares
-					.Where(share => share.UserId == user.Id)
-					.Sum(share => share.Amount));
-
-			var spentOnPurchases = expenseList
-				.Where(payment => payment.Type == PaymentType.Purchase &&
-				                  payment.PaymentShares.Exists(share => share.UserId == user.Id))
-				.Sum(payment => payment.PaymentShares
-					.Where(share => share.UserId == user.Id)
-					.Sum(share => share.Amount));
-
-			var totalExpense = spentOnElectricity + spentOnPurchases;
-			var totalProfit = totalIncome - totalExpense;
-			var monthlyProfit = totalProfit / monthsSinceProjectStartDate;
-			var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
-			var expensesList = _statisticsHelper.GetExpenses(expenseList, user.Id);
-			var profits = _statisticsHelper.GetProfitsList(priceBars, expensesList);
-
-			var statisticsDto = new UserStatisticsDto(
-				user,
-				totalIncome,
-				monthlyIncome,
-				totalExpense,
-				spentOnElectricity,
-				spentOnPurchases,
-				totalProfit,
-				monthlyProfit,
-				paybackPercent,
-				priceBars,
-				profits,
-				expensesList);
-
-			statisticsDtoList.Add(statisticsDto);
-		}
-
-		if (!isCurrentUserAdmin) return statisticsDtoList;
-
-		var generalStatisticsDto = _statisticsHelper.GetGeneralStatisticsDto(statisticsDtoList);
-		statisticsDtoList.Insert(0, generalStatisticsDto);
-
+		var incomesPerUser = await GetPriceBarsAsync(payoutsList, usdToRubRate, uniqueCurrencyPairs, userDtosList);
+		var statisticsDtoList = _statisticsHelper.GetStatisticsDtoList(incomesPerUser,expenseList);
+		
 		return statisticsDtoList;
 	}
 
@@ -100,16 +38,9 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 	private async Task<Dictionary<UserDto, List<MonthlyPriceBar>>> GetPriceBarsAsync(
 		List<ShareablePayment> payouts,
 		decimal usdToRubRate,
-		IEnumerable<CurrencyPair> uniqueCurrencyPairs)
+		IEnumerable<CurrencyPair> uniqueCurrencyPairs,
+		List<UserDto> userDtosList)
 	{
-		var userDtosList = await _userManagementService.GetUserDtosAsync();
-		var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
-		if (!isCurrentUserAdmin)
-		{
-			var currentUserId = _currentUserService.GetCurrentUserId();
-			userDtosList = userDtosList.Where(user => user.Id == currentUserId).ToList();
-		}
-
 		var currentDate = DateTime.UtcNow;
 		var firstPayoutDate = payouts
 			.Select(payout => payout.Date)

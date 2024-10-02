@@ -29,23 +29,6 @@ public sealed class UserManagementService : IUserManagementService
 
 		return await usersQuery.ToListAsync().ConfigureAwait(false);
 	}
-	
-	public async Task<List<UserDto>> GetUserDtosAsync()
-	{
-		var users = await _context.Users
-			.ToListAsync()
-			.ConfigureAwait(false);
-		
-		var userDtosList = new List<UserDto>();
-
-		foreach (var user in users)
-		{
-			var userDto = new UserDto(user.Id, user.FirstName, user.LastName, user.Patronymic);
-			userDtosList.Add(userDto);
-		}
-		
-		return userDtosList;
-	}
 
 	public async Task<User?> GetAsync(Guid userId)
 	{
