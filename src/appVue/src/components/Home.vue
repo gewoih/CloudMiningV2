@@ -19,9 +19,10 @@
           }"></i>
         <Dropdown v-model="selectedIncomeType" :options="incomeTypes" class="w-15rem" optionLabel="name"
                   optionValue="value"/>
+        <Dropdown v-model="selectedMember" :options="members" class="w-15rem ml-3" :optionLabel="memberFullName"
+                  @change="assignId"/>
       </template>
     </Toolbar>
-    <!-- TODO: Сделать карточки через grid -->
     <div class="flex align-items-center justify-content-between mb-8">
       <Card class="my-box">
         <template #title>
