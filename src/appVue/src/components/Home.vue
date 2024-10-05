@@ -2,7 +2,7 @@
   <div class="w-9">
     <Toolbar class="mb-5 pt-0 border-none">
       <template #start>
-        <h1>Моя статистика</h1>
+        <h1>Cтатистика</h1>
       </template>
       <template #end>
         <i class="pi pi-question-circle mr-3 text-2xl"
@@ -17,10 +17,9 @@
             },
             escape: false
           }"></i>
-        <Dropdown v-model="selectedIncomeType" :options="incomeTypes" class="w-15rem" optionLabel="name"
-                  optionValue="value"/>
-        <Dropdown v-model="selectedMember" :options="members" class="w-15rem ml-3" :optionLabel="memberFullName"
-                  @change="assignId"/>
+        <Dropdown v-model="selectedStrategyType" :options="strategyTypes" class="w-15rem" optionLabel="name"
+                  optionValue="value" @change="fetchStatistics"/>
+        <Dropdown v-model="selectedStatistics" :options="statisticsList" class="w-15rem ml-3" :optionLabel="statisticsLabel" @change="displayStatistics"/>
       </template>
     </Toolbar>
     <div class="flex align-items-center justify-content-between mb-8">
@@ -104,8 +103,13 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
+import {Statistics} from "@/models/Statistics.ts";
+import {StrategyType} from "@/enums/StrategyType.ts";
+import {statisticsService} from "@/services/statistics.api.ts";
 
-const selectedIncomeType = ref(1)
+const statisticsList = ref<Statistics[]>();
+const selectedStatistics = ref<Statistics>();
+const selectedStrategyType = ref(StrategyType.Hold)
 const selectedIncomeAndProfitTimeline = ref(1)
 const selectedExpenseType = ref(1)
 const selectedExpenseTimeline = ref(1)
@@ -113,9 +117,9 @@ const incomeAndProfitChartData = ref();
 const incomeAndProfitChartOptions = ref();
 const expenseChartData = ref();
 const expenseChartOptions = ref();
-const incomeTypes = ref([
-  {name: 'Доход (Hold)', value: 1},
-  {name: 'Доход (Receive&Sell)', value: 2},
+const strategyTypes = ref([
+  {name: 'Доход (Hold)', value: 'Hold'},
+  {name: 'Доход (Receive&Sell)', value: 'ReceiveAndSell'},
 ]);
 
 const incomeAndProfitTimelines = ref([
@@ -135,6 +139,20 @@ const expenseTimelines = ref([
   {name: 'С начала года', value: 2},
   {name: '12 месяцев', value: 3},
 ]);
+
+const statisticsLabel = (statistics: Statistics) => {
+  if (statistics.user) {
+    return `${statistics.user.lastName} ${statistics.user.firstName}`;
+  }
+  return 'Общая статистика';
+}
+const fetchStatistics = async () => {
+  statisticsList.value = await statisticsService.getStatistics(selectedStrategyType.value);
+  selectedStatistics.value = statisticsList.value.find(stat => stat.user == null) || selectedStatistics.value;
+};
+
+const displayStatistics = () => {
+};
 
 const setIncomeAndProfitChartData = () => {
 
@@ -298,6 +316,11 @@ onMounted(() => {
   expenseChartData.value = setExpenseChartData();
   expenseChartOptions.value = setExpenseChartOptions();
 });
+
+
+fetchStatistics();
+console.log(selectedStatistics.value);
+
 </script>
 
 
