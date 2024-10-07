@@ -204,20 +204,10 @@ const setIncomeAndProfitChartData = () => {
   const incomes = filterDataByTimeline(selectedStatistics.value?.incomes || [], selectedIncomeAndProfitTimeline.value);
   const profits = filterDataByTimeline(selectedStatistics.value?.profits || [], selectedIncomeAndProfitTimeline.value);
 
-  const formattedIncomes = incomes.map(income => ({
-    ...income,
-    date: new Date(income.date)
-  }));
+  const incomeData = incomes.map(income => income.value);
+  const profitData = profits.map(profit => profit.value);
 
-  const formattedProfits = profits.map(profit => ({
-    ...profit,
-    date: new Date(profit.date)
-  }));
-
-  const incomeData = formattedIncomes.map(income => income.value);
-  const profitData = formattedProfits.map(profit => profit.value);
-
-  const labels = formattedProfits.map(profit => {
+  const labels = profits.map(profit => {
     return profit.date.toLocaleDateString('ru-RU', {month: 'short', year: '2-digit'});
   });
 
