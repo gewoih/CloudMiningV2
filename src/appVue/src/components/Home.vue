@@ -115,6 +115,7 @@ import {UserRole} from "@/enums/UserRole.ts";
 import {ExpenseType} from "@/enums/ExpenseType.ts";
 import {TimeLine} from "@/enums/TimeLine.ts";
 import {PriceBar} from "@/models/PriceBar.ts";
+import {Expense} from "@/models/Expense.ts";
 
 const statisticsList = ref<Statistics[]>();
 const selectedStatistics = ref<Statistics>();
@@ -158,9 +159,13 @@ const statisticsLabel = (statistics: Statistics) => {
 }
 const fetchStatistics = async () => {
   statisticsList.value = await statisticsService.getStatistics(selectedStrategyType.value);
+
   if (userRole.value == UserRole.Admin) {
     selectedStatistics.value = statisticsList.value.find(stat => stat.user == null) || selectedStatistics.value;
+  } else {
+    selectedStatistics.value = statisticsList.value[0] || selectedStatistics.value;
   }
+
   updateCharts();
 };
 
@@ -199,6 +204,11 @@ const filterDataByTimeline = (data: PriceBar[], timeline: TimeLine) => {
     }
   }
 };
+const filterDataByExpenseType = (data: Expense[], expenseType: ExpenseType) => {
+  return data
+      .filter(d => d.type === expenseType)
+      .flatMap(d => d.priceBars || []);
+}
 
 const setIncomeAndProfitChartData = () => {
   const incomes = filterDataByTimeline(selectedStatistics.value?.incomes || [], selectedIncomeAndProfitTimeline.value);
@@ -208,7 +218,7 @@ const setIncomeAndProfitChartData = () => {
   const profitData = profits.map(profit => profit.value);
 
   const labels = profits.map(profit => {
-    return profit.date.toLocaleDateString('ru-RU', {month: 'short', year: '2-digit'});
+    return profit.date.toLocaleDateString('ru-RU', {month: 'short', year: '2-digit'}).replace(' г.', '');
   });
 
   const getBarColor = (value: number) => value < 0 ? 'rgb(255, 0, 0)' : 'rgb(139, 92, 246)';
@@ -303,12 +313,20 @@ const setIncomeAndProfitChartOptions = () => {
   };
 }
 const setExpenseChartData = () => {
+  const filteredExpensePriceBars = filterDataByExpenseType(selectedStatistics.value?.expenses || [], selectedExpenseType.value);
+  const expenses = filterDataByTimeline(filteredExpensePriceBars, selectedExpenseTimeline.value);
+
+  const expenseData = expenses.map(expense => expense.value);
+  const labels = expenses.map(expense => {
+    return expense.date.toLocaleDateString('ru-RU', {month: 'short', year: '2-digit'}).replace(' г.', '');
+  });
+
   return {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels: labels,
     datasets: [
       {
         label: 'Расходы',
-        data: [540, 325, 702, 620, 325, 702, 620],
+        data: expenseData,
         backgroundColor: ['rgb(139, 92, 246)'],
         borderColor: ['rgb(139, 92, 246)'],
         borderRadius: {
@@ -387,7 +405,6 @@ const updateExpenseChart = () => {
 
 getUserRole();
 fetchStatistics();
-updateCharts();
 
 </script>
 
