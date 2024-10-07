@@ -2,7 +2,8 @@
   <div class="w-9">
     <Toolbar class="mb-5 pt-0 border-none">
       <template #start>
-        <h1>Cтатистика</h1>
+        <h1 v-if="userRole === UserRole.Admin">Статистика</h1>
+        <h1 v-else>Моя статистика</h1>
       </template>
       <template #end>
         <i class="pi pi-question-circle mr-3 text-2xl"
@@ -19,7 +20,8 @@
           }"></i>
         <Dropdown v-model="selectedStrategyType" :options="strategyTypes" class="w-15rem" optionLabel="name"
                   optionValue="value" @change="fetchStatistics"/>
-        <Dropdown v-model="selectedStatistics" :options="statisticsList" class="w-15rem ml-3" :optionLabel="statisticsLabel" @change="displayStatistics"/>
+        <Dropdown v-if="userRole === UserRole.Admin" v-model="selectedStatistics" :options="statisticsList"
+                  class="w-15rem ml-3" :optionLabel="statisticsLabel" @change="updateCharts"/>
       </template>
     </Toolbar>
     <div class="flex align-items-center justify-content-between mb-8">
@@ -29,10 +31,10 @@
           Доходы
         </template>
         <template #content>
-          <h2 class="m-0">500 000,88 ₽</h2> 
+          <h2 class="m-0">{{ getFormattedAmount(selectedStatistics?.totalIncome || 0) }} ₽</h2>
         </template>
         <template #footer>
-          <div class="mb-1"><b>4200,99 ₽</b> в месяц</div>
+          <div class="mb-1"><b>{{ getFormattedAmount(selectedStatistics?.monthlyIncome || 0) }} ₽</b> в месяц</div>
         </template>
       </Card>
       <Card class="my-box">
@@ -41,11 +43,12 @@
           Расходы
         </template>
         <template #content>
-          <h2 class="m-0">340 000,88 ₽</h2>
+          <h2 class="m-0">{{ getFormattedAmount(selectedStatistics?.totalExpense || 0) }} ₽</h2>
         </template>
         <template #footer>
-          <div class="mb-2"><b>150 000,44 ₽</b> электричество</div>
-          <div><b>150 000,44 ₽</b> покупки</div>
+          <div class="mb-2"><b>{{ getFormattedAmount(selectedStatistics?.electricityExpense || 0) }} ₽</b> электричество
+          </div>
+          <div><b>{{ getFormattedAmount(selectedStatistics?.purchaseExpense || 0) }} ₽</b> покупки</div>
         </template>
       </Card>
       <Card class="my-box">
@@ -54,11 +57,11 @@
           Прибыль
         </template>
         <template #content>
-          <h2 class="m-0">220 000,66 ₽</h2>
+          <h2 class="m-0">{{ getFormattedAmount(selectedStatistics?.totalProfit || 0) }} ₽</h2>
         </template>
         <template #footer>
-          <div class="mb-2"><b>6213,44 ₽</b> в месяц</div>
-          <div><b>94.45%</b> окупилось</div>
+          <div class="mb-2"><b>{{ getFormattedAmount(selectedStatistics?.monthlyProfit || 0) }} ₽</b> в месяц</div>
+          <div><b>{{ getFormattedAmount(selectedStatistics?.paybackPercent || 0) }}%</b> окупилось</div>
         </template>
       </Card>
     </div>
@@ -67,16 +70,18 @@
         <template #title>
           <Toolbar class="border-none pt-0 pb-0">
             <template #start>
-             <div class="font-medium">Доходы/Прибыль</div> 
+              <div class="font-medium">Доходы/Прибыль</div>
             </template>
             <template #end>
-              <Dropdown v-model="selectedIncomeAndProfitTimeline" :options="incomeAndProfitTimelines" class="custom-dropdown" optionLabel="name"
-                        optionValue="value" />
+              <Dropdown v-model="selectedIncomeAndProfitTimeline" :options="incomeAndProfitTimelines"
+                        class="custom-dropdown" optionLabel="name"
+                        optionValue="value" @change="updateIncomeAndProfitChart"/>
             </template>
           </Toolbar>
         </template>
         <template #content>
-          <Chart type="bar" :data="incomeAndProfitChartData" :options="incomeAndProfitChartOptions" class="h-19rem mb-1"/>
+          <Chart type="bar" :data="incomeAndProfitChartData" :options="incomeAndProfitChartOptions"
+                 class="h-19rem mb-1"/>
         </template>
       </Card>
       <Card class="my-chart">
@@ -86,10 +91,10 @@
               <div class="font-medium">Расходы</div>
             </template>
             <template #end>
-              <Dropdown v-model="selectedExpenseType" :options="expenseTypes" class="custom-dropdown mr-2" optionLabel="name"
-                        optionValue="value" />
-              <Dropdown v-model="selectedExpenseTimeline" :options="expenseTimelines" class="custom-dropdown" optionLabel="name"
-                        optionValue="value" />
+              <Dropdown v-model="selectedExpenseType" :options="expenseTypes" class="custom-dropdown mr-2"
+                        optionLabel="name" optionValue="value" @change="updateExpenseChart"/>
+              <Dropdown v-model="selectedExpenseTimeline" :options="expenseTimelines" class="custom-dropdown"
+                        optionLabel="name" optionValue="value" @change="updateExpenseChart"/>
             </template>
           </Toolbar>
         </template>
@@ -102,17 +107,22 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {ref} from "vue";
 import {Statistics} from "@/models/Statistics.ts";
 import {StrategyType} from "@/enums/StrategyType.ts";
 import {statisticsService} from "@/services/statistics.api.ts";
+import {UserRole} from "@/enums/UserRole.ts";
+import {ExpenseType} from "@/enums/ExpenseType.ts";
+import {TimeLine} from "@/enums/TimeLine.ts";
+import {PriceBar} from "@/models/PriceBar.ts";
 
 const statisticsList = ref<Statistics[]>();
 const selectedStatistics = ref<Statistics>();
-const selectedStrategyType = ref(StrategyType.Hold)
-const selectedIncomeAndProfitTimeline = ref(1)
-const selectedExpenseType = ref(1)
-const selectedExpenseTimeline = ref(1)
+const selectedStrategyType = ref(StrategyType.Hold);
+const userRole = ref(UserRole.User);
+const selectedIncomeAndProfitTimeline = ref(TimeLine.AllTime);
+const selectedExpenseType = ref(ExpenseType.Total);
+const selectedExpenseTimeline = ref(TimeLine.AllTime);
 const incomeAndProfitChartData = ref();
 const incomeAndProfitChartOptions = ref();
 const expenseChartData = ref();
@@ -123,21 +133,21 @@ const strategyTypes = ref([
 ]);
 
 const incomeAndProfitTimelines = ref([
-  {name: 'За всё время', value: 1},
-  {name: 'С начала года', value: 2},
-  {name: '12 месяцев', value: 3},
+  {name: 'За всё время', value: 'AllTime'},
+  {name: 'С начала года', value: 'YearToDate'},
+  {name: '12 месяцев', value: 'Last12Months'},
 ]);
 
 const expenseTypes = ref([
-  {name: 'Общие', value: 1},
-  {name: 'Электричество', value: 2},
-  {name: 'Покупки', value: 3},
+  {name: 'Общие', value: 'Total'},
+  {name: 'Электричество', value: 'OnlyElectricity'},
+  {name: 'Покупки', value: 'OnlyPurchases'},
 ]);
 
 const expenseTimelines = ref([
-  {name: 'За всё время', value: 1},
-  {name: 'С начала года', value: 2},
-  {name: '12 месяцев', value: 3},
+  {name: 'За всё время', value: 'AllTime'},
+  {name: 'С начала года', value: 'YearToDate'},
+  {name: '12 месяцев', value: 'Last12Months'},
 ]);
 
 const statisticsLabel = (statistics: Statistics) => {
@@ -148,22 +158,81 @@ const statisticsLabel = (statistics: Statistics) => {
 }
 const fetchStatistics = async () => {
   statisticsList.value = await statisticsService.getStatistics(selectedStrategyType.value);
-  selectedStatistics.value = statisticsList.value.find(stat => stat.user == null) || selectedStatistics.value;
+  if (userRole.value == UserRole.Admin) {
+    selectedStatistics.value = statisticsList.value.find(stat => stat.user == null) || selectedStatistics.value;
+  }
+  updateCharts();
 };
 
-const displayStatistics = () => {
+const getFormattedAmount = (value: number) => {
+  return value.toLocaleString('ru-RU', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
+const getUserRole = () => {
+  const jwt = localStorage.getItem('access_token');
+  const decodedJwt = jwt && JSON.parse(atob(jwt.split('.')[1]));
+  userRole.value = decodedJwt["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+};
+
+const filterDataByTimeline = (data: PriceBar[], timeline: TimeLine) => {
+  const now = new Date();
+  const formattedData = data.map(d => ({
+    ...d,
+    date: new Date(d.date)
+  }));
+
+  switch (timeline) {
+    case TimeLine.YearToDate: {
+      return formattedData.filter(d => d.date.getFullYear() === now.getFullYear());
+    }
+    case TimeLine.Last12Months: {
+      const oneYearAgo = new Date(now);
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      return formattedData.filter(d => d.date >= oneYearAgo);
+    }
+    case TimeLine.AllTime:
+    default: {
+      return formattedData;
+    }
+  }
 };
 
 const setIncomeAndProfitChartData = () => {
+  const incomes = filterDataByTimeline(selectedStatistics.value?.incomes || [], selectedIncomeAndProfitTimeline.value);
+  const profits = filterDataByTimeline(selectedStatistics.value?.profits || [], selectedIncomeAndProfitTimeline.value);
+
+  const formattedIncomes = incomes.map(income => ({
+    ...income,
+    date: new Date(income.date)
+  }));
+
+  const formattedProfits = profits.map(profit => ({
+    ...profit,
+    date: new Date(profit.date)
+  }));
+
+  const incomeData = formattedIncomes.map(income => income.value);
+  const profitData = formattedProfits.map(profit => profit.value);
+
+  const labels = formattedProfits.map(profit => {
+    return profit.date.toLocaleDateString('ru-RU', {month: 'short', year: '2-digit'});
+  });
+
+  const getBarColor = (value: number) => value < 0 ? 'rgb(255, 0, 0)' : 'rgb(139, 92, 246)';
+  const getProfitColor = (value: number) => value < 0 ? 'rgb(255, 0, 0)' : 'rgb(0, 255, 195)';
+  const getProfitBorderRadius = (value: number) => value < 0 ? 8 : 0;
 
   return {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels: labels,
     datasets: [
       {
         label: 'Доходы',
-        data: [28, 48, 40, 19, 86, 27, 90],
-        borderColor: ['rgb(139, 92, 246)'],
-        backgroundColor: ['rgb(139, 92, 246)'],
+        data: incomeData,
+        borderColor: incomeData.map(value => getBarColor(value)),
+        backgroundColor: incomeData.map(value => getBarColor(value)),
         order: 2,
         borderRadius: {
           topLeft: 8,
@@ -174,15 +243,16 @@ const setIncomeAndProfitChartData = () => {
       },
       {
         label: 'Прибыль',
-        data: [18, 28, 30, 9, 46, 17, 50],
-        borderColor: 'rgb(0, 255, 195)',
-        backgroundColor: ['rgba(255,255,255,0)'],
+        data: profitData,
+        borderColor: profitData.map(value => getProfitColor(value)),
+        backgroundColor: profitData.map(value => value < 0 ? 'rgb(255, 0, 0)' : 'rgba(255,255,255,0)'),
         borderWidth: {
           top: 2,
           bottom: 0,
           left: 0,
-          right: 0 
+          right: 0
         },
+        borderRadius: profitData.map(value => getProfitBorderRadius(value)),
         order: 1
       }
     ]
@@ -310,16 +380,24 @@ const setExpenseChartOptions = () => {
     }
   };
 }
-onMounted(() => {
+const updateCharts = () => {
+  updateIncomeAndProfitChart();
+  updateExpenseChart();
+}
+
+const updateIncomeAndProfitChart = () => {
   incomeAndProfitChartData.value = setIncomeAndProfitChartData();
   incomeAndProfitChartOptions.value = setIncomeAndProfitChartOptions();
+}
+
+const updateExpenseChart = () => {
   expenseChartData.value = setExpenseChartData();
   expenseChartOptions.value = setExpenseChartOptions();
-});
+}
 
-
+getUserRole();
 fetchStatistics();
-console.log(selectedStatistics.value);
+updateCharts();
 
 </script>
 
