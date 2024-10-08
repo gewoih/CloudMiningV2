@@ -3,6 +3,7 @@ using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Statistics;
+using CloudMining.Interfaces.DTO.Users;
 using CloudMining.Interfaces.Interfaces;
 
 namespace CloudMining.Application.Services;
@@ -11,107 +12,96 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 {
 	private readonly IMarketDataService _marketDataService;
 	private readonly IStatisticsHelper _statisticsHelper;
-	private readonly IShareablePaymentService _shareablePaymentService;
 
-	public ReceiveAndSellCalculationStrategy(IShareablePaymentService shareablePaymentService,
+	public ReceiveAndSellCalculationStrategy(
 		IMarketDataService marketDataService,
 		IStatisticsHelper statisticsHelper)
 	{
-		_shareablePaymentService = shareablePaymentService;
 		_marketDataService = marketDataService;
 		_statisticsHelper = statisticsHelper;
 	}
 
-	public async Task<StatisticsDto> GetStatisticsAsync()
+	public async Task<List<StatisticsDto>> GetStatisticsAsync(List<ShareablePayment> payoutsList,
+		List<ShareablePayment> expenseList,
+		IEnumerable<CurrencyPair> uniqueCurrencyPairs,
+		List<UserDto> userDtosList)
 	{
-		var monthsSinceProjectStartDate = _statisticsHelper.CalculateMonthsSinceProjectStart();
-		var payoutsList = await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Crypto], includePaymentShares: false);
 		var payoutsDates = GetPayoutsDates(payoutsList);
 		var usdToRubRatesByDate = await _marketDataService.GetUsdToRubRatesByDateAsync(payoutsDates);
-		var uniqueCurrencyPairs = _statisticsHelper.GetUniqueCurrencyPairs(payoutsList);
-		var incomes = await GetPriceBarsAsync(payoutsList, usdToRubRatesByDate, payoutsDates, uniqueCurrencyPairs);
-		var totalIncome = incomes.Sum(priceBar => priceBar.Value);
-		var monthlyIncome = totalIncome / monthsSinceProjectStartDate;
-		var expenses =
-			await _shareablePaymentService.GetAsync(paymentTypes: [PaymentType.Electricity, PaymentType.Purchase],
-				includePaymentShares: false);
-		var spentOnElectricity = expenses.Where(payment => payment.Type == PaymentType.Electricity)
-			.Sum(payment => payment.Amount);
-		var spentOnPurchases = expenses.Where(payment => payment.Type == PaymentType.Purchase)
-			.Sum(payment => payment.Amount);
-		var totalExpense = spentOnElectricity + spentOnPurchases;
-		var totalProfit = totalIncome - totalExpense;
-		var monthlyProfit = totalProfit / monthsSinceProjectStartDate;
-		var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
-		var expensesList = _statisticsHelper.GetExpenses(expenses);
-		var profits = _statisticsHelper.GetProfitsList(incomes, expensesList);
+		var incomesPerUser = await GetPriceBarsAsync(payoutsList, usdToRubRatesByDate, payoutsDates,
+			uniqueCurrencyPairs, userDtosList);
+		var statisticsDtoList = _statisticsHelper.GetStatisticsDtoList(incomesPerUser, expenseList);
 
-		var statisticsDto = new StatisticsDto(
-			totalIncome,
-			monthlyIncome,
-			totalExpense,
-			spentOnElectricity,
-			spentOnPurchases,
-			totalProfit,
-			monthlyProfit,
-			paybackPercent,
-			incomes,
-			profits,
-			expensesList);
-
-		return statisticsDto;
+		return statisticsDtoList;
 	}
 
 
-	private async Task<List<MonthlyPriceBar>> GetPriceBarsAsync(
+	private async Task<Dictionary<UserDto, List<MonthlyPriceBar>>> GetPriceBarsAsync(
 		List<ShareablePayment> payouts,
 		Dictionary<DateOnly, decimal> usdToRubRate,
 		List<DateTime> payoutsDates,
-		IEnumerable<CurrencyPair> uniqueCurrencyPairs)
+		IEnumerable<CurrencyPair> uniqueCurrencyPairs,
+		List<UserDto> userDtosList)
 	{
 		var currencyRates =
 			await _marketDataService.GetMarketDataForCurrenciesByDateAsync(uniqueCurrencyPairs, payoutsDates);
 
-		var usdIncomeByDate = CalculateIncome(payouts, currencyRates, CurrencyCode.USDT);
-		var rubIncomeByDate = CalculateCurrencyIncomeByDate(usdIncomeByDate, usdToRubRate);
-		var monthlyIncomeByDate = GroupIncomeByMonths(rubIncomeByDate);
+		var priceBarsPerUser = new Dictionary<UserDto, List<MonthlyPriceBar>>();
 
-		var priceBars = new List<MonthlyPriceBar>();
-
-		foreach (var (date, incomeValue) in monthlyIncomeByDate)
+		foreach (var user in userDtosList)
 		{
-			priceBars.Add(new MonthlyPriceBar(incomeValue, date));
+			var usdIncomeByDate = CalculateIncome(user.Id, payouts, currencyRates, CurrencyCode.USDT);
+			var rubIncomeByDate = CalculateCurrencyIncomeByDate(usdIncomeByDate, usdToRubRate);
+			var monthlyIncomeByDate = GroupIncomeByMonths(rubIncomeByDate);
+
+			var userPriceBars = new List<MonthlyPriceBar>();
+
+			foreach (var (date, incomeValue) in monthlyIncomeByDate)
+			{
+				userPriceBars.Add(new MonthlyPriceBar(incomeValue, date));
+			}
+
+			if (userPriceBars.Count != 0)
+			{
+				priceBarsPerUser[user] = userPriceBars;
+			}
 		}
 
-		return priceBars;
+		return priceBarsPerUser;
 	}
 
-	private static Dictionary<DateOnly, decimal> CalculateIncome(List<ShareablePayment> payouts,
+	private static Dictionary<DateOnly, decimal> CalculateIncome(Guid userId, List<ShareablePayment> payouts,
 		Dictionary<CurrencyPair, List<MarketData?>> currencyRates, CurrencyCode currency)
 	{
 		var incomes = new Dictionary<DateOnly, decimal>();
 
 		foreach (var payout in payouts)
 		{
+			var userPaymentShare = payout.PaymentShares.FirstOrDefault(share => share.UserId == userId);
+			if (userPaymentShare == null)
+				continue;
+
 			var currencyPair = new CurrencyPair
 			{
 				From = payout.Currency.Code,
 				To = currency
 			};
+			if (!currencyRates.TryGetValue(currencyPair, out var marketDataList))
+				continue;
 
-			if (!currencyRates.TryGetValue(currencyPair, out var marketDataList)) continue;
 			var payoutDate = DateOnly.FromDateTime(payout.Date);
 			var currencyRate = marketDataList
 				.Where(marketData => DateOnly.FromDateTime(marketData!.Date) == payoutDate)
 				.Select(marketData => marketData!.Price)
-				.First();
-				
-			if(incomes.ContainsKey(payoutDate)) 
-				incomes[payoutDate] += currencyRate * payout.Amount;
-			else
-				incomes[payoutDate] = currencyRate * payout.Amount;
+				.FirstOrDefault();
+			if (currencyRate == 0)
+				continue;
+
+			var income = currencyRate * userPaymentShare.Amount;
+			if (!incomes.TryAdd(payoutDate, income))
+				incomes[payoutDate] += income;
 		}
-		
+
 		return incomes;
 	}
 
@@ -137,11 +127,11 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 	private static Dictionary<DateOnly, decimal> GroupIncomeByMonths(Dictionary<DateOnly, decimal> incomes)
 	{
 		var monthlyIncome = new Dictionary<DateOnly, decimal>();
-		
+
 		foreach (var (date, value) in incomes)
 		{
 			var firstDayOfMonth = new DateOnly(date.Year, date.Month, 1);
-			
+
 			if (!monthlyIncome.TryAdd(firstDayOfMonth, value))
 				monthlyIncome[firstDayOfMonth] += value;
 		}
@@ -155,7 +145,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 			.Select(payment => payment.Date)
 			.Distinct()
 			.ToList();
-		
+
 		return payoutsDates;
 	}
 }

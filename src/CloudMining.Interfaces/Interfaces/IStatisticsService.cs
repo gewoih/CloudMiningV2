@@ -5,5 +5,5 @@ namespace CloudMining.Interfaces.Interfaces;
 
 public interface IStatisticsService
 {
-   Task<StatisticsDto> GetStatisticsAsync(StatisticsCalculationStrategy strategy);
+   Task<List<StatisticsDto>> GetStatisticsAsync(StatisticsCalculationStrategy strategy);
 }

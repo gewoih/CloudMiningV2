@@ -117,7 +117,7 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 		int skip = 0,
 		int take = int.MaxValue,
 		List<PaymentType>? paymentTypes = null,
-		bool includePaymentShares = true)
+		bool adminCheck = true)
 	{
 		var currentUserId = _currentUserService.GetCurrentUserId();
 		if (currentUserId == null)
@@ -130,14 +130,14 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 		if (paymentTypes != null)
 			paymentsQuery = paymentsQuery.Where(payment => paymentTypes.Contains(payment.Type));
 
-		if (includePaymentShares)
+		paymentsQuery = paymentsQuery.Include(payment => payment.PaymentShares);
+
+		if (adminCheck)
 		{
-			paymentsQuery = paymentsQuery.Include(payment => payment.PaymentShares);
-			
 			var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
 			if (!isCurrentUserAdmin)
 			{
-				paymentsQuery = paymentsQuery.Where(payment => 
+				paymentsQuery = paymentsQuery.Where(payment =>
 					payment.PaymentShares.Any(paymentShare => paymentShare.UserId == currentUserId));
 			}
 		}
