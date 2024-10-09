@@ -5,6 +5,7 @@ using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.Shares;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.DTO;
+using CloudMining.Interfaces.DTO.Payments;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,7 @@ public sealed class ShareService : IShareService
 	{
 		if (shareChanges.Count == 0)
 			return 0;
-		
+
 		var userShare = shareChanges
 			.OrderByDescending(shareChange => shareChange.Date)
 			.First()
@@ -68,9 +69,10 @@ public sealed class ShareService : IShareService
 		return sharesChanges;
 	}
 
-	public async Task<List<PaymentShare>> CreatePaymentShares(decimal amount, Currency currency)
+	public async Task<List<PaymentShare>> CreatePaymentShares(CreatePaymentDto paymentDto, Currency currency)
 	{
-		IEnumerable<UserCalculatedShare> usersShares = await CalculateUsersSharesAsync(amount, currency);
+		IEnumerable<UserCalculatedShare> usersShares =
+			await CalculateUsersSharesAsync(paymentDto.Amount, paymentDto.PaymentType, currency);
 		usersShares = usersShares.Where(userShare => userShare.Amount != 0);
 
 		var paymentShares = new List<PaymentShare>();
@@ -90,28 +92,40 @@ public sealed class ShareService : IShareService
 		return paymentShares;
 	}
 
-	private async Task<List<UserCalculatedShare>> CalculateUsersSharesAsync(decimal amount, Currency currency)
+	private async Task<List<UserCalculatedShare>> CalculateUsersSharesAsync(
+		decimal amount,
+		PaymentType paymentType,
+		Currency currency)
 	{
 		var usersShares = await GetUsersSharesAsync();
 
 		var usersCalculatedShares = new List<UserCalculatedShare>();
-		var totalUsersCommissions = usersShares.Sum(share => share.CommissionPercent);
-		var amountAfterCommissions = amount - amount * totalUsersCommissions;
+		var adjustedAmount = amount;
+    
+		if (paymentType == PaymentType.Crypto)
+		{
+			var totalUsersCommissions = usersShares.Sum(share => share.CommissionPercent);
+			adjustedAmount = amount - amount * totalUsersCommissions;
+		}
+
 		foreach (var userShare in usersShares)
 		{
-			var userCommissionPercent = userShare.CommissionPercent;
 			var userSharePercent = userShare.Share / 100;
-			var userCommission = amount * userCommissionPercent;
-			var userNetAmount = amountAfterCommissions * userSharePercent;
-			var userTotalNetAmount = userNetAmount + userCommission;
+			var userNetAmount = adjustedAmount * userSharePercent;
 
-			var roundedAmount = Math.Round(userTotalNetAmount, currency.Precision, MidpointRounding.ToZero);
+			if (paymentType == PaymentType.Crypto)
+			{
+				var userCommission = amount * userShare.CommissionPercent;
+				userNetAmount += userCommission;
+			}
+
+			var roundedAmount = Math.Round(userNetAmount, currency.Precision, MidpointRounding.ToZero);
 			usersCalculatedShares.Add(new UserCalculatedShare(userShare.UserId, roundedAmount, userShare.Share));
 		}
 
 		return usersCalculatedShares;
 	}
-	
+
 	private async Task<List<UserShare>> GetUsersSharesAsync()
 	{
 		var usersWithShares = await _context.Users
@@ -135,8 +149,9 @@ public sealed class ShareService : IShareService
 				var role = await _roleManager.FindByNameAsync(userRole);
 				userCommissionPercent = role.CommissionPercent;
 			}
-			
-			usersShares.Add(new UserShare(userWithShare.User.Id, userWithShare.LastShareChange?.After ?? 0, userCommissionPercent));
+
+			usersShares.Add(new UserShare(userWithShare.User.Id, userWithShare.LastShareChange?.After ?? 0,
+				userCommissionPercent));
 		}
 
 		return usersShares;
