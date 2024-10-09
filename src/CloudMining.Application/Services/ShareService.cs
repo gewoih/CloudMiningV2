@@ -18,37 +18,6 @@ public sealed class ShareService : IShareService
 		_context = context;
 	}
 
-	public async Task<decimal> GetUserShareAsync(Guid userId)
-	{
-		var userShare = await _context.ShareChanges
-			.OrderByDescending(shareChange => shareChange.Date)
-			.Where(shareChange => shareChange.UserId == userId)
-			.Select(shareChange => shareChange.After)
-			.FirstOrDefaultAsync()
-			.ConfigureAwait(false);
-
-		return userShare;
-	}
-
-	public async Task<List<UserShare>> GetUsersSharesAsync()
-	{
-		var usersWithShares = await _context.Users
-			.Select(user => new
-			{
-				User = user,
-				LastShareChange = user.ShareChanges
-					.OrderByDescending(shareChange => shareChange.CreatedDate)
-					.FirstOrDefault()
-			})
-			.ToListAsync()
-			.ConfigureAwait(false);
-
-		var usersShares = usersWithShares.Select(u =>
-			new UserShare(u.User.Id, u.LastShareChange?.After ?? 0)).ToList();
-
-		return usersShares;
-	}
-
 	public decimal CalculateUserShare(List<ShareChange> shareChanges)
 	{
 		if (shareChanges.Count == 0)
@@ -130,5 +99,24 @@ public sealed class ShareService : IShareService
 		}
 
 		return usersCalculatedShares;
+	}
+	
+	private async Task<List<UserShare>> GetUsersSharesAsync()
+	{
+		var usersWithShares = await _context.Users
+			.Select(user => new
+			{
+				User = user,
+				LastShareChange = user.ShareChanges
+					.OrderByDescending(shareChange => shareChange.CreatedDate)
+					.FirstOrDefault()
+			})
+			.ToListAsync()
+			.ConfigureAwait(false);
+
+		var usersShares = usersWithShares.Select(u =>
+			new UserShare(u.User.Id, u.LastShareChange?.After ?? 0)).ToList();
+
+		return usersShares;
 	}
 }
