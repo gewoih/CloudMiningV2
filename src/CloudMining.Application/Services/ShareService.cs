@@ -1,10 +1,13 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
+using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.Shares;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.DTO;
+using CloudMining.Interfaces.DTO.Payments;
 using CloudMining.Interfaces.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services;
@@ -12,48 +15,21 @@ namespace CloudMining.Application.Services;
 public sealed class ShareService : IShareService
 {
 	private readonly CloudMiningContext _context;
+	private readonly UserManager<User> _userManager;
+	private readonly RoleManager<Role> _roleManager;
 
-	public ShareService(CloudMiningContext context)
+	public ShareService(CloudMiningContext context, UserManager<User> userManager, RoleManager<Role> roleManager)
 	{
 		_context = context;
-	}
-
-	public async Task<decimal> GetUserShareAsync(Guid userId)
-	{
-		var userShare = await _context.ShareChanges
-			.OrderByDescending(shareChange => shareChange.Date)
-			.Where(shareChange => shareChange.UserId == userId)
-			.Select(shareChange => shareChange.After)
-			.FirstOrDefaultAsync()
-			.ConfigureAwait(false);
-
-		return userShare;
-	}
-
-	public async Task<List<UserShare>> GetUsersSharesAsync()
-	{
-		var usersWithShares = await _context.Users
-			.Select(user => new
-			{
-				User = user,
-				LastShareChange = user.ShareChanges
-					.OrderByDescending(shareChange => shareChange.CreatedDate)
-					.FirstOrDefault()
-			})
-			.ToListAsync()
-			.ConfigureAwait(false);
-
-		var usersShares = usersWithShares.Select(u =>
-			new UserShare(u.User.Id, u.LastShareChange?.After ?? 0)).ToList();
-
-		return usersShares;
+		_userManager = userManager;
+		_roleManager = roleManager;
 	}
 
 	public decimal CalculateUserShare(List<ShareChange> shareChanges)
 	{
 		if (shareChanges.Count == 0)
 			return 0;
-		
+
 		var userShare = shareChanges
 			.OrderByDescending(shareChange => shareChange.Date)
 			.First()
@@ -93,9 +69,10 @@ public sealed class ShareService : IShareService
 		return sharesChanges;
 	}
 
-	public async Task<List<PaymentShare>> CreatePaymentShares(decimal amount, Currency currency)
+	public async Task<List<PaymentShare>> CreatePaymentShares(CreatePaymentDto paymentDto, Currency currency)
 	{
-		IEnumerable<UserCalculatedShare> usersShares = await CalculateUsersSharesAsync(amount, currency);
+		IEnumerable<UserCalculatedShare> usersShares =
+			await CalculateUsersSharesAsync(paymentDto.Amount, paymentDto.PaymentType, currency);
 		usersShares = usersShares.Where(userShare => userShare.Amount != 0);
 
 		var paymentShares = new List<PaymentShare>();
@@ -115,20 +92,68 @@ public sealed class ShareService : IShareService
 		return paymentShares;
 	}
 
-	private async Task<List<UserCalculatedShare>> CalculateUsersSharesAsync(decimal amount, Currency currency)
+	private async Task<List<UserCalculatedShare>> CalculateUsersSharesAsync(
+		decimal amount,
+		PaymentType paymentType,
+		Currency currency)
 	{
 		var usersShares = await GetUsersSharesAsync();
 
 		var usersCalculatedShares = new List<UserCalculatedShare>();
+		var adjustedAmount = amount;
+    
+		if (paymentType == PaymentType.Crypto)
+		{
+			var totalUsersCommissions = usersShares.Sum(share => share.CommissionPercent);
+			adjustedAmount = amount - amount * totalUsersCommissions;
+		}
+
 		foreach (var userShare in usersShares)
 		{
 			var userSharePercent = userShare.Share / 100;
-			var userNetAmount = userSharePercent * amount;
+			var userNetAmount = adjustedAmount * userSharePercent;
+
+			if (paymentType == PaymentType.Crypto)
+			{
+				var userCommission = amount * userShare.CommissionPercent;
+				userNetAmount += userCommission;
+			}
 
 			var roundedAmount = Math.Round(userNetAmount, currency.Precision, MidpointRounding.ToZero);
 			usersCalculatedShares.Add(new UserCalculatedShare(userShare.UserId, roundedAmount, userShare.Share));
 		}
 
 		return usersCalculatedShares;
+	}
+
+	private async Task<List<UserShare>> GetUsersSharesAsync()
+	{
+		var usersWithShares = await _context.Users
+			.Select(user => new
+			{
+				User = user,
+				LastShareChange = user.ShareChanges
+					.OrderByDescending(shareChange => shareChange.CreatedDate)
+					.FirstOrDefault()
+			})
+			.ToListAsync()
+			.ConfigureAwait(false);
+
+		var usersShares = new List<UserShare>();
+		foreach (var userWithShare in usersWithShares)
+		{
+			var userRole = (await _userManager.GetRolesAsync(userWithShare.User)).FirstOrDefault();
+			var userCommissionPercent = 0m;
+			if (userRole is not null)
+			{
+				var role = await _roleManager.FindByNameAsync(userRole);
+				userCommissionPercent = role.CommissionPercent;
+			}
+
+			usersShares.Add(new UserShare(userWithShare.User.Id, userWithShare.LastShareChange?.After ?? 0,
+				userCommissionPercent));
+		}
+
+		return usersShares;
 	}
 }

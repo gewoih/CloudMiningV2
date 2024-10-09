@@ -1,8 +1,11 @@
-﻿using CloudMining.Domain.Enums;
+﻿using System.Diagnostics;
+using System.Security.Principal;
+using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.Interfaces;
+using MassTransit.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -1066,11 +1069,21 @@ public static class DatabaseInitializer
 	{
 		var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
 
-		foreach (var roleName in Enum.GetNames(typeof(UserRole)))
+		foreach (var role in Enum.GetValues<UserRole>())
 		{
+			var roleName = Enum.GetName(role);
 			var roleExist = await roleManager.RoleExistsAsync(roleName);
-			if (!roleExist)
-				await roleManager.CreateAsync(new Role { Name = roleName });
+			if (roleExist) 
+				continue;
+			
+			var roleCommissionPercent = role switch
+			{
+				UserRole.Admin => 0.05m,
+				UserRole.Manager => 0.03m,
+				_ => 0m
+			};
+
+			await roleManager.CreateAsync(new Role { Name = roleName, CommissionPercent = roleCommissionPercent });
 		}
 	}
 
@@ -1110,7 +1123,7 @@ public static class DatabaseInitializer
 			"24042001Nr.",
 			new DateTime(2021, 7, 19, 0, 0, 0, DateTimeKind.Utc));
 		
-		await RegisterUserIfNotExists("User",
+		await RegisterUserIfNotExists("Manager",
 			"test2@mail.ru",
 			"Максим",
 			"Раненко",
