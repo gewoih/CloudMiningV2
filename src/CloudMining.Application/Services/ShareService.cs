@@ -1,10 +1,12 @@
 ﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
+using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.Shares;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.DTO;
 using CloudMining.Interfaces.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudMining.Application.Services;
@@ -12,10 +14,14 @@ namespace CloudMining.Application.Services;
 public sealed class ShareService : IShareService
 {
 	private readonly CloudMiningContext _context;
+	private readonly UserManager<User> _userManager;
+	private readonly RoleManager<Role> _roleManager;
 
-	public ShareService(CloudMiningContext context)
+	public ShareService(CloudMiningContext context, UserManager<User> userManager, RoleManager<Role> roleManager)
 	{
 		_context = context;
+		_userManager = userManager;
+		_roleManager = roleManager;
 	}
 
 	public decimal CalculateUserShare(List<ShareChange> shareChanges)
@@ -89,12 +95,17 @@ public sealed class ShareService : IShareService
 		var usersShares = await GetUsersSharesAsync();
 
 		var usersCalculatedShares = new List<UserCalculatedShare>();
+		var totalUsersCommissions = usersShares.Sum(share => share.CommissionPercent);
+		var amountAfterCommissions = amount - amount * totalUsersCommissions;
 		foreach (var userShare in usersShares)
 		{
+			var userCommissionPercent = userShare.CommissionPercent;
 			var userSharePercent = userShare.Share / 100;
-			var userNetAmount = userSharePercent * amount;
+			var userCommission = amount * userCommissionPercent;
+			var userNetAmount = amountAfterCommissions * userSharePercent;
+			var userTotalNetAmount = userNetAmount + userCommission;
 
-			var roundedAmount = Math.Round(userNetAmount, currency.Precision, MidpointRounding.ToZero);
+			var roundedAmount = Math.Round(userTotalNetAmount, currency.Precision, MidpointRounding.ToZero);
 			usersCalculatedShares.Add(new UserCalculatedShare(userShare.UserId, roundedAmount, userShare.Share));
 		}
 
@@ -114,8 +125,19 @@ public sealed class ShareService : IShareService
 			.ToListAsync()
 			.ConfigureAwait(false);
 
-		var usersShares = usersWithShares.Select(u =>
-			new UserShare(u.User.Id, u.LastShareChange?.After ?? 0)).ToList();
+		var usersShares = new List<UserShare>();
+		foreach (var userWithShare in usersWithShares)
+		{
+			var userRole = (await _userManager.GetRolesAsync(userWithShare.User)).FirstOrDefault();
+			var userCommissionPercent = 0m;
+			if (userRole is not null)
+			{
+				var role = await _roleManager.FindByNameAsync(userRole);
+				userCommissionPercent = role.CommissionPercent;
+			}
+			
+			usersShares.Add(new UserShare(userWithShare.User.Id, userWithShare.LastShareChange?.After ?? 0, userCommissionPercent));
+		}
 
 		return usersShares;
 	}
