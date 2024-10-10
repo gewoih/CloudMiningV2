@@ -18,10 +18,10 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
-app.use(router);
 app.use(PrimeVue)
 app.use(ToastService);
 app.use(ConfirmationService);
+app.use(router);
 app.component('Toast', Toast);
 app.directive('tooltip', Tooltip);
 

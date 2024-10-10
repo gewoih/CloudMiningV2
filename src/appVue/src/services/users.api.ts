@@ -1,6 +1,5 @@
 import {RegisterUser} from '@/models/RegisterUser.ts';
 import {LoginUser} from "@/models/LoginUser.ts";
-import router from "@/router.ts";
 import {apiService} from "@/services/api.ts";
 
 class UsersService {
@@ -13,7 +12,6 @@ class UsersService {
         const token = response.data;
 
         localStorage.setItem('access_token', token);
-        await router.push({name: 'home'});
         return token;
     }
 }

@@ -3,6 +3,7 @@ import {ref, computed} from 'vue';
 import {LoginUser} from '@/models/LoginUser.ts';
 import {usersService} from '@/services/users.api';
 import {useUserStore} from "@/stores/user.ts";
+import router from "@/router.ts";
 
 const userStore = useUserStore();
 
@@ -18,6 +19,7 @@ const isValid = computed(() => {
 async function login() {
   const token = await usersService.loginUser(user.value);
   userStore.setToken(token)
+  await router.push({name: 'home'});
 }
 </script>
 
