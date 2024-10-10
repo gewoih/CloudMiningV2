@@ -32,58 +32,66 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import router from "@/router.ts";
 import Menu from "primevue/menu";
-
-const items = ref([
-  {
-    label: 'Главная',
-    icon: 'pi pi-chart-line',
-    route: 'home',
-  },
-  {
-    label: 'Участники',
-    icon: 'pi pi-users',
-    route: 'members',
-  },
-  {
-    label: 'Платежи',
-    icon: 'pi pi-wallet',
-    route: 'payments',
-  }
-]);
-
-const settingsMenuItems = ref([
-  {
-    label: 'Регистрация', icon: 'pi pi-user-plus', command: () => {
-      router.push({name: "register"});
-    }
-  },
-  {
-    label: 'Вход', icon: 'pi pi-sign-in', command: () => {
-      router.push({name: "login"});
-    }
-  },
-  // {
-  //   label: 'Профиль', icon: 'pi pi-user-edit', command: () => {
-  //     router.push({name: "register"});
-  //   }
-  // },
-  // {
-  //   label: 'Настройки', icon: 'pi pi-cog', command: () => {
-  //     router.push({name: "register"});
-  //   }
-  // },
-  // {
-  //   label: 'Выйти', icon: 'pi pi-sign-out', command: () => {
-  //     router.push({name: "register"});
-  //   }
-  // }
-]);
+import {useUserStore} from "@/stores/user.ts";
 
 const menu = ref();
-const toggleMenu = (event) => {
+const userStore = useUserStore();
+
+const items = computed(() => {
+  return [
+    {
+      label: 'Главная',
+      icon: 'pi pi-chart-line',
+      route: 'home',
+      visible: userStore.isAuthenticated
+    },
+    {
+      label: 'Участники',
+      icon: 'pi pi-users',
+      route: 'members',
+      visible: userStore.isAdmin && userStore.isAuthenticated
+    },
+    {
+      label: 'Платежи',
+      icon: 'pi pi-wallet',
+      route: 'payments',
+      visible: userStore.isAuthenticated
+    }
+  ].filter(item => item.visible);
+});
+
+const settingsMenuItems = computed(() => {
+  return [
+    {
+      label: 'Добавить пользователя',
+      icon: 'pi pi-user-plus',
+      command: () => {
+        router.push({name: "register"});
+      },
+      visible: userStore.isAdmin
+    },
+    {
+      label: enterButtonLabels,
+      icon: 'pi pi-sign-in',
+      command: () => {
+        router.push({name: "login"});
+        userStore.setToken(null);
+      },
+      visible: true
+    }
+  ].filter(item => item.visible);
+});
+
+const toggleMenu = (event: any) => {
   menu.value.toggle(event);
 };
+const enterButtonLabels = () => {
+  if (userStore.isAuthenticated) {
+    return "Сменить пользователя"
+  } else
+    return "Вход"
+}
 </script>

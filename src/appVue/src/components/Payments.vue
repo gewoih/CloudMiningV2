@@ -5,7 +5,7 @@
         <Dropdown v-model="selectedPaymentType" :options="paymentTypes" class="w-full md:w-14rem" optionLabel="name"
                   optionValue="value" @change="fetchPayments"/>
       </template>
-      <template v-if="userRole === UserRole.Admin && selectedPaymentType !== PaymentType.Crypto" #end>
+      <template v-if="userStore.isAdmin && selectedPaymentType !== PaymentType.Crypto" #end>
         <Button class="mr-2" icon="pi pi-plus" label="Добавить платеж" severity="success"
                 @click="isModalVisible = true"/>
       </template>
@@ -13,26 +13,26 @@
 
     <DataTable v-model:expandedRows="expandedRows" :value="payments" dataKey="id"
                @rowExpand="fetchShares">
-      <Column v-if="userRole === UserRole.Admin" expander/>
-      <Column v-if="userRole === UserRole.Admin" field="isCompleted" header="Статус">
+      <Column v-if="userStore.isAdmin" expander/>
+      <Column v-if="userStore.isAdmin" field="isCompleted" header="Статус">
         <template v-slot:body="slotProps">
           <Tag :severity="getPaymentStatusSeverity(slotProps.data)"
                :value="isCompletedHandle(slotProps.data)"/>
         </template>
       </Column>
-      <Column v-if="userRole !== UserRole.Admin" field="status" header="Статус">
+      <Column v-if="!userStore.isAdmin" field="status" header="Статус">
         <template v-slot:body="slotProps">
           <Tag :severity="getShareStatusSeverity(slotProps.data)" :value="getStatus(slotProps.data)"/>
         </template>
       </Column>
-      <Column v-if="userRole !== UserRole.Admin" header="Ваша сумма">
+      <Column v-if="!userStore.isAdmin" header="Ваша сумма">
         <template v-slot:body="slotProps">
           {{
             getTruncatedAmount(slotProps.data.sharedAmount, slotProps.data.currency.precision) + ' ' + slotProps.data.currency.shortName
           }}
         </template>
       </Column>
-      <Column v-if="userRole !== UserRole.Admin" header="Ваша доля">
+      <Column v-if="!userStore.isAdmin" header="Ваша доля">
         <template v-slot:body="slotProps">
           {{
             getTruncatedAmount(slotProps.data.share, 2) + ' ' + "%"
@@ -52,10 +52,10 @@
         </template>
       </Column>
       <Column
-          v-if="(userRole === UserRole.Admin && selectedPaymentType !== PaymentType.Crypto) || selectedPaymentType === PaymentType.Purchase"
+          v-if="(userStore.isAdmin && selectedPaymentType !== PaymentType.Crypto) || selectedPaymentType === PaymentType.Purchase"
           field="caption"
           header="Комментарий"></Column>
-      <Column v-if="userRole !== UserRole.Admin && selectedPaymentType !== PaymentType.Crypto">
+      <Column v-if="!userStore.isAdmin && selectedPaymentType !== PaymentType.Crypto">
         <template v-slot:body="sharedSlotProps">
           <div v-if="sharedSlotProps.data.status === ShareStatus.Created">
             <ConfirmPopup group="templating">
@@ -74,7 +74,7 @@
           </div>
         </template>
       </Column>
-      <template v-if="userRole === UserRole.Admin" v-slot:expansion="slotProps">
+      <template v-if="userStore.isAdmin" v-slot:expansion="slotProps">
         <div class="p-3">
           <DataTable :value="paymentSharesMap[slotProps.data.id]">
             <Column header="ФИО">
@@ -130,7 +130,7 @@
                @page="pageChange"></Paginator>
   </div>
 
-  <Dialog v-if="userRole === UserRole.Admin" v-model:visible="isModalVisible" :dismissableMask="true" :draggable="false"
+  <Dialog v-if="userStore.isAdmin" v-model:visible="isModalVisible" :dismissableMask="true" :draggable="false"
           header="Добавление платежа" modal>
     <div class="flex align-items-center gap-3 mb-3">
       <label class="font-semibold w-6rem" for="amount">Сумма</label>
@@ -159,12 +159,12 @@ import {CurrencyCode} from "@/enums/CurrencyCode.ts";
 import {PaymentType} from "@/enums/PaymentType.ts";
 import {CreatePayment} from "@/models/CreatePayment.ts";
 import {PaymentShare} from "@/models/PaymentShare.ts";
-import {UserRole} from "@/enums/UserRole.ts";
 import {AdminPayment} from "@/models/AdminPayment.ts";
 import {Payment} from "@/models/Payment.ts";
 import {ShareStatus} from "@/enums/ShareStatus.ts";
 import {useConfirm} from "primevue/useconfirm";
 import ConfirmPopup from 'primevue/confirmpopup';
+import {useUserStore} from "@/stores/user.ts";
 
 const isModalVisible = ref(false);
 const expandedRows = ref({});
@@ -175,7 +175,7 @@ const paymentShares = ref<PaymentShare[]>();
 const totalPaymentsCount = ref(0);
 const pageSize = ref(10);
 const pageNumber = ref(1);
-const userRole = ref(UserRole.User);
+const userStore = useUserStore();
 const confirm = useConfirm();
 
 const newPayment = ref<CreatePayment>({
@@ -266,7 +266,7 @@ const getShareStatusSeverity = (payment) => {
 };
 const getStatus = (payment) => {
   if (selectedPaymentType.value != PaymentType.Crypto) {
-    if (userRole.value != UserRole.Admin) {
+    if (!userStore.isAdmin) {
       switch (payment.status) {
         case ShareStatus.Created:
           return "К оплате";
@@ -309,7 +309,7 @@ const isCompletedHandle = (data) => {
 
 
 const showTemplate = (event, data, sharedData) => {
-  if (userRole.value == UserRole.Admin) {
+  if (userStore.isAdmin) {
     if (data.status == ShareStatus.Created && selectedPaymentType.value != PaymentType.Crypto) {
       confirm.require({
         target: event.currentTarget,
@@ -395,12 +395,6 @@ const getTruncatedAmount = (value: number, precision: number) => {
   return Math.trunc(value * factor) / factor;
 }
 
-const getUserRole = () => {
-  const jwt = localStorage.getItem('access_token');
-  const decodedJwt = jwt && JSON.parse(atob(jwt.split('.')[1]));
-  userRole.value = decodedJwt["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-};
-
 const fetchShares = async (event) => {
   const paymentId = event.data.id;
   if (!paymentSharesMap.value[paymentId]) {
@@ -419,7 +413,7 @@ const fetchPayments = async () => {
 const createPayment = async () => {
   newPayment.value.paymentType = selectedPaymentType.value;
   const response = await paymentsService.createPayment(newPayment.value);
-  payments.value?.push(response);
+  payments.value?.unshift(response);
 
   newPayment.value = {
     caption: null,
@@ -441,9 +435,7 @@ const isSharesCompleted = (paymentId: string) => {
   });
 };
 
-getUserRole();
 fetchPayments();
-
 
 </script>
 
