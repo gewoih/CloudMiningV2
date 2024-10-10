@@ -419,7 +419,7 @@ const fetchPayments = async () => {
 const createPayment = async () => {
   newPayment.value.paymentType = selectedPaymentType.value;
   const response = await paymentsService.createPayment(newPayment.value);
-  payments.value?.push(response);
+  payments.value?.unshift(response);
 
   newPayment.value = {
     caption: null,

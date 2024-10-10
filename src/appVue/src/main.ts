@@ -12,8 +12,12 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Toast from "primevue/toast";
 import Tooltip from "primevue/tooltip";
+import { createPinia } from 'pinia';
 
 const app = createApp(App);
+const pinia = createPinia();
+
+app.use(pinia);
 app.use(router);
 app.use(PrimeVue)
 app.use(ToastService);

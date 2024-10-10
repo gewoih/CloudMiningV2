@@ -14,6 +14,7 @@ class UsersService {
 
         localStorage.setItem('access_token', token);
         await router.push({name: 'home'});
+        return token;
     }
 }
 
