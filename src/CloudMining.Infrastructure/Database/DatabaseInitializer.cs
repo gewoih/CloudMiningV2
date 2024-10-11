@@ -1,20 +1,40 @@
-﻿using System.Diagnostics;
-using System.Security.Principal;
-using CloudMining.Domain.Enums;
+﻿using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.Interfaces;
-using MassTransit.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CloudMining.Infrastructure.Database;
 
-public static class DatabaseInitializer
+public sealed class DatabaseInitializer
 {
-	private static UserManager<User> _userManager;
+	private readonly UserManager<User> _userManager;
+	private readonly RoleManager<Role> _roleManager;
+	private readonly ICurrencyService _currencyService;
+	private readonly IUserManagementService _userManagementService;
+	private readonly CloudMiningContext _context;
+
+	public DatabaseInitializer(UserManager<User> userManager, 
+		RoleManager<Role> roleManager,
+		ICurrencyService currencyService, 
+		IUserManagementService userManagementService, 
+		CloudMiningContext context)
+	{
+		_userManager = userManager;
+		_roleManager = roleManager;
+		_currencyService = currencyService;
+		_userManagementService = userManagementService;
+		_context = context;
+	}
+
+	public async Task InitializeAsync()
+	{
+		await CreateEthPayoutsAsync();
+		await CreateRolesAsync();
+		await CreateUsersAsync();
+	}
 
 	public static List<Currency> GetCurrencies()
 	{
@@ -58,15 +78,14 @@ public static class DatabaseInitializer
 		];
 	}
 
-	public static async Task CreateEthPayouts(IServiceProvider serviceProvider)
+	private async Task CreateEthPayoutsAsync()
 	{
-		var currenciesService = serviceProvider.GetRequiredService<ICurrencyService>();
-		var userManagementService = serviceProvider.GetRequiredService<IUserManagementService>();
-		var context = serviceProvider.GetRequiredService<CloudMiningContext>();
+		if (await _context.ShareablePayments.AnyAsync(payment => payment.Currency.Code == CurrencyCode.ETH))
+			return;
 
-		var ethCurrencyId = await currenciesService.GetIdAsync(CurrencyCode.ETH);
+		var ethCurrencyId = await _currencyService.GetIdAsync(CurrencyCode.ETH);
 
-		var users = await userManagementService.GetUsersAsync();
+		var users = await _userManagementService.GetUsersAsync();
 		var nikita = users.First(user => user.FirstName == "Никита");
 		var maksimGrigoriev = users.First(user => user is { FirstName: "Максим", LastName: "Григорьев" });
 		var egor = users.First(user => user.FirstName == "Егор");
@@ -1058,24 +1077,19 @@ public static class DatabaseInitializer
 			},
 		};
 
-		if (await context.ShareablePayments.AnyAsync(payment => payment.Currency.Code == CurrencyCode.ETH))
-			return;
-		
-		await context.ShareablePayments.AddRangeAsync(payouts);
-		await context.SaveChangesAsync();
+		await _context.ShareablePayments.AddRangeAsync(payouts);
+		await _context.SaveChangesAsync();
 	}
 
-	public static async Task CreateRolesAsync(IServiceProvider serviceProvider)
+	private async Task CreateRolesAsync()
 	{
-		var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
-
 		foreach (var role in Enum.GetValues<UserRole>())
 		{
 			var roleName = Enum.GetName(role);
-			var roleExist = await roleManager.RoleExistsAsync(roleName);
-			if (roleExist) 
+			var roleExist = await _roleManager.RoleExistsAsync(roleName);
+			if (roleExist)
 				continue;
-			
+
 			var roleCommissionPercent = role switch
 			{
 				UserRole.Admin => 0.05m,
@@ -1083,14 +1097,12 @@ public static class DatabaseInitializer
 				_ => 0m
 			};
 
-			await roleManager.CreateAsync(new Role { Name = roleName, CommissionPercent = roleCommissionPercent });
+			await _roleManager.CreateAsync(new Role { Name = roleName, CommissionPercent = roleCommissionPercent });
 		}
 	}
 
-	public static async Task CreateUsersAsync(IServiceProvider serviceProvider)
+	private async Task CreateUsersAsync()
 	{
-		_userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-
 		await RegisterUserIfNotExists("Admin",
 			"nranenko@bk.ru",
 			"Никита",
@@ -1106,7 +1118,7 @@ public static class DatabaseInitializer
 			"Владимирович",
 			"24042001Nr.",
 			new DateTime(2021, 6, 15, 0, 0, 0, DateTimeKind.Utc));
-		
+
 		await RegisterUserIfNotExists("User",
 			"test4@mail.ru",
 			"Егор",
@@ -1114,7 +1126,7 @@ public static class DatabaseInitializer
 			"Сергеевич",
 			"24042001Nr.",
 			new DateTime(2021, 6, 17, 0, 0, 0, DateTimeKind.Utc));
-		
+
 		await RegisterUserIfNotExists("User",
 			"test3@mail.ru",
 			"Иван",
@@ -1122,7 +1134,7 @@ public static class DatabaseInitializer
 			"Владимирович",
 			"24042001Nr.",
 			new DateTime(2021, 7, 19, 0, 0, 0, DateTimeKind.Utc));
-		
+
 		await RegisterUserIfNotExists("Manager",
 			"test2@mail.ru",
 			"Максим",
@@ -1130,7 +1142,7 @@ public static class DatabaseInitializer
 			"Владимирович",
 			"24042001Nr.",
 			new DateTime(2021, 7, 28, 0, 0, 0, DateTimeKind.Utc));
-		
+
 		await RegisterUserIfNotExists("User",
 			"test1@mail.ru",
 			"Максим",
@@ -1138,7 +1150,7 @@ public static class DatabaseInitializer
 			"Олегович",
 			"24042001Nr.",
 			new DateTime(2021, 8, 24, 0, 0, 0, DateTimeKind.Utc));
-		
+
 		await RegisterUserIfNotExists("User",
 			"test@mail.ru",
 			"Филипп",
@@ -1148,7 +1160,7 @@ public static class DatabaseInitializer
 			new DateTime(2021, 11, 11, 0, 0, 0, DateTimeKind.Utc));
 	}
 
-	private static async Task RegisterUserIfNotExists(string role, string email, string firstName,
+	private async Task RegisterUserIfNotExists(string role, string email, string firstName,
 		string lastName, string patronymic, string password, DateTime registrationDate)
 	{
 		var user = new User

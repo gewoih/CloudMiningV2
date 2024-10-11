@@ -6,6 +6,7 @@ using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Domain.Models.UserSettings;
 using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.CentralBankRussia;
+using CloudMining.Infrastructure.Database;
 using CloudMining.Infrastructure.Emcd;
 using CloudMining.Infrastructure.Telegram;
 using CloudMining.Interfaces.DTO.Members;
@@ -24,6 +25,8 @@ public static class ServicesSetup
 {
 	public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration)
 	{
+		services.AddScoped<DatabaseInitializer>();
+		
 		services.AddScoped<IUserManagementService, UserManagementService>();
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<ICurrentUserService, CurrentUserService>();

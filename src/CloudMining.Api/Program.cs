@@ -25,9 +25,8 @@ var scope = app.Services.CreateScope();
 var database = scope.ServiceProvider.GetService<CloudMiningContext>()?.Database;
 await database.MigrateAsync();
 
-await DatabaseInitializer.CreateRolesAsync(scope.ServiceProvider);
-await DatabaseInitializer.CreateUsersAsync(scope.ServiceProvider);
-await DatabaseInitializer.CreateEthPayouts(scope.ServiceProvider);
+var databaseInitializer = scope.ServiceProvider.GetService<DatabaseInitializer>();
+await databaseInitializer.InitializeAsync();
 
 if (app.Environment.IsDevelopment())
 {
