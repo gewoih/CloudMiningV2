@@ -1,3 +1,3 @@
 ﻿namespace CloudMining.Interfaces.DTO;
 
-public record UserShare(Guid UserId, decimal Share);
+public record UserShare(Guid UserId, decimal Share, decimal CommissionPercent);

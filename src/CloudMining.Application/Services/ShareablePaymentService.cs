@@ -59,7 +59,7 @@ public sealed class ShareablePaymentService : IShareablePaymentService
 			return null;
 
 		var usersPaymentShares =
-			await _shareService.CreatePaymentShares(createPaymentDto.Amount, foundCurrency);
+			await _shareService.CreatePaymentShares(createPaymentDto, foundCurrency);
 
 		var newPayment = _shareablePaymentMapper.ToDomain(createPaymentDto);
 		newPayment.CurrencyId = foundCurrency.Id;
