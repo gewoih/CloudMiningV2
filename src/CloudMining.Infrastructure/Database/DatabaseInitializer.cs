@@ -2,6 +2,7 @@
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments.Shareable;
+using CloudMining.Interfaces.DTO.Payments.Deposits;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,26 +15,29 @@ public sealed class DatabaseInitializer
 	private readonly RoleManager<Role> _roleManager;
 	private readonly ICurrencyService _currencyService;
 	private readonly IUserManagementService _userManagementService;
+	private readonly IDepositService _depositService;
 	private readonly CloudMiningContext _context;
 
 	public DatabaseInitializer(UserManager<User> userManager, 
 		RoleManager<Role> roleManager,
 		ICurrencyService currencyService, 
 		IUserManagementService userManagementService, 
-		CloudMiningContext context)
+		CloudMiningContext context, 
+		IDepositService depositService)
 	{
 		_userManager = userManager;
 		_roleManager = roleManager;
 		_currencyService = currencyService;
 		_userManagementService = userManagementService;
 		_context = context;
+		_depositService = depositService;
 	}
 
 	public async Task InitializeAsync()
 	{
-		await CreateEthPayoutsAsync();
-		await CreateRolesAsync();
-		await CreateUsersAsync();
+		await InitializeEthPayoutsAsync();
+		await InitializeRolesAsync();
+		await InitializeUsersAsync();
 	}
 
 	public static List<Currency> GetCurrencies()
@@ -78,7 +82,7 @@ public sealed class DatabaseInitializer
 		];
 	}
 
-	private async Task CreateEthPayoutsAsync()
+	private async Task InitializeEthPayoutsAsync()
 	{
 		if (await _context.ShareablePayments.AnyAsync(payment => payment.Currency.Code == CurrencyCode.ETH))
 			return;
@@ -1081,7 +1085,7 @@ public sealed class DatabaseInitializer
 		await _context.SaveChangesAsync();
 	}
 
-	private async Task CreateRolesAsync()
+	private async Task InitializeRolesAsync()
 	{
 		foreach (var role in Enum.GetValues<UserRole>())
 		{
@@ -1101,7 +1105,7 @@ public sealed class DatabaseInitializer
 		}
 	}
 
-	private async Task CreateUsersAsync()
+	private async Task InitializeUsersAsync()
 	{
 		await RegisterUserIfNotExists("Admin",
 			"nranenko@bk.ru",
@@ -1179,6 +1183,83 @@ public sealed class DatabaseInitializer
 			var createUser = await _userManager.CreateAsync(user, password);
 			if (createUser.Succeeded)
 				await _userManager.AddToRoleAsync(user, role);
+		}
+	}
+
+	private async Task InitializeDepositsAsync()
+	{
+		var ivanKulaginId = await _context.Users.Where(u => u.LastName == "Кулагин").Select(u => u.Id).FirstAsync();
+		var maksimGrigorievId = await _context.Users.Where(u => u.LastName == "Григорьев").Select(u => u.Id).FirstAsync();
+		var nikitaRanenkoId = await _context.Users.Where(u => u.LastName == "Раненко" && u.FirstName == "Никита").Select(u => u.Id).FirstAsync();
+		var maksimRanenkoId = await _context.Users.Where(u => u.LastName == "Раненко" && u.FirstName == "Максим").Select(u => u.Id).FirstAsync();
+		var egorKonyaevId = await _context.Users.Where(u => u.LastName == "Коняев").Select(u => u.Id).FirstAsync();
+		var filippEvseevId = await _context.Users.Where(u => u.LastName == "Евсеев").Select(u => u.Id).FirstAsync();
+		var maksimGlinkinId = await _context.Users.Where(u => u.LastName == "Глинкин").Select(u => u.Id).FirstAsync();
+		
+		var deposits = new List<DepositDto>
+		{
+			//Пополнения общего счета
+			new(maksimGrigorievId, 70000, new DateTime(2021, 6, 15)),
+			new(nikitaRanenkoId, 94050, new DateTime(2021, 6, 17)),
+			new(maksimGrigorievId, 306550, new DateTime(2021, 6, 17)),
+			new(egorKonyaevId, 250000, new DateTime(2021, 6, 17)),
+			
+			//Москитные сетки
+			new(maksimGrigorievId, 2500, new DateTime(2021, 6, 21)),
+			
+			//Кулеры для видеокарт
+			new(maksimGrigorievId, 1825, new DateTime(2021, 6, 25)),
+			new(egorKonyaevId, 1175, new DateTime(2021, 6, 25)),
+			
+			//Пополнения общего счета
+			new(ivanKulaginId, 91000, new DateTime(2021, 7, 19)),
+			new(maksimRanenkoId, 100000, new DateTime(2021, 7, 28)),
+			
+			//На майнер
+			new(maksimGrigorievId, 17000, new DateTime(2021, 7, 28)),
+			
+			//Расходники
+			new(maksimRanenkoId, 277, new DateTime(2021, 7, 30)),
+			
+			//Объединение майнеров
+			new(nikitaRanenkoId, 210000, new DateTime(2021, 8, 2)),
+			
+			//Вывод крипты на прокладку кабеля
+			new(egorKonyaevId, 6750, new DateTime(2021, 8, 3)),
+			
+			//На прокладку кабеля
+			new(maksimGrigorievId, 10130, new DateTime(2021, 8, 3)),
+			new(maksimRanenkoId, 10000, new DateTime(2021, 8, 8)),
+			
+			//Объединение S17 pro
+			new(maksimRanenkoId, 133000, new DateTime(2021, 8, 28)),
+			new(nikitaRanenkoId, 133000, new DateTime(2021, 8, 28)),
+			new(maksimGlinkinId, 133000, new DateTime(2021, 8, 28)),
+			
+			//Пополнение общего счета
+			new(egorKonyaevId, 2.28m, new DateTime(2021, 9, 4)),
+			
+			//Коньяк электрику
+			new(maksimRanenkoId, 263, new DateTime(2021, 9, 21)),
+			new(nikitaRanenkoId, 473, new DateTime(2021, 9, 21)),
+			new(maksimGlinkinId, 144, new DateTime(2021, 9, 21)),
+			new(egorKonyaevId, 279, new DateTime(2021, 9, 21)),
+			new(maksimGrigorievId, 442, new DateTime(2021, 9, 21)),
+			new(ivanKulaginId, 99, new DateTime(2021, 9, 21)),
+			
+			//Стеллаж
+			new(maksimRanenkoId, 1240, new DateTime(2021, 10, 23)),
+			new(nikitaRanenkoId, 2225, new DateTime(2021, 10, 23)),
+			new(maksimGlinkinId, 678, new DateTime(2021, 10, 23)),
+			new(egorKonyaevId, 1314, new DateTime(2021, 10, 23)),
+			new(maksimGrigorievId, 2079, new DateTime(2021, 10, 23)),
+			new(ivanKulaginId, 464, new DateTime(2021, 10, 23)),
+			
+			//Пополнения общего счета
+			new(filippEvseevId, 80000, new DateTime(2021, 11, 11)),
+			new(egorKonyaevId, 50000, new DateTime(2021, 11, 12)),
+			
+			//Пополнения общего счета
 		}
 	}
 }
