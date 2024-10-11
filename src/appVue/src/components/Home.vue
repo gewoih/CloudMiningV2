@@ -2,7 +2,7 @@
   <div class="w-9">
     <Toolbar class="mb-5 pt-0 border-none">
       <template #start>
-        <h1 v-if="userRole === UserRole.Admin">Статистика</h1>
+        <h1 v-if="userStore.isAdmin">Статистика</h1>
         <h1 v-else>Моя статистика</h1>
       </template>
       <template #end>
@@ -20,7 +20,7 @@
           }"></i>
         <Dropdown v-model="selectedStrategyType" :options="strategyTypes" class="w-15rem" optionLabel="name"
                   optionValue="value" @change="fetchStatistics"/>
-        <Dropdown v-if="userRole === UserRole.Admin" v-model="selectedStatistics" :options="statisticsList"
+        <Dropdown v-if="userStore.isAdmin" v-model="selectedStatistics" :options="statisticsList"
                   class="w-15rem ml-3" :optionLabel="statisticsLabel" @change="updateCharts"/>
       </template>
     </Toolbar>
@@ -111,16 +111,16 @@ import {ref} from "vue";
 import {Statistics} from "@/models/Statistics.ts";
 import {StrategyType} from "@/enums/StrategyType.ts";
 import {statisticsService} from "@/services/statistics.api.ts";
-import {UserRole} from "@/enums/UserRole.ts";
 import {ExpenseType} from "@/enums/ExpenseType.ts";
 import {TimeLine} from "@/enums/TimeLine.ts";
 import {PriceBar} from "@/models/PriceBar.ts";
 import {Expense} from "@/models/Expense.ts";
+import {useUserStore} from "@/stores/user.ts";
 
 const statisticsList = ref<Statistics[]>();
 const selectedStatistics = ref<Statistics>();
 const selectedStrategyType = ref(StrategyType.Hold);
-const userRole = ref(UserRole.User);
+const userStore = useUserStore();
 const selectedIncomeAndProfitTimeline = ref(TimeLine.AllTime);
 const selectedExpenseType = ref(ExpenseType.Total);
 const selectedExpenseTimeline = ref(TimeLine.AllTime);
@@ -160,7 +160,7 @@ const statisticsLabel = (statistics: Statistics) => {
 const fetchStatistics = async () => {
   statisticsList.value = await statisticsService.getStatistics(selectedStrategyType.value);
 
-  if (userRole.value == UserRole.Admin) {
+  if (userStore.isAdmin) {
     selectedStatistics.value = statisticsList.value.find(stat => stat.user == null) || selectedStatistics.value;
   } else {
     selectedStatistics.value = statisticsList.value[0] || selectedStatistics.value;
@@ -174,12 +174,6 @@ const getFormattedAmount = (value: number) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
-};
-
-const getUserRole = () => {
-  const jwt = localStorage.getItem('access_token');
-  const decodedJwt = jwt && JSON.parse(atob(jwt.split('.')[1]));
-  userRole.value = decodedJwt["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 };
 
 const filterDataByTimeline = (data: PriceBar[], timeline: TimeLine) => {
@@ -403,7 +397,6 @@ const updateExpenseChart = () => {
   expenseChartOptions.value = setExpenseChartOptions();
 }
 
-getUserRole();
 fetchStatistics();
 
 </script>
