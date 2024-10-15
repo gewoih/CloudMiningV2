@@ -3,6 +3,5 @@
 public enum PaymentType
 {
 	Electricity,
-	Crypto,
-	Purchase
+	Crypto
 }

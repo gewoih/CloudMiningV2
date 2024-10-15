@@ -5,7 +5,7 @@ public record StatisticsDto(
     decimal MonthlyIncome,
     decimal TotalExpense,
     decimal ElectricityExpense,
-    decimal PurchaseExpense,
+    decimal DepositAmount,
     decimal TotalProfit,
     decimal MonthlyProfit,
     decimal PaybackPercent,
