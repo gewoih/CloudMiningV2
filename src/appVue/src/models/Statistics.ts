@@ -12,7 +12,7 @@ export interface Statistics {
     monthlyIncome: number;
     totalExpense: number;
     electricityExpense: number;
-    purchaseExpense: number;
+    depositAmount: number;
     totalProfit: number;
     monthlyProfit: number;
     paybackPercent: number;

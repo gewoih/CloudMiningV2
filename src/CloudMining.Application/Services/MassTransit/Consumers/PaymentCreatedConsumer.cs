@@ -26,7 +26,6 @@ public sealed class PaymentCreatedConsumer : IConsumer<PaymentCreated>
 			message = paymentType switch
 			{
 				PaymentType.Electricity => "От Вас требуется оплата электричества.",
-				PaymentType.Purchase => "Вы участвуете в новой покупке.",
 				PaymentType.Crypto => "Для Вас получена новая выплата!",
 				_ => message
 			};

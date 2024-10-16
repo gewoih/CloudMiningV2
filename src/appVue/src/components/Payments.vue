@@ -52,7 +52,7 @@
         </template>
       </Column>
       <Column
-          v-if="(userStore.isAdmin && selectedPaymentType !== PaymentType.Crypto) || selectedPaymentType === PaymentType.Purchase"
+          v-if="(userStore.isAdmin && selectedPaymentType !== PaymentType.Crypto)"
           field="caption"
           header="Комментарий"></Column>
       <Column v-if="!userStore.isAdmin && selectedPaymentType !== PaymentType.Crypto">
@@ -188,8 +188,7 @@ const newPayment = ref<CreatePayment>({
 
 const paymentTypes = ref([
   {name: 'Электричество', value: 'Electricity'},
-  {name: 'Выплаты', value: 'Crypto'},
-  {name: 'Покупки', value: 'Purchase'}
+  {name: 'Выплаты', value: 'Crypto'}
 ]);
 
 const pageChange = async (event) => {
