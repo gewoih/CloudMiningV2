@@ -3,6 +3,7 @@ using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Infrastructure.Settings;
 using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.DTO.Payments.Deposits;
+using CloudMining.Interfaces.DTO.Purchases;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.DTO.Users;
 using CloudMining.Interfaces.Interfaces;
@@ -15,13 +16,16 @@ public class StatisticsHelper : IStatisticsHelper
 	private readonly DateOnly _projectStartDate;
 	private readonly IUserManagementService _userManagementService;
 	private readonly ICurrentUserService _currentUserService;
+	private readonly IPurchaseService _purchaseService;
 
 	public StatisticsHelper(IOptions<ProjectInformationSettings> projectInformation,
 		IUserManagementService userManagementService,
-		ICurrentUserService currentUserService)
+		ICurrentUserService currentUserService,
+		IPurchaseService purchaseService)
 	{
 		_userManagementService = userManagementService;
 		_currentUserService = currentUserService;
+		_purchaseService = purchaseService;
 		_projectStartDate = projectInformation.Value.ProjectStartDate;
 	}
 
@@ -197,7 +201,7 @@ public class StatisticsHelper : IStatisticsHelper
 		return userDtosList;
 	}
 
-	public List<StatisticsDto> GetStatisticsDtoList(
+	public async Task<List<StatisticsDto>> GetStatisticsDtoList(
 		Dictionary<UserDto, List<MonthlyPriceBar>> incomesPerUser,
 		List<ShareablePayment> expenseList,
 		Dictionary<Guid, List<DepositDto>>? usersDeposits)
@@ -205,6 +209,11 @@ public class StatisticsHelper : IStatisticsHelper
 		var monthsSinceProjectStartDate = CalculateMonthsSinceProjectStart();
 		var statisticsDtoList = new List<StatisticsDto>();
 		var isCurrentUserAdmin = _currentUserService.IsCurrentUserAdmin();
+		var purchases = new List<PurchaseDto>();
+		if (!isCurrentUserAdmin)
+		{
+			purchases = await _purchaseService.GetPurchasesAsync();
+		}
 
 		foreach (var (user, priceBars) in incomesPerUser)
 		{
@@ -242,20 +251,23 @@ public class StatisticsHelper : IStatisticsHelper
 				paybackPercent,
 				priceBars,
 				profits,
-				expensesList);
+				expensesList,
+				purchases);
 
 			statisticsDtoList.Add(statisticsDto);
 		}
 
 		if (!isCurrentUserAdmin) return statisticsDtoList;
+		
+		purchases = await _purchaseService.GetPurchasesAsync();
 
-		var generalStatisticsDto = GetGeneralStatisticsDto(statisticsDtoList);
+		var generalStatisticsDto = GetGeneralStatisticsDto(statisticsDtoList, purchases);
 		statisticsDtoList.Insert(0, generalStatisticsDto);
 
 		return statisticsDtoList;
 	}
 
-	private static StatisticsDto GetGeneralStatisticsDto(List<StatisticsDto> statisticsDtoList)
+	private static StatisticsDto GetGeneralStatisticsDto(List<StatisticsDto> statisticsDtoList, List<PurchaseDto> purchasesList)
 	{
 		var totalIncome = 0m;
 		var monthlyIncome = 0m;
@@ -328,7 +340,8 @@ public class StatisticsHelper : IStatisticsHelper
 			paybackPercent,
 			totalIncomes,
 			totalProfits,
-			totalExpenses
+			totalExpenses,
+			purchasesList
 		);
 	}
 }
