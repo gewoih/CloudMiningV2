@@ -6,5 +6,5 @@ namespace CloudMining.Interfaces.Interfaces;
 public interface IPurchaseService
 {
 	Task<List<PurchaseDto>> GetPurchasesAsync();
-	Task<bool> CreatePurchaseAsync(CreatePurchaseDto purchaseDto);
+	Task<Purchase> CreatePurchaseAsync(CreatePurchaseDto purchaseDto);
 }

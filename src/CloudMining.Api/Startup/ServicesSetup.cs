@@ -3,6 +3,7 @@ using CloudMining.Application.Services;
 using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Domain.Models.Payments.Shareable;
+using CloudMining.Domain.Models.Purchases;
 using CloudMining.Domain.Models.UserSettings;
 using CloudMining.Infrastructure.Binance;
 using CloudMining.Infrastructure.CentralBankRussia;
@@ -13,6 +14,7 @@ using CloudMining.Interfaces.DTO.NotificationSettings;
 using CloudMining.Interfaces.DTO.Payments;
 using CloudMining.Interfaces.DTO.Payments.Admin;
 using CloudMining.Interfaces.DTO.Payments.User;
+using CloudMining.Interfaces.DTO.Purchases;
 using CloudMining.Interfaces.DTO.Users;
 using CloudMining.Interfaces.Interfaces;
 using Telegram.Bot;
@@ -59,6 +61,7 @@ public static class ServicesSetup
 		services.AddSingleton<IMapper<Deposit, DepositDto>, DepositMapper>();
 		services.AddSingleton<IMapper<ShareablePayment, CreatePaymentDto>, ShareablePaymentMapper>();
 		services.AddSingleton<IMapper<User, RegisterDto>, UserRegistrationMapper>();
+		services.AddSingleton<IMapper<Purchase, PurchaseDto>, PurchaseMapper>();
 
 		services.AddHttpClient<EmcdApiClient>();
 		services.AddHostedService<PayoutsLoaderService>();

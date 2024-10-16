@@ -1,4 +1,5 @@
-﻿using CloudMining.Domain.Enums;
+﻿using CloudMining.Application.Mappings;
+using CloudMining.Domain.Enums;
 using CloudMining.Interfaces.DTO.Purchases;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
@@ -14,11 +15,15 @@ public class StatisticsController : ControllerBase
 {
     private readonly IStatisticsService _statisticsService;
     private readonly IPurchaseService _purchaseService;
+    private readonly PurchaseMapper _purchaseMapper;
 
-    public StatisticsController(IStatisticsService statisticsService, IPurchaseService purchaseService)
+    public StatisticsController(IStatisticsService statisticsService,
+        IPurchaseService purchaseService,
+        PurchaseMapper purchaseMapper)
     {
         _statisticsService = statisticsService;
         _purchaseService = purchaseService;
+        _purchaseMapper = purchaseMapper;
     }
     
     [HttpGet]
@@ -30,12 +35,11 @@ public class StatisticsController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPost("purchases")]
-    public async Task<IActionResult> CreatePurchase([FromBody] CreatePurchaseDto purchaseDto)
+    public async Task<PurchaseDto> CreatePurchase([FromBody] CreatePurchaseDto createPurchaseDto)
     {
-        var succeeded = await _purchaseService.CreatePurchaseAsync(purchaseDto);
-        if (!succeeded)
-            return StatusCode(500, "An error occurred while creating the purchase.");
-
-        return Ok();
+        var newPurchase = await _purchaseService.CreatePurchaseAsync(createPurchaseDto);
+        var purchaseDto = _purchaseMapper.ToDto(newPurchase);
+        
+        return purchaseDto;
     }
 }

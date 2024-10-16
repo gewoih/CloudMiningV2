@@ -25,7 +25,7 @@ public class PurchaseService : IPurchaseService
 		return purchasesDto;
 	}
 
-	public async Task<bool> CreatePurchaseAsync(CreatePurchaseDto purchaseDto)
+	public async Task<Purchase> CreatePurchaseAsync(CreatePurchaseDto purchaseDto)
 	{
 		var newPurchase = new Purchase
 		{
@@ -34,9 +34,9 @@ public class PurchaseService : IPurchaseService
 			Date = DateOnly.FromDateTime(purchaseDto.Date)
 		};
 
-		await _context.Purchases.AddAsync(newPurchase);
-		var result = await _context.SaveChangesAsync();
+		await _context.Purchases.AddAsync(newPurchase); 
+		await _context.SaveChangesAsync();
 
-		return result > 0;
+		return new Purchase();
 	}
 }
