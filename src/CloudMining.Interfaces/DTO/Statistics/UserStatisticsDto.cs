@@ -1,4 +1,5 @@
-﻿using CloudMining.Interfaces.DTO.Users;
+﻿using CloudMining.Interfaces.DTO.Purchases;
+using CloudMining.Interfaces.DTO.Users;
 
 namespace CloudMining.Interfaces.DTO.Statistics;
 
@@ -14,7 +15,8 @@ public record UserStatisticsDto(
 	decimal PaybackPercent,
 	List<MonthlyPriceBar> Incomes,
 	List<MonthlyPriceBar> Profits,
-	List<Expense> Expenses)
+	List<Expense> Expenses,
+	List<PurchaseDto>? Purchases)
 	: StatisticsDto(
 		TotalIncome,
 		MonthlyIncome,
@@ -26,4 +28,5 @@ public record UserStatisticsDto(
 		PaybackPercent,
 		Incomes,
 		Profits,
-		Expenses);
+		Expenses,
+		Purchases);
