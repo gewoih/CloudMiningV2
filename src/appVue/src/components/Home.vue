@@ -48,7 +48,7 @@
         <template #footer>
           <div class="mb-2"><b>{{ getFormattedAmount(selectedStatistics?.electricityExpense || 0) }} ₽</b> электричество
           </div>
-          <div><b>{{ getFormattedAmount(selectedStatistics?.purchaseExpense || 0) }} ₽</b> покупки</div>
+          <div><b>{{ getFormattedAmount(selectedStatistics?.depositAmount || 0) }} ₽</b> депозит</div>
         </template>
       </Card>
       <Card class="my-box">
@@ -142,7 +142,7 @@ const incomeAndProfitTimelines = ref([
 const expenseTypes = ref([
   {name: 'Общие', value: 'Total'},
   {name: 'Электричество', value: 'OnlyElectricity'},
-  {name: 'Покупки', value: 'OnlyPurchases'},
+  {name: 'Депозиты', value: 'OnlyDeposits'},
 ]);
 
 const expenseTimelines = ref([
@@ -194,7 +194,7 @@ const filterDataByTimeline = (data: PriceBar[], timeline: TimeLine) => {
     }
     case TimeLine.AllTime:
     default: {
-      return formattedData;
+      return formattedData.sort((a, b) => a.date.getTime() - b.date.getTime());
     }
   }
 };
@@ -205,28 +205,40 @@ const filterDataByExpenseType = (data: Expense[], expenseType: ExpenseType) => {
 }
 
 const setIncomeAndProfitChartData = () => {
+
   const incomes = filterDataByTimeline(selectedStatistics.value?.incomes || [], selectedIncomeAndProfitTimeline.value);
   const profits = filterDataByTimeline(selectedStatistics.value?.profits || [], selectedIncomeAndProfitTimeline.value);
-
-  const incomeData = incomes.map(income => income.value);
-  const profitData = profits.map(profit => profit.value);
-
-  const labels = profits.map(profit => {
-    return profit.date.toLocaleDateString('ru-RU', {month: 'short', year: '2-digit'}).replace(' г.', '');
+  
+  const allDates = [...new Set([...incomes.map(i => i.date.toISOString().slice(0, 7)), ...profits.map(p => p.date.toISOString().slice(0, 7))])]
+      .sort();
+  
+  const incomeData = allDates.map(date => {
+    const income = incomes.find(i => i.date.toISOString().slice(0, 7) === date);
+    return income ? income.value : 0;
   });
-
+  
+  const profitData = allDates.map(date => {
+    const profit = profits.find(p => p.date.toISOString().slice(0, 7) === date);
+    return profit ? profit.value : 0;
+  });
+  
+  const labels = allDates.map(date => {
+    const [year, month] = date.split('-');
+    return new Date(Number(year), Number(month) - 1).toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' }).replace(' г.', '');
+  });
+  
   const getBarColor = (value: number) => value < 0 ? 'rgb(255, 0, 0)' : 'rgb(139, 92, 246)';
   const getProfitColor = (value: number) => value < 0 ? 'rgb(255, 0, 0)' : 'rgb(0, 255, 195)';
   const getProfitBorderRadius = (value: number) => value < 0 ? 8 : 0;
-
+  
   return {
     labels: labels,
     datasets: [
       {
         label: 'Доходы',
         data: incomeData,
-        borderColor: incomeData.map(value => getBarColor(value)),
-        backgroundColor: incomeData.map(value => getBarColor(value)),
+        borderColor: incomeData.map(value => getBarColor(value || 0)),
+        backgroundColor: incomeData.map(value => getBarColor(value || 0)),
         order: 2,
         borderRadius: {
           topLeft: 8,
@@ -238,20 +250,21 @@ const setIncomeAndProfitChartData = () => {
       {
         label: 'Прибыль',
         data: profitData,
-        borderColor: profitData.map(value => getProfitColor(value)),
-        backgroundColor: profitData.map(value => value < 0 ? 'rgb(255, 0, 0)' : 'rgba(255,255,255,0)'),
+        borderColor: profitData.map(value => getProfitColor(value || 0)),
+        backgroundColor: profitData.map(value => value !== null && value < 0 ? 'rgb(255, 0, 0)' : 'rgba(255,255,255,0)'),
         borderWidth: {
           top: 2,
           bottom: 0,
           left: 0,
           right: 0
         },
-        borderRadius: profitData.map(value => getProfitBorderRadius(value)),
+        borderRadius: profitData.map(value => getProfitBorderRadius(value || 0)),
         order: 1
       }
     ]
   };
 };
+
 const setIncomeAndProfitChartOptions = () => {
   const documentStyle = getComputedStyle(document.documentElement);
   const textColor = documentStyle.getPropertyValue('--text-color');

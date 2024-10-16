@@ -3,6 +3,7 @@ using CloudMining.Domain.Enums;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Infrastructure.Database;
 using CloudMining.Interfaces.DTO.Payments.Deposits;
+using CloudMining.Interfaces.DTO.Users;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,7 +36,7 @@ public sealed class DepositService : IDepositService
         var newDeposit = _depositMapper.ToDomain(depositDto);
         newDeposit.CurrencyId = currencyId;
         
-        var usersDeposits = await GetUsersDeposits();
+        var usersDeposits = await GetUsersDepositsAsync();
         usersDeposits[depositDto.UserId] += depositDto.Amount;
 
         var newShareChanges = await _shareService.GetUpdatedUsersSharesAsync(usersDeposits, depositDto.Date);
@@ -47,7 +48,7 @@ public sealed class DepositService : IDepositService
         return newDeposit;
     }
 
-    private async Task<Dictionary<Guid, decimal>> GetUsersDeposits()
+    private async Task<Dictionary<Guid, decimal>> GetUsersDepositsAsync()
     {
         var usersDeposits = await _context.Users
             .Include(user => user.Deposits)
@@ -55,5 +56,23 @@ public sealed class DepositService : IDepositService
             .ConfigureAwait(false);
 
         return usersDeposits;
+    }
+
+    public async Task<Dictionary<Guid, List<DepositDto>>> GetDepositsPerUserAsync(IEnumerable<UserDto> users)
+    {
+        var userIds = users.Select(user => user.Id).ToList();
+
+        var deposits = await _context.Deposits
+            .Where(deposit => userIds.Contains(deposit.UserId))
+            .ToListAsync();
+        
+        var result = deposits
+            .GroupBy(deposit => deposit.UserId)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(deposit => _depositMapper.ToDto(deposit)).ToList()
+            );
+
+        return result;
     }
 }
