@@ -32,7 +32,7 @@ public class ReceiveAndSellCalculationStrategy : IStatisticsCalculationStrategy
 		var usdToRubRatesByDate = await _marketDataService.GetUsdToRubRatesByDateAsync(payoutsDates);
 		var incomesPerUser = await GetPriceBarsAsync(payoutsList, usdToRubRatesByDate, payoutsDates,
 			uniqueCurrencyPairs, userDtosList);
-		var statisticsDtoList = await _statisticsHelper.GetStatisticsDtoList(incomesPerUser, electricityExpenseList, usersDeposits);
+		var statisticsDtoList = _statisticsHelper.GetStatisticsDtoList(incomesPerUser, electricityExpenseList, usersDeposits);
 
 		return statisticsDtoList;
 	}

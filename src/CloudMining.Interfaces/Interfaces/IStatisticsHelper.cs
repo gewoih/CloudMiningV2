@@ -10,7 +10,7 @@ public interface IStatisticsHelper
 {
 	List<CurrencyPair> GetUniqueCurrencyPairs(IEnumerable<ShareablePayment> payouts);
 	Task<List<UserDto>> GetUserDtosAsync(bool withAdminCheck = false);
-	Task<List<StatisticsDto>> GetStatisticsDtoList(
+	List<StatisticsDto> GetStatisticsDtoList(
 		Dictionary<UserDto,List<MonthlyPriceBar>> incomesPerUser,
 		List<ShareablePayment> expenseList,
 		Dictionary<Guid,List<DepositDto>>? usersDeposits);

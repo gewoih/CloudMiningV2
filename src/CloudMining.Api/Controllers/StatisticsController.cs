@@ -1,5 +1,6 @@
 ﻿using CloudMining.Application.Mappings;
 using CloudMining.Domain.Enums;
+using CloudMining.Domain.Models.Purchases;
 using CloudMining.Interfaces.DTO.Purchases;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.Interfaces;
@@ -15,11 +16,11 @@ public class StatisticsController : ControllerBase
 {
     private readonly IStatisticsService _statisticsService;
     private readonly IPurchaseService _purchaseService;
-    private readonly PurchaseMapper _purchaseMapper;
+    private readonly IMapper<Purchase, PurchaseDto> _purchaseMapper;
 
     public StatisticsController(IStatisticsService statisticsService,
         IPurchaseService purchaseService,
-        PurchaseMapper purchaseMapper)
+        IMapper<Purchase, PurchaseDto> purchaseMapper)
     {
         _statisticsService = statisticsService;
         _purchaseService = purchaseService;
@@ -27,10 +28,14 @@ public class StatisticsController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<List<StatisticsDto>> Get([FromQuery] StatisticsCalculationStrategy statisticsCalculationStrategy)
+    public async Task<StatisticsPageDto> Get([FromQuery] StatisticsCalculationStrategy statisticsCalculationStrategy)
     {
         var statisticsDtoList = await _statisticsService.GetStatisticsAsync(statisticsCalculationStrategy);
-        return statisticsDtoList;
+        var purchaseListDto = await _purchaseService.GetPurchasesAsync();
+        
+        var statisticsPage = new StatisticsPageDto(statisticsDtoList, purchaseListDto);
+        
+        return statisticsPage;
     }
 
     [Authorize(Roles = "Admin")]

@@ -31,7 +31,7 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 	{
 		var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
 		var incomesPerUser = await GetPriceBarsAsync(payoutsList, usdToRubRate, uniqueCurrencyPairs, userDtosList);
-		var statisticsDtoList = await _statisticsHelper.GetStatisticsDtoList(incomesPerUser, electricityExpenseList, usersDeposits);
+		var statisticsDtoList = _statisticsHelper.GetStatisticsDtoList(incomesPerUser, electricityExpenseList, usersDeposits);
 		
 		return statisticsDtoList;
 	}

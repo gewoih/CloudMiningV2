@@ -13,6 +13,4 @@ public record StatisticsDto(
     decimal PaybackPercent,
     List<MonthlyPriceBar> Incomes,
     List<MonthlyPriceBar> Profits,
-    List<Expense> Expenses,
-    List<PurchaseDto>? Purchases
-    );
+    List<Expense> Expenses);
