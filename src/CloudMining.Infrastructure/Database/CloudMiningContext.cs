@@ -4,6 +4,7 @@ using CloudMining.Domain.Models.Identity;
 using CloudMining.Domain.Models.Notifications;
 using CloudMining.Domain.Models.Payments;
 using CloudMining.Domain.Models.Payments.Shareable;
+using CloudMining.Domain.Models.Purchases;
 using CloudMining.Domain.Models.Shares;
 using CloudMining.Domain.Models.UserSettings;
 using MassTransit;
@@ -28,6 +29,7 @@ public class CloudMiningContext : IdentityDbContext<User, Role, Guid>
 	public DbSet<Notification> Notifications { get; set; }
 	public DbSet<OutboxState> OutboxStates { get; set; }
 	public DbSet<MarketData> MarketData { get; set; }
+	public DbSet<Purchase> Purchases { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder builder)
 	{
