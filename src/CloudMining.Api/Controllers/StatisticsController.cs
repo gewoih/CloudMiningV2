@@ -31,9 +31,9 @@ public class StatisticsController : ControllerBase
     public async Task<StatisticsPageDto> Get([FromQuery] StatisticsCalculationStrategy statisticsCalculationStrategy)
     {
         var statisticsDtoList = await _statisticsService.GetStatisticsAsync(statisticsCalculationStrategy);
-        var purchaseListDto = await _purchaseService.GetPurchasesAsync();
+        var purchaseDtoList = await _purchaseService.GetPurchasesAsync();
         
-        var statisticsPage = new StatisticsPageDto(statisticsDtoList, purchaseListDto);
+        var statisticsPage = new StatisticsPageDto(statisticsDtoList, purchaseDtoList);
         
         return statisticsPage;
     }
