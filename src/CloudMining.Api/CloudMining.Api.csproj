@@ -5,12 +5,16 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>588e2747-7ad1-43c0-8444-82e2025e4917</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
         <Content Remove="Views\ShareablePayment\Index.cshtml"/>
         <Content Remove="Views\User\Login.cshtml"/>
         <Content Remove="Views\User\Register.cshtml"/>
+        <Content Include="..\..\.dockerignore">
+          <Link>.dockerignore</Link>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
