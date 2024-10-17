@@ -103,6 +103,29 @@
         </template>
       </Card>
     </div>
+    <div class="flex align-items-center justify-content-center mt-7 mb-7">
+      <Card class="my-purchases">
+        <template #title>
+          <Toolbar class="border-none pt-0 pb-0">
+            <template #start>
+              <div class="font-medium">Детализация расходов проекта</div>
+            </template>
+            <template #end>
+
+            </template>
+          </Toolbar>
+        </template>
+        <template #content>
+          <VirtualScroller :items="purchaseList" :itemSize="50" class="h-11rem">
+            <template v-slot:item="{ item, options }">
+              <div :class="['flex align-items-center justify-content-between p-2', { 'surface-hover': options.odd }]" style="height: 50px">
+                {{ item.caption }} {{ getFormattedAmount(item.amount) }} ₽ {{ getFormattedDate(item.date) }}
+              </div>
+            </template>
+          </VirtualScroller>
+        </template>
+      </Card>
+    </div>
   </div>
 </template>
 
@@ -116,8 +139,12 @@ import {TimeLine} from "@/enums/TimeLine.ts";
 import {PriceBar} from "@/models/PriceBar.ts";
 import {Expense} from "@/models/Expense.ts";
 import {useUserStore} from "@/stores/user.ts";
+import {Purchase} from "@/models/Purchase.ts";
+import {format} from "date-fns";
 
 const statisticsList = ref<Statistics[]>();
+const purchaseList = ref<Purchase[]>();
+const isPurchaseListInitialized = ref(false);
 const selectedStatistics = ref<Statistics>();
 const selectedStrategyType = ref(StrategyType.Hold);
 const userStore = useUserStore();
@@ -158,7 +185,13 @@ const statisticsLabel = (statistics: Statistics) => {
   return 'Общая статистика';
 }
 const fetchStatistics = async () => {
-  statisticsList.value = await statisticsService.getStatistics(selectedStrategyType.value);
+  const response = await statisticsService.getStatistics(selectedStrategyType.value);
+  statisticsList.value = response.statisticsDtoList;
+  
+  if (!isPurchaseListInitialized.value){
+    purchaseList.value = response.purchaseDtoList;
+    isPurchaseListInitialized.value = true;
+  }
 
   if (userStore.isAdmin) {
     selectedStatistics.value = statisticsList.value.find(stat => stat.user == null) || selectedStatistics.value;
@@ -174,6 +207,10 @@ const getFormattedAmount = (value: number) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
+};
+
+const getFormattedDate = (date: Date) => {
+  return format(date, 'dd.MM.yyyy');
 };
 
 const filterDataByTimeline = (data: PriceBar[], timeline: TimeLine) => {
