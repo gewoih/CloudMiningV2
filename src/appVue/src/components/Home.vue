@@ -108,7 +108,7 @@
         <template #title>
           <Toolbar class="border-none pt-0 pb-0">
             <template #start>
-              <div class="font-medium">Детализация расходов проекта</div>
+              <div class="font-medium">Детализация покупок проекта</div>
             </template>
             <template #end>
 
@@ -118,8 +118,10 @@
         <template #content>
           <VirtualScroller :items="purchaseList" :itemSize="50" class="h-11rem">
             <template v-slot:item="{ item, options }">
-              <div :class="['flex align-items-center justify-content-between p-2', { 'surface-hover': options.odd }]" style="height: 50px">
-                {{ item.caption }} {{ getFormattedAmount(item.amount) }} ₽ {{ getFormattedDate(item.date) }}
+              <div :class="['flex align-items-center justify-content-around p-2 border-bottom-1 border-300', { 'h-3rem': options.count }]">
+                <div class="flex-2 ml-3">{{ item.caption }}</div>
+                <div class="flex-1 text-right">{{ getFormattedAmount(item.amount) }} ₽</div>
+                <div class="flex-1 text-center">{{ getFormattedDate(item.date) }}</div>
               </div>
             </template>
           </VirtualScroller>
@@ -189,7 +191,7 @@ const fetchStatistics = async () => {
   statisticsList.value = response.statisticsDtoList;
   
   if (!isPurchaseListInitialized.value){
-    purchaseList.value = response.purchaseDtoList;
+    purchaseList.value = getSortedByDatePurchaseList(response.purchaseDtoList);
     isPurchaseListInitialized.value = true;
   }
 
@@ -211,6 +213,14 @@ const getFormattedAmount = (value: number) => {
 
 const getFormattedDate = (date: Date) => {
   return format(date, 'dd.MM.yyyy');
+};
+
+const getSortedByDatePurchaseList = (purchases: Purchase[]) => {
+  return purchases.sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
 };
 
 const filterDataByTimeline = (data: PriceBar[], timeline: TimeLine) => {
