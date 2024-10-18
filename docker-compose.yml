@@ -1,5 +1,7 @@
+version: '3.9'
+
 services:
-  vue-app:
+  frontend:
     build:
       context: src/vue-app
     container_name: vue-app
@@ -7,15 +9,20 @@ services:
       - "8080:80"
     networks:
       - cloud-mining
+    depends_on:
+      - backend
   
-  cloud-mining.api:
+  backend:
     image: cloud-mining.api
     build:
-      context: src/CloudMining.Api
+      context: ./src
+    container_name: backend
+    ports:
+      - "5000:80"
     depends_on:
       - postgresql
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Server=postgresql;Port=5432;Database=cloud-mining;User Id=postgres;Password=PUEqINkp;
     networks:
       - cloud-mining
