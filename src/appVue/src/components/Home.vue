@@ -108,24 +108,58 @@
         <template #title>
           <Toolbar class="border-none pt-0 pb-0">
             <template #start>
-              <div class="font-medium">Детализация расходов проекта</div>
+              <div class="font-medium text-lg">Детализация покупок проекта</div>
             </template>
-            <template #end>
-
+            <template v-if="userStore.isAdmin" #end>
+              <Button class="mr-2" icon="pi pi-plus" label="Добавить покупку" severity="success"
+                      @click="isModalVisible = true"/>
             </template>
           </Toolbar>
         </template>
         <template #content>
-          <VirtualScroller :items="purchaseList" :itemSize="50" class="h-11rem">
-            <template v-slot:item="{ item, options }">
-              <div :class="['flex align-items-center justify-content-between p-2', { 'surface-hover': options.odd }]" style="height: 50px">
-                {{ item.caption }} {{ getFormattedAmount(item.amount) }} ₽ {{ getFormattedDate(item.date) }}
-              </div>
-            </template>
-          </VirtualScroller>
+          <DataTable :value="purchaseList" scrollable scrollHeight="12rem" tableStyle="min-width: 6rem" dataKey="id">
+            <Column class="pl-5" header="Наименование">
+              <template v-slot:body="slotProps">
+                <span v-html="getFormattedCaption(slotProps.data.caption)"></span>
+              </template>
+            </Column>
+            <Column header="Сумма">
+              <template v-slot:body="slotProps">
+                {{
+                  getFormattedAmount(slotProps.data.amount) + ' ' + "₽"
+                }}
+              </template>
+            </Column>
+            <Column header="Дата">
+              <template v-slot:body="slotProps">
+                {{
+                  getFormattedDate(slotProps.data.date)
+                }}
+              </template>
+            </Column>
+          </DataTable>
         </template>
       </Card>
     </div>
+    <Dialog v-if="userStore.isAdmin" v-model:visible="isModalVisible" :dismissableMask="true" :draggable="false"
+            header="Добавление покупки" modal>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label class="font-semibold w-8rem" for="caption">Наименование</label>
+        <InputText id="caption" v-model="newPurchase.caption" autocomplete="off" class="flex-auto"/>
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label class="font-semibold w-8rem" for="amount">Сумма</label>
+        <InputNumber id="amount" v-model="newPurchase.amount" autocomplete="off" class="flex-auto"/>
+      </div>
+      <div class="flex align-items-center gap-3 mb-5">
+        <label class="font-semibold w-8rem" for="date">Дата</label>
+        <Calendar id="date" v-model="newPurchase.date" showTime hourFormat="24" autocomplete="off" class="flex-auto" date-format="dd.mm.yy"
+                  show-icon/>
+      </div>
+      <div class="flex justify-content-end gap-2">
+        <Button label="Сохранить" type="submit" @click="createNewPurchase"></Button>
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -141,10 +175,12 @@ import {Expense} from "@/models/Expense.ts";
 import {useUserStore} from "@/stores/user.ts";
 import {Purchase} from "@/models/Purchase.ts";
 import {format} from "date-fns";
+import {CreatePurchase} from "@/models/CreatePurchase.ts";
 
 const statisticsList = ref<Statistics[]>();
 const purchaseList = ref<Purchase[]>();
 const isPurchaseListInitialized = ref(false);
+const isModalVisible = ref(false);
 const selectedStatistics = ref<Statistics>();
 const selectedStrategyType = ref(StrategyType.Hold);
 const userStore = useUserStore();
@@ -178,6 +214,12 @@ const expenseTimelines = ref([
   {name: '12 месяцев', value: 'Last12Months'},
 ]);
 
+const newPurchase = ref<CreatePurchase>({
+  caption: null,
+  amount: 0,
+  date: new Date()
+})
+
 const statisticsLabel = (statistics: Statistics) => {
   if (statistics.user) {
     return `${statistics.user.lastName} ${statistics.user.firstName}`;
@@ -190,6 +232,7 @@ const fetchStatistics = async () => {
   
   if (!isPurchaseListInitialized.value){
     purchaseList.value = response.purchaseDtoList;
+    sortPurchaseListByDate();
     isPurchaseListInitialized.value = true;
   }
 
@@ -212,6 +255,40 @@ const getFormattedAmount = (value: number) => {
 const getFormattedDate = (date: Date) => {
   return format(date, 'dd.MM.yyyy');
 };
+
+const sortPurchaseListByDate = () => {
+  const purchases = purchaseList?.value;
+
+  if (!purchases || purchases.length === 0) {
+    return [];
+  }
+
+  const sortedPurchases = [...purchases].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return dateB - dateA;
+  });
+
+  purchaseList.value = sortedPurchases;
+  return sortedPurchases;
+};
+
+const createNewPurchase = async () => {
+  const response = await statisticsService.createPurchase(newPurchase.value);
+  purchaseList.value?.unshift(response);
+  sortPurchaseListByDate();
+  
+  newPurchase.value = {
+    caption: null,
+    amount: 0,
+    date: new Date()
+  };
+  isModalVisible.value = false;
+}
+
+const getFormattedCaption = (data: string) => {
+  return `&nbsp;&nbsp;${data}`; // Используем 4 неразрывных пробела
+}
 
 const filterDataByTimeline = (data: PriceBar[], timeline: TimeLine) => {
   const now = new Date();
