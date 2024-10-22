@@ -2,6 +2,7 @@
 using CloudMining.Domain.Models.Currencies;
 using CloudMining.Domain.Models.Payments.Shareable;
 using CloudMining.Interfaces.DTO.Currencies;
+using CloudMining.Interfaces.DTO.Payments.Deposits;
 using CloudMining.Interfaces.DTO.Statistics;
 using CloudMining.Interfaces.DTO.Users;
 using CloudMining.Interfaces.Interfaces;
@@ -23,13 +24,14 @@ public class HoldCalculationStrategy : IStatisticsCalculationStrategy
 
 	public async Task<List<StatisticsDto>> GetStatisticsAsync(
 		List<ShareablePayment> payoutsList,
-		List<ShareablePayment> expenseList,
+		List<ShareablePayment> electricityExpenseList,
 		IEnumerable<CurrencyPair> uniqueCurrencyPairs,
-		List<UserDto> userDtosList)
+		List<UserDto> userDtosList,
+		Dictionary<Guid,List<DepositDto>>? usersDeposits)
 	{
 		var usdToRubRate = await _marketDataService.GetLastUsdToRubRateAsync();
 		var incomesPerUser = await GetPriceBarsAsync(payoutsList, usdToRubRate, uniqueCurrencyPairs, userDtosList);
-		var statisticsDtoList = _statisticsHelper.GetStatisticsDtoList(incomesPerUser,expenseList);
+		var statisticsDtoList = _statisticsHelper.GetStatisticsDtoList(incomesPerUser, electricityExpenseList, usersDeposits);
 		
 		return statisticsDtoList;
 	}

@@ -48,7 +48,7 @@
         <template #footer>
           <div class="mb-2"><b>{{ getFormattedAmount(selectedStatistics?.electricityExpense || 0) }} ₽</b> электричество
           </div>
-          <div><b>{{ getFormattedAmount(selectedStatistics?.purchaseExpense || 0) }} ₽</b> покупки</div>
+          <div><b>{{ getFormattedAmount(selectedStatistics?.depositAmount || 0) }} ₽</b> депозит</div>
         </template>
       </Card>
       <Card class="my-box">
@@ -103,6 +103,63 @@
         </template>
       </Card>
     </div>
+    <div class="flex align-items-center justify-content-center mt-7 mb-7">
+      <Card class="my-purchases">
+        <template #title>
+          <Toolbar class="border-none pt-0 pb-0">
+            <template #start>
+              <div class="font-medium text-lg">Детализация покупок проекта</div>
+            </template>
+            <template v-if="userStore.isAdmin" #end>
+              <Button class="mr-2" icon="pi pi-plus" label="Добавить покупку" severity="success"
+                      @click="isModalVisible = true"/>
+            </template>
+          </Toolbar>
+        </template>
+        <template #content>
+          <DataTable :value="purchaseList" scrollable scrollHeight="12rem" tableStyle="min-width: 6rem" dataKey="id">
+            <Column class="pl-5" header="Наименование">
+              <template v-slot:body="slotProps">
+                <span v-html="getFormattedCaption(slotProps.data.caption)"></span>
+              </template>
+            </Column>
+            <Column header="Сумма">
+              <template v-slot:body="slotProps">
+                {{
+                  getFormattedAmount(slotProps.data.amount) + ' ' + "₽"
+                }}
+              </template>
+            </Column>
+            <Column header="Дата">
+              <template v-slot:body="slotProps">
+                {{
+                  getFormattedDate(slotProps.data.date)
+                }}
+              </template>
+            </Column>
+          </DataTable>
+        </template>
+      </Card>
+    </div>
+    <Dialog v-if="userStore.isAdmin" v-model:visible="isModalVisible" :dismissableMask="true" :draggable="false"
+            header="Добавление покупки" modal>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label class="font-semibold w-8rem" for="caption">Наименование</label>
+        <InputText id="caption" v-model="newPurchase.caption" autocomplete="off" class="flex-auto"/>
+      </div>
+      <div class="flex align-items-center gap-3 mb-3">
+        <label class="font-semibold w-8rem" for="amount">Сумма</label>
+        <InputNumber id="amount" v-model="newPurchase.amount" autocomplete="off" class="flex-auto"/>
+      </div>
+      <div class="flex align-items-center gap-3 mb-5">
+        <label class="font-semibold w-8rem" for="date">Дата</label>
+        <Calendar id="date" v-model="newPurchase.date" showTime hourFormat="24" autocomplete="off" class="flex-auto" date-format="dd.mm.yy"
+                  show-icon/>
+      </div>
+      <div class="flex justify-content-end gap-2">
+        <Button label="Сохранить" type="submit" @click="createNewPurchase"></Button>
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -116,8 +173,14 @@ import {TimeLine} from "@/enums/TimeLine.ts";
 import {PriceBar} from "@/models/PriceBar.ts";
 import {Expense} from "@/models/Expense.ts";
 import {useUserStore} from "@/stores/user.ts";
+import {Purchase} from "@/models/Purchase.ts";
+import {format} from "date-fns";
+import {CreatePurchase} from "@/models/CreatePurchase.ts";
 
 const statisticsList = ref<Statistics[]>();
+const purchaseList = ref<Purchase[]>();
+const isPurchaseListInitialized = ref(false);
+const isModalVisible = ref(false);
 const selectedStatistics = ref<Statistics>();
 const selectedStrategyType = ref(StrategyType.Hold);
 const userStore = useUserStore();
@@ -142,7 +205,7 @@ const incomeAndProfitTimelines = ref([
 const expenseTypes = ref([
   {name: 'Общие', value: 'Total'},
   {name: 'Электричество', value: 'OnlyElectricity'},
-  {name: 'Покупки', value: 'OnlyPurchases'},
+  {name: 'Депозиты', value: 'OnlyDeposits'},
 ]);
 
 const expenseTimelines = ref([
@@ -151,6 +214,12 @@ const expenseTimelines = ref([
   {name: '12 месяцев', value: 'Last12Months'},
 ]);
 
+const newPurchase = ref<CreatePurchase>({
+  caption: null,
+  amount: 0,
+  date: new Date()
+})
+
 const statisticsLabel = (statistics: Statistics) => {
   if (statistics.user) {
     return `${statistics.user.lastName} ${statistics.user.firstName}`;
@@ -158,7 +227,14 @@ const statisticsLabel = (statistics: Statistics) => {
   return 'Общая статистика';
 }
 const fetchStatistics = async () => {
-  statisticsList.value = await statisticsService.getStatistics(selectedStrategyType.value);
+  const response = await statisticsService.getStatistics(selectedStrategyType.value);
+  statisticsList.value = response.statisticsDtoList;
+  
+  if (!isPurchaseListInitialized.value){
+    purchaseList.value = response.purchaseDtoList;
+    sortPurchaseListByDate();
+    isPurchaseListInitialized.value = true;
+  }
 
   if (userStore.isAdmin) {
     selectedStatistics.value = statisticsList.value.find(stat => stat.user == null) || selectedStatistics.value;
@@ -175,6 +251,44 @@ const getFormattedAmount = (value: number) => {
     maximumFractionDigits: 2
   });
 };
+
+const getFormattedDate = (date: Date) => {
+  return format(date, 'dd.MM.yyyy');
+};
+
+const sortPurchaseListByDate = () => {
+  const purchases = purchaseList?.value;
+
+  if (!purchases || purchases.length === 0) {
+    return [];
+  }
+
+  const sortedPurchases = [...purchases].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return dateB - dateA;
+  });
+
+  purchaseList.value = sortedPurchases;
+  return sortedPurchases;
+};
+
+const createNewPurchase = async () => {
+  const response = await statisticsService.createPurchase(newPurchase.value);
+  purchaseList.value?.unshift(response);
+  sortPurchaseListByDate();
+  
+  newPurchase.value = {
+    caption: null,
+    amount: 0,
+    date: new Date()
+  };
+  isModalVisible.value = false;
+}
+
+const getFormattedCaption = (data: string) => {
+  return `&nbsp;&nbsp;${data}`; // Используем 4 неразрывных пробела
+}
 
 const filterDataByTimeline = (data: PriceBar[], timeline: TimeLine) => {
   const now = new Date();
@@ -194,7 +308,7 @@ const filterDataByTimeline = (data: PriceBar[], timeline: TimeLine) => {
     }
     case TimeLine.AllTime:
     default: {
-      return formattedData;
+      return formattedData.sort((a, b) => a.date.getTime() - b.date.getTime());
     }
   }
 };
@@ -205,28 +319,40 @@ const filterDataByExpenseType = (data: Expense[], expenseType: ExpenseType) => {
 }
 
 const setIncomeAndProfitChartData = () => {
+
   const incomes = filterDataByTimeline(selectedStatistics.value?.incomes || [], selectedIncomeAndProfitTimeline.value);
   const profits = filterDataByTimeline(selectedStatistics.value?.profits || [], selectedIncomeAndProfitTimeline.value);
-
-  const incomeData = incomes.map(income => income.value);
-  const profitData = profits.map(profit => profit.value);
-
-  const labels = profits.map(profit => {
-    return profit.date.toLocaleDateString('ru-RU', {month: 'short', year: '2-digit'}).replace(' г.', '');
+  
+  const allDates = [...new Set([...incomes.map(i => i.date.toISOString().slice(0, 7)), ...profits.map(p => p.date.toISOString().slice(0, 7))])]
+      .sort();
+  
+  const incomeData = allDates.map(date => {
+    const income = incomes.find(i => i.date.toISOString().slice(0, 7) === date);
+    return income ? income.value : 0;
   });
-
+  
+  const profitData = allDates.map(date => {
+    const profit = profits.find(p => p.date.toISOString().slice(0, 7) === date);
+    return profit ? profit.value : 0;
+  });
+  
+  const labels = allDates.map(date => {
+    const [year, month] = date.split('-');
+    return new Date(Number(year), Number(month) - 1).toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' }).replace(' г.', '');
+  });
+  
   const getBarColor = (value: number) => value < 0 ? 'rgb(255, 0, 0)' : 'rgb(139, 92, 246)';
   const getProfitColor = (value: number) => value < 0 ? 'rgb(255, 0, 0)' : 'rgb(0, 255, 195)';
   const getProfitBorderRadius = (value: number) => value < 0 ? 8 : 0;
-
+  
   return {
     labels: labels,
     datasets: [
       {
         label: 'Доходы',
         data: incomeData,
-        borderColor: incomeData.map(value => getBarColor(value)),
-        backgroundColor: incomeData.map(value => getBarColor(value)),
+        borderColor: incomeData.map(value => getBarColor(value || 0)),
+        backgroundColor: incomeData.map(value => getBarColor(value || 0)),
         order: 2,
         borderRadius: {
           topLeft: 8,
@@ -238,20 +364,21 @@ const setIncomeAndProfitChartData = () => {
       {
         label: 'Прибыль',
         data: profitData,
-        borderColor: profitData.map(value => getProfitColor(value)),
-        backgroundColor: profitData.map(value => value < 0 ? 'rgb(255, 0, 0)' : 'rgba(255,255,255,0)'),
+        borderColor: profitData.map(value => getProfitColor(value || 0)),
+        backgroundColor: profitData.map(value => value !== null && value < 0 ? 'rgb(255, 0, 0)' : 'rgba(255,255,255,0)'),
         borderWidth: {
           top: 2,
           bottom: 0,
           left: 0,
           right: 0
         },
-        borderRadius: profitData.map(value => getProfitBorderRadius(value)),
+        borderRadius: profitData.map(value => getProfitBorderRadius(value || 0)),
         order: 1
       }
     ]
   };
 };
+
 const setIncomeAndProfitChartOptions = () => {
   const documentStyle = getComputedStyle(document.documentElement);
   const textColor = documentStyle.getPropertyValue('--text-color');

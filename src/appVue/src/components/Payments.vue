@@ -52,7 +52,7 @@
         </template>
       </Column>
       <Column
-          v-if="(userStore.isAdmin && selectedPaymentType !== PaymentType.Crypto) || selectedPaymentType === PaymentType.Purchase"
+          v-if="(userStore.isAdmin && selectedPaymentType !== PaymentType.Crypto)"
           field="caption"
           header="Комментарий"></Column>
       <Column v-if="!userStore.isAdmin && selectedPaymentType !== PaymentType.Crypto">
@@ -188,11 +188,10 @@ const newPayment = ref<CreatePayment>({
 
 const paymentTypes = ref([
   {name: 'Электричество', value: 'Electricity'},
-  {name: 'Выплаты', value: 'Crypto'},
-  {name: 'Покупки', value: 'Purchase'}
+  {name: 'Выплаты', value: 'Crypto'}
 ]);
 
-const pageChange = async (event) => {
+const pageChange = async (event: any) => {
   const newPageNumber = event.page + 1;
   if (newPageNumber !== pageNumber.value) {
     pageNumber.value = newPageNumber;
@@ -201,11 +200,11 @@ const pageChange = async (event) => {
   }
 };
 
-const getPaymentStatusSeverity = (data) => {
+const getPaymentStatusSeverity = (data: any) => {
   return data.isCompleted ? 'success' : 'warning';
 };
 
-const getButtonLabel = (data) => {
+const getButtonLabel = (data: any) => {
   if (selectedPaymentType.value != PaymentType.Crypto) {
     switch (data.status) {
       case ShareStatus.Created:
@@ -222,7 +221,7 @@ const getButtonLabel = (data) => {
   }
 };
 
-const getButtonSeverity = (data) => {
+const getButtonSeverity = (data: any) => {
   if (selectedPaymentType.value != PaymentType.Crypto) {
     switch (data.status) {
       case ShareStatus.Created:
@@ -239,7 +238,7 @@ const getButtonSeverity = (data) => {
   }
 };
 
-const getShareStatusSeverity = (payment) => {
+const getShareStatusSeverity = (payment: any) => {
   if (selectedPaymentType.value != PaymentType.Crypto) {
     switch (payment.status) {
       case ShareStatus.Created:
@@ -264,7 +263,7 @@ const getShareStatusSeverity = (payment) => {
     }
   }
 };
-const getStatus = (payment) => {
+const getStatus = (payment: any) => {
   if (selectedPaymentType.value != PaymentType.Crypto) {
     if (!userStore.isAdmin) {
       switch (payment.status) {
@@ -303,12 +302,12 @@ const getStatus = (payment) => {
   }
 };
 
-const isCompletedHandle = (data) => {
+const isCompletedHandle = (data: any) => {
   return data.isCompleted ? "Завершен" : "Ожидание";
 }
 
 
-const showTemplate = (event, data, sharedData) => {
+const showTemplate = (event: any, data: any, sharedData: any) => {
   if (userStore.isAdmin) {
     if (data.status == ShareStatus.Created && selectedPaymentType.value != PaymentType.Crypto) {
       confirm.require({
@@ -395,7 +394,7 @@ const getTruncatedAmount = (value: number, precision: number) => {
   return Math.trunc(value * factor) / factor;
 }
 
-const fetchShares = async (event) => {
+const fetchShares = async (event: any) => {
   const paymentId = event.data.id;
   if (!paymentSharesMap.value[paymentId]) {
     paymentSharesMap.value[paymentId] = await paymentsService.getShares(paymentId);

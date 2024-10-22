@@ -16,7 +16,8 @@ public class DepositsController : ControllerBase
 	{
 		_depositService = depositService;
 	}
-
+	
+	[Authorize(Roles = "Admin")]
 	[HttpPost]
 	public async Task<IActionResult> Create([FromBody] DepositDto depositDto)
 	{
