@@ -184,9 +184,9 @@ const isModalVisible = ref(false);
 const selectedStatistics = ref<Statistics>();
 const selectedStrategyType = ref(StrategyType.Hold);
 const userStore = useUserStore();
-const selectedIncomeAndProfitTimeline = ref(TimeLine.AllTime);
+const selectedIncomeAndProfitTimeline = ref(TimeLine.Last12Months);
 const selectedExpenseType = ref(ExpenseType.Total);
-const selectedExpenseTimeline = ref(TimeLine.AllTime);
+const selectedExpenseTimeline = ref(TimeLine.Last12Months);
 const incomeAndProfitChartData = ref();
 const incomeAndProfitChartOptions = ref();
 const expenseChartData = ref();
@@ -197,9 +197,9 @@ const strategyTypes = ref([
 ]);
 
 const incomeAndProfitTimelines = ref([
+  {name: '12 месяцев', value: 'Last12Months'},
   {name: 'За всё время', value: 'AllTime'},
   {name: 'С начала года', value: 'YearToDate'},
-  {name: '12 месяцев', value: 'Last12Months'},
 ]);
 
 const expenseTypes = ref([
@@ -209,9 +209,9 @@ const expenseTypes = ref([
 ]);
 
 const expenseTimelines = ref([
+  {name: '12 месяцев', value: 'Last12Months'},
   {name: 'За всё время', value: 'AllTime'},
   {name: 'С начала года', value: 'YearToDate'},
-  {name: '12 месяцев', value: 'Last12Months'},
 ]);
 
 const newPurchase = ref<CreatePurchase>({
