@@ -264,7 +264,6 @@ public class StatisticsHelper : IStatisticsHelper
 		var depositAmount = 0m;
 		var totalProfit = 0m;
 		var monthlyProfit = 0m;
-		var paybackPercent = 0m;
 
 		var incomeSumsByDate = new Dictionary<DateOnly, decimal>();
 		var profitSumsByDate = new Dictionary<DateOnly, decimal>();
@@ -279,7 +278,6 @@ public class StatisticsHelper : IStatisticsHelper
 			depositAmount += statisticsDto.DepositAmount;
 			totalProfit += statisticsDto.TotalProfit;
 			monthlyProfit += statisticsDto.MonthlyProfit;
-			paybackPercent += statisticsDto.PaybackPercent;
 
 			foreach (var income in statisticsDto.Incomes)
 			{
@@ -303,6 +301,8 @@ public class StatisticsHelper : IStatisticsHelper
 				}
 			}
 		}
+		
+		var paybackPercent = totalExpense != 0 ? totalProfit / totalExpense * 100 : 0;
 
 		var totalIncomes = incomeSumsByDate
 			.Select(x => new MonthlyPriceBar(x.Value, x.Key))

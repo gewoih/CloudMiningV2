@@ -37,6 +37,6 @@ public class PurchaseService : IPurchaseService
 		await _context.Purchases.AddAsync(newPurchase); 
 		await _context.SaveChangesAsync();
 
-		return new Purchase();
+		return newPurchase;
 	}
 }
