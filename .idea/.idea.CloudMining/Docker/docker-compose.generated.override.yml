@@ -1,0 +1,28 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  backend:
+    build:
+      context: "C:\\Users\\nrane\\Desktop\\Projects\\CloudMining\\src"
+      dockerfile: "Dockerfile"
+      args:
+        BUILD_CONFIGURATION: "Debug"
+    entrypoint:
+    - "/opt/rider-debugger/linux-x64/JetBrains.Debugger.Worker"
+    - "--runtimeconfig"
+    - "/opt/rider-debugger/JetBrains.Debugger.Worker.runtimeconfig.json"
+    - "--mode=server"
+    - "--frontend-port=57100"
+    - "--backend-port=57300"
+    - "--timeout=60"
+    environment:
+      RIDER_DEBUGGER_LOG_DIR: "/var/opt/rider-debugger"
+      RESHARPER_LOG_CONF: "/etc/opt/rider-debugger/backend-log.xml"
+    ports:
+    - "127.0.0.1:57001:57100"
+    - "127.0.0.1:57201:57300"
+    volumes:
+    - "C:\\Users\\nrane\\AppData\\Local\\JetBrains\\RiderRemoteDebugger\\2024.1.6\\\
+      Linux64:/opt/rider-debugger"
+    - "C:\\Program Files\\JetBrains\\JetBrains Rider 2023.3.2\\bin:/etc/opt/rider-debugger/backend-log.xml"
+    - "C:\\Users\\nrane\\AppData\\Local\\JetBrains\\Rider2024.1\\log\\DebuggerWorker\\\
+      JetBrains.Debugger.Worker.2024_10_24_14_26_13:/var/opt/rider-debugger:rw"

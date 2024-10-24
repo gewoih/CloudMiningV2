@@ -7,7 +7,7 @@ public static class CorsSetup
 		services.AddCors(options =>
 		{
 			options.AddPolicy("AllowSpecificOrigin", configure =>
-				configure.WithOrigins("http://localhost:8080")
+				configure.WithOrigins("http://localhost:8080", "http://localhost")
 					.AllowAnyMethod()
 					.AllowAnyHeader());
 		});

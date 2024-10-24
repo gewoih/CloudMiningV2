@@ -1,0 +1,42 @@
+services:
+  frontend:
+    build:
+      context: src/vue-app
+    container_name: vue-app
+    ports:
+      - "80:80"
+    networks:
+      - cloud-mining
+    depends_on:
+      - backend
+  
+  backend:
+    build:
+      context: ./src
+    container_name: backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgresql
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Server=postgresql;Port=5432;Database=cloud-mining;User Id=postgres;Password=PUEqINkp;
+    networks:
+      - cloud-mining
+
+  postgresql:
+    image: postgres:latest
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: cloud-mining
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: PUEqINkp
+    ports:
+      - "5432:5432"
+    networks:
+      - cloud-mining
+      
+networks:
+  cloud-mining:
+    driver: bridge
