@@ -39,12 +39,12 @@ public sealed class DatabaseInitializer
 
 	public async Task InitializeAsync()
 	{
-		await InitializeEthPayoutsAsync();
 		await InitializeRolesAsync();
 		await InitializeUsersAsync();
 		await InitializeDepositsAsync();
 		await InitializePurchasesAsync();
 		await InitializeElectricityPaymentsAsync();
+		await InitializeEthPayoutsAsync();
 	}
 
 	public static List<Currency> GetCurrencies()
