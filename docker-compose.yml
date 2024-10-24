@@ -11,7 +11,6 @@ services:
       - backend
   
   backend:
-    image: cloud-mining.api
     build:
       context: ./src
     container_name: backend
@@ -21,6 +20,7 @@ services:
       - postgresql
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
       - ConnectionStrings__DefaultConnection=Server=postgresql;Port=5432;Database=cloud-mining;User Id=postgres;Password=PUEqINkp;
     networks:
       - cloud-mining
