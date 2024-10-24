@@ -1,0 +1,22 @@
+name: docker-compose for .NET + Vue
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build docker images
+      run: docker-compose build
+
+    - name: Run docker compose
+      run: docker-compose up -d
