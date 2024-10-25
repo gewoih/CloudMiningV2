@@ -17,7 +17,7 @@ COPY ["CloudMining.Application/CloudMining.Application.csproj", "CloudMining.App
 COPY ["CloudMining.Domain/CloudMining.Domain.csproj", "CloudMining.Domain/"]
 COPY ["CloudMining.Infrastructure/CloudMining.Infrastructure.csproj", "CloudMining.Infrastructure/"]
 COPY ["CloudMining.Interfaces/CloudMining.Interfaces.csproj", "CloudMining.Interfaces/"]
-RUN dotnet restore "CloudMining.Api/CloudMining.Api.csproj" --verbosity detailed
+RUN dotnet restore "CloudMining.Api/CloudMining.Api.csproj"
 
 COPY . .
 WORKDIR "/src/CloudMining.Api"
