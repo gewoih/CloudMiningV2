@@ -30,7 +30,7 @@ public sealed class CryptoMarketDataLoaderStrategy : IMarketDataLoaderStrategy
 				fromCurrency: currencyPair.From,
 				toCurrency: currencyPair.To,
 				fromDate: fromDate,
-				limit: 1000);
+				limit: 100);
 
 			if (binanceMarketData.Count == 0)
 				break;
