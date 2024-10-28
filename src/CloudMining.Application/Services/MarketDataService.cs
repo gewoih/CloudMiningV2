@@ -27,15 +27,19 @@ public sealed class MarketDataService : IMarketDataService
 			.Select(data => (data.From, data.To, data.MaxDate))
 			.ToHashSet();
 
-		foreach (var data in marketData)
+		var marketDataChunks = marketData.Chunk(100);
+		foreach (var marketDataChunk in marketDataChunks)
 		{
-			var combo = (data.From, data.To, data.Date);
-			if (!existingCombinationsHashSet.Contains(combo))
-				await _context.MarketData.AddAsync(data);
-		}
+			foreach (var data in marketDataChunk)
+			{
+				var combo = (data.From, data.To, data.Date);
+				if (!existingCombinationsHashSet.Contains(combo))
+					await _context.MarketData.AddAsync(data);
+			}
 
-		await _context.SaveChangesAsync()
-			.ConfigureAwait(false);
+			await _context.SaveChangesAsync()
+				.ConfigureAwait(false);
+		}
 	}
 
 	public async Task<DateTime?> GetLastMarketDataDateAsync(CurrencyCode fromCurrency, CurrencyCode toCurrency)
