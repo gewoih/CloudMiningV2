@@ -16,6 +16,11 @@ services:
     container_name: backend
     ports:
       - "5000:5000"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.25"
     depends_on:
       - postgresql
     environment:
@@ -34,6 +39,11 @@ services:
       POSTGRES_PASSWORD: PUEqINkp
     ports:
       - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.25"
     networks:
       - cloud-mining
       
