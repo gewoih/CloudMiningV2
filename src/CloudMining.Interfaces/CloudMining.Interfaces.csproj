@@ -5,6 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>CloudMining.Interfaces</RootNamespace>
+        <PublishTrimmed>true</PublishTrimmed>
+        <PublishAot>true</PublishAot>
     </PropertyGroup>
 
     <ItemGroup>

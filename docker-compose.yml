@@ -34,6 +34,11 @@ services:
       POSTGRES_PASSWORD: PUEqINkp
     ports:
       - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.25"
     networks:
       - cloud-mining
       
