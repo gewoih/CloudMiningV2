@@ -21,6 +21,8 @@ services:
         limits:
           memory: 256M
           cpus: "0.25"
+    dns:
+      - 8.8.8.8
     depends_on:
       - postgresql
     environment:
