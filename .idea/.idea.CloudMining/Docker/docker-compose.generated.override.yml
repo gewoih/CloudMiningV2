@@ -18,11 +18,11 @@ services:
       RIDER_DEBUGGER_LOG_DIR: "/var/opt/rider-debugger"
       RESHARPER_LOG_CONF: "/etc/opt/rider-debugger/backend-log.xml"
     ports:
-    - "127.0.0.1:57001:57100"
-    - "127.0.0.1:57201:57300"
+    - "127.0.0.1:57000:57100"
+    - "127.0.0.1:57200:57300"
     volumes:
     - "C:\\Users\\nrane\\AppData\\Local\\JetBrains\\RiderRemoteDebugger\\2024.2.7\\\
       Linux64:/opt/rider-debugger"
     - "C:\\Program Files\\JetBrains\\JetBrains Rider 2024.2.7\\bin:/etc/opt/rider-debugger/backend-log.xml"
     - "C:\\Users\\nrane\\AppData\\Local\\JetBrains\\Rider2024.2\\log\\DebuggerWorker\\\
-      JetBrains.Debugger.Worker.2024_10_28_15_46_02:/var/opt/rider-debugger:rw"
+      JetBrains.Debugger.Worker.2024_10_28_15_24_21:/var/opt/rider-debugger:rw"
