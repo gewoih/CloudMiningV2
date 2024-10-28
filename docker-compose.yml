@@ -39,6 +39,8 @@ services:
       POSTGRES_DB: cloud-mining
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: PUEqINkp
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     deploy:
@@ -52,3 +54,6 @@ services:
 networks:
   cloud-mining:
     driver: bridge
+    
+volumes:
+  pgdata:
