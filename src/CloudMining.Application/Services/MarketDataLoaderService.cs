@@ -4,6 +4,7 @@ using CloudMining.Interfaces.DTO.Currencies;
 using CloudMining.Interfaces.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CloudMining.Application.Services;
@@ -16,13 +17,15 @@ public sealed class MarketDataLoaderService : BackgroundService
 	private readonly DateOnly _loadHistoricalDataFrom;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly List<CurrencyPair> _currencyPairs;
+	private readonly ILogger<MarketDataLoaderService> _logger;
 
 	public MarketDataLoaderService(IOptions<MarketDataLoaderSettings> settings,
 		IOptions<ProjectInformationSettings> projectInformation,
-		IServiceScopeFactory scopeFactory)
+		IServiceScopeFactory scopeFactory, ILogger<MarketDataLoaderService> logger)
 	{
 		_loadHistoricalDataFrom = projectInformation.Value.ProjectStartDate;
 		_scopeFactory = scopeFactory;
+		_logger = logger;
 		_loadingDelay = settings.Value.Delay;
 		_currencyPairs = settings.Value.CurrencyPairs;
 	}
@@ -31,10 +34,17 @@ public sealed class MarketDataLoaderService : BackgroundService
 	{
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			await using var scope = _scopeFactory.CreateAsyncScope();
-			var marketDataService = scope.ServiceProvider.GetRequiredService<IMarketDataService>();
+			try
+			{
+				await using var scope = _scopeFactory.CreateAsyncScope();
+				var marketDataService = scope.ServiceProvider.GetRequiredService<IMarketDataService>();
 
-			await LoadAndSaveMarketData(marketDataService);
+				await LoadAndSaveMarketData(marketDataService);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error while loading market data");
+			}
 
 			await Task.Delay(_loadingDelay, stoppingToken);
 		}
