@@ -43,7 +43,7 @@ public sealed class ShareService : IShareService
 	{
 		var totalDepositsAmount = usersDeposits.Sum(userDeposits => userDeposits.Value);
 
-		var currentShares = await GetUsersSharesAsync();
+		var currentShares = await GetUsersSharesAsync(newDepositDate);
 		var sharesChanges = new List<ShareChange>();
 		foreach (var userShare in currentShares)
 		{
@@ -72,7 +72,7 @@ public sealed class ShareService : IShareService
 	public async Task<List<PaymentShare>> CreatePaymentShares(CreatePaymentDto paymentDto, Currency currency)
 	{
 		IEnumerable<UserCalculatedShare> usersShares =
-			await CalculateUsersSharesAsync(paymentDto.Amount, paymentDto.PaymentType, currency);
+			await CalculateUsersSharesAsync(paymentDto.Amount, paymentDto.PaymentType, paymentDto.Date, currency);
 		usersShares = usersShares.Where(userShare => userShare.Amount != 0);
 
 		var paymentShares = new List<PaymentShare>();
@@ -95,13 +95,14 @@ public sealed class ShareService : IShareService
 	private async Task<List<UserCalculatedShare>> CalculateUsersSharesAsync(
 		decimal amount,
 		PaymentType paymentType,
+		DateTime paymentDate,
 		Currency currency)
 	{
-		var usersShares = await GetUsersSharesAsync();
+		var usersShares = await GetUsersSharesAsync(paymentDate);
 
 		var usersCalculatedShares = new List<UserCalculatedShare>();
 		var adjustedAmount = amount;
-    
+
 		if (paymentType == PaymentType.Crypto)
 		{
 			var totalUsersCommissions = usersShares.Sum(share => share.CommissionPercent);
@@ -126,14 +127,16 @@ public sealed class ShareService : IShareService
 		return usersCalculatedShares;
 	}
 
-	private async Task<List<UserShare>> GetUsersSharesAsync()
+	private async Task<List<UserShare>> GetUsersSharesAsync(DateTime targetDate)
 	{
 		var usersWithShares = await _context.Users
 			.Select(user => new
 			{
 				User = user,
-				LastShareChange = user.ShareChanges
-					.OrderByDescending(shareChange => shareChange.CreatedDate)
+				ShareChange = user.ShareChanges
+					.Where(shareChange => shareChange.Date <= targetDate)
+					.OrderByDescending(shareChange => shareChange.Date)
+					.ThenByDescending(shareChange => shareChange.CreatedDate)
 					.FirstOrDefault()
 			})
 			.ToListAsync()
@@ -150,7 +153,7 @@ public sealed class ShareService : IShareService
 				userCommissionPercent = role.CommissionPercent;
 			}
 
-			usersShares.Add(new UserShare(userWithShare.User.Id, userWithShare.LastShareChange?.After ?? 0,
+			usersShares.Add(new UserShare(userWithShare.User.Id, userWithShare.ShareChange?.After ?? 0,
 				userCommissionPercent));
 		}
 
