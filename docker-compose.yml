@@ -14,9 +14,6 @@ services:
     build:
       context: ./src
     container_name: backend
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     ports:
       - "5000:5000"
     depends_on:
