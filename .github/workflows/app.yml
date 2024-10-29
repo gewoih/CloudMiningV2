@@ -14,11 +14,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Stop existing containers
+      run: docker compose down
     
     - name: Build docker images
       run: docker compose build
 
-    - name: Run docker compose
-      run: |
-        docker compose down
-        docker compose up -d
+    - name: Run containers
+      run: docker compose up -d
