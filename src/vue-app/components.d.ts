@@ -34,6 +34,5 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Tag: typeof import('primevue/tag')['default']
     Toolbar: typeof import('primevue/toolbar')['default']
-    VirtualScroller: typeof import('primevue/virtualscroller')['default']
   }
 }

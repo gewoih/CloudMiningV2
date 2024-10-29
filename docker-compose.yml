@@ -16,11 +16,6 @@ services:
     container_name: backend
     ports:
       - "5000:5000"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.25"
     dns:
       - 8.8.8.8
     depends_on:
@@ -43,11 +38,6 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.25"
     networks:
       - cloud-mining
       
