@@ -7,17 +7,14 @@ on:
     branches: [ "master" ]
 
 jobs:
-
   build:
-
     runs-on: self-hosted
-
     steps:
     - uses: actions/checkout@v4
-
+  
     - name: Stop existing containers
       run: docker compose down
-    
+  
     - name: Build docker images
       run: docker compose build
 
